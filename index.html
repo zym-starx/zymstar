@@ -1,19 +1,293 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zymstar</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1433 50%, #2d1b4e 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated background stars */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 80px;
+      animation: fadeInDown 1s ease;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .name {
+      font-size: clamp(3rem, 8vw, 5rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #e879f9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      letter-spacing: -2px;
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% { 
+        filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.3));
+      }
+      50% { 
+        filter: drop-shadow(0 0 30px rgba(167, 139, 250, 0.6));
+      }
+    }
+
+    .tagline {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: #c4b5fd;
+      font-weight: 300;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #9ca3af;
       max-width: 600px;
-      margin: 80px auto;
-      padding: 20px;
+      margin: 0 auto;
       line-height: 1.6;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 60px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      border-radius: 20px;
+      padding: 30px;
+      transition: all 0.3s ease;
+      animation: fadeInUp 1s ease;
+      animation-fill-mode: both;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(167, 139, 250, 0.4);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(167, 139, 250, 0.2);
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #e0e0e0;
+      margin-bottom: 10px;
+    }
+
+    .card-desc {
+      color: #9ca3af;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 60px;
+    }
+
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: rgba(167, 139, 250, 0.1);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      border-radius: 50px;
+      color: #c4b5fd;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .link-btn:hover {
+      background: rgba(167, 139, 250, 0.2);
+      border-color: rgba(167, 139, 250, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(167, 139, 250, 0.3);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 80px;
+      padding: 30px;
+      color: #6b7280;
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(167, 139, 250, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 20px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .links {
+        flex-direction: column;
+        align-items: center;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Zymstar is live!</h1>
-  <p>This is my temporary home on the internet. More coming soon.</p>
+  <div class="stars" id="stars"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1 class="name">zymstar</h1>
+      <p class="tagline"> • temp • </p>
+      <p class="subtitle">Probably doing something cool. Maybe. We'll see. Stay untuned.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <h2 class="card-title">oh no diva down</h2>
+        <p class="card-desc">the prophecy did not foretell this bullshit</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🎹</div>
+        <h2 class="card-title">Music</h2>
+        <p class="card-desc">Making sounds on a keyboard. Sometimes they're good.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">✨</div>
+        <h2 class="card-title">Other Things</h2>
+        <p class="card-desc">I might rage quit tbh</p>
+      </div>
+    </div>
+
+    <div class="links">
+      <a href="https://github.com/zymstar" class="link-btn" target="_blank" rel="noopener">
+        <span>GitHub</span>
+      </a>
+      <a href="https://linkedin.com/in/zymstar" class="link-btn" target="_blank" rel="noopener">
+        <span>LinkedIn</span>
+      </a>
+      <a href="mailto:hello@zymstar.com" class="link-btn">
+        <span>Contact</span>
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>I will face God and walk backwards into hell ✨</p>
+    </div>
+  </div>
+
+  <script>
+    // Generate random stars
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      const numberOfStars = 100;
+
+      for (let i = 0; i < numberOfStars; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        const size = Math.random() * 2 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        
+        starsContainer.appendChild(star);
+      }
+    }
+
+    createStars();
+  </script>
 </body>
 </html>
