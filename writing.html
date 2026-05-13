@@ -3,23 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>zymstar — Zeynep Yıldız</title>
+  <title>zymstar / writing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; padding: 0; background: #040214; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; height: 100vh; }
+    html, body { margin: 0; padding: 0; background: #faf8f4; font-family: 'Inter', sans-serif; color: #1a1a1a; }
     * { box-sizing: border-box; }
-    kbd { font-family: 'JetBrains Mono', monospace; }
+    ::selection { background: #1a1a1a; color: #faf8f4; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-
   <script type="text/babel" data-presets="env,react">
 // Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
 // These are meant to feel consistent across every section of zymstar.com
@@ -390,220 +388,337 @@ function Starfield({ density = 100, twinkle = true }) {
 Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCommandPalette, useKonami, Starfield, SECTIONS });
 
 </script>
-
   <script type="text/babel" data-presets="env,react">
-    // Live home: constellation — each star routes to its section page.
-    function ConstellationHome() {
-      const palette = useCommandPalette();
-      const [hovered, setHovered] = React.useState(null);
-      const [mouse, setMouse] = React.useState({ x: 0, y: 0 });
-      const [konami, setKonami] = React.useState(false);
-      useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
-      const ref = React.useRef(null);
+// Section scaffold — shared layout for every section page.
+// Provides: consistent top nav, command palette with routing, back-to-home link,
+// fonts preloaded. Each section wraps its content in <SectionFrame>.
 
-      const nodes = [
-        // personal-projects cluster — finance / hardware / ml — visually grouped via dotted ring
-        { id: 'finance',     x: 430, y: 260, size: 6, near: ['hardware','ml','tools'], group: 'project' },
-        { id: 'hardware',    x: 240, y: 310, size: 5, near: ['finance','tools'],       group: 'project' },
-        { id: 'ml',          x: 520, y: 150, size: 5, near: ['finance','thesis'],      group: 'project' },
-        { id: 'thesis',      x: 640, y: 180, size: 7, near: ['ml','writing'] },
-        { id: 'writing',     x: 760, y: 260, size: 4, near: ['thesis','reading','vlog'] },
-        { id: 'reading',     x: 900, y: 360, size: 4, near: ['writing'] },
-        { id: 'vlog',        x: 700, y: 380, size: 5, near: ['writing','photography'] },
-        { id: 'photography', x: 540, y: 430, size: 4, near: ['vlog','dumdum'] },
-        { id: 'dumdum',      x: 380, y: 400, size: 5, near: ['photography','tools'] },
-        { id: 'tools',       x: 120, y: 410, size: 4, near: ['finance','hardware','dumdum'] },
-        { id: 'cv',          x: 880, y: 180, size: 3, near: ['thesis'] },
-        { id: 'guestbook',   x: 220, y: 450, size: 3, near: ['dumdum'] },
-      ];
-      const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
-      const secById = Object.fromEntries(SECTIONS.map(s => [s.id, s]));
-      const connections = [];
-      const seen = new Set();
-      nodes.forEach(n => n.near.forEach(m => {
-        const key = [n.id, m].sort().join('|');
-        if (!seen.has(key)) { seen.add(key); connections.push([n.id, m]); }
-      }));
+// Route a section id to its html file.
+function routeToSection(id) {
+  // Map any special cases here. Default: {id}.html
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
 
-      React.useEffect(() => {
-        const onMove = (e) => {
-          const rect = ref.current?.getBoundingClientRect();
-          if (!rect) return;
-          setMouse({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-        };
-        const el = ref.current;
-        el?.addEventListener('mousemove', onMove);
-        return () => el?.removeEventListener('mousemove', onMove);
-      }, []);
+function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
+  const palette = useCommandPalette();
+  const [konami, setKonami] = React.useState(false);
+  useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
 
-      const go = (id) => { window.location.href = `${id}.html`; };
+  return (
+    <div style={{
+      position: 'relative', minHeight: '100vh', overflow: 'hidden auto',
+      background: background || '#0a0e27',
+      color: '#e9e6ff', fontFamily: 'Inter, sans-serif',
+    }}>
+      <TopNav theme={theme} onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        onClose={() => palette.setOpen(false)}
+        onPick={(s) => routeToSection(s.id)}
+      />
+      <div style={{ paddingTop: 68 }}>
+        {children}
+      </div>
+      {konami && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
+          letterSpacing: '0.1em', pointerEvents: 'none',
+        }}>
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+        </div>
+      )}
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
+
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '28px 56px 40px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+      letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
+      gap: 12, flexWrap: 'wrap',
+    }}>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
+
+const footerLink = {
+  color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+  letterSpacing: '0.15em', fontSize: 11,
+};
+
+Object.assign(window, { SectionFrame, routeToSection });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+    // Writing — personal blog. Iris West vibe: lowkey, stylish, serif-led.
+    // No noisy chrome. Just a quiet column of dated entries.
+    const POSTS = [
+      {
+        slug: 'on-being-the-loud-one',
+        title: 'on being the loud one in a quiet field',
+        date: '2026-04-12',
+        readMin: 6,
+        tags: ['notes'],
+        excerpt:
+          "the academy taught me to whisper and the internet taught me to yell. lately i\u2019ve been trying to find a register that is mine. somewhere between paper-voice and twitter-voice.",
+        featured: true,
+      },
+      {
+        slug: 'i-built-a-thing-no-one-asked-for',
+        title: 'i built a thing no one asked for',
+        date: '2026-03-28',
+        readMin: 4,
+        tags: ['making'],
+        excerpt:
+          "every weekend i ship something useless. a metronome that hates you. a calendar for yesterday. it turns out useless is a kind of permission.",
+      },
+      {
+        slug: 'reading-fiction-while-debugging',
+        title: 'reading fiction while debugging',
+        date: '2026-03-09',
+        readMin: 5,
+        tags: ['notes', 'reading'],
+        excerpt:
+          "a stack trace is a story. so is a paragraph. i started keeping novels open in a tab beside the IDE. they help.",
+      },
+      {
+        slug: 'thesis-week-12',
+        title: 'thesis · week 12 · the layer that knew',
+        date: '2026-02-22',
+        readMin: 8,
+        tags: ['research'],
+        excerpt:
+          "i found a cluster of attention heads that lights up for two-digit addition and only two-digit addition. i sat in a coffee shop and cried, briefly, about it.",
+      },
+      {
+        slug: 'small-things-i-am-allowed-to-want',
+        title: 'small things i am allowed to want',
+        date: '2026-02-04',
+        readMin: 3,
+        tags: ['notes'],
+        excerpt:
+          "a slow morning. a finished paper. a friend who texts back. a dataset that loads on the first try.",
+      },
+      {
+        slug: 'finance-minor-confession',
+        title: 'finance minor, slight confession',
+        date: '2026-01-18',
+        readMin: 5,
+        tags: ['notes', 'making'],
+        excerpt:
+          "i did the finance minor because i wanted to know how money lies to itself. the models were the most honest thing in the room.",
+      },
+      {
+        slug: 'on-not-shipping',
+        title: 'on not shipping',
+        date: '2025-12-29',
+        readMin: 4,
+        tags: ['notes'],
+        excerpt:
+          "year-end. half my projects are still in the drafts folder. i\u2019m trying to decide whether that\u2019s shame or compost.",
+      },
+    ];
+
+    const ALL_TAGS = ['all', ...Array.from(new Set(POSTS.flatMap(p => p.tags)))];
+
+    function WritingPage() {
+      const [tag, setTag] = React.useState('all');
+      const list = POSTS.filter(p => tag === 'all' || p.tags.includes(tag));
+      const featured = list.find(p => p.featured) || list[0];
+      const rest = list.filter(p => p !== featured);
 
       return (
-        <div ref={ref} style={{
-          position: 'relative', width: '100vw', height: '100vh',
-          background: 'radial-gradient(ellipse at 30% 20%, #0f0a2e 0%, #050318 60%, #020108 100%)',
-          overflow: 'hidden', color: '#e9e6ff', cursor: 'crosshair',
-        }}>
-          <Starfield density={140} />
-          <TopNav theme="cosmic" onOpenPalette={() => palette.setOpen(true)} />
-          <CommandPalette open={palette.open} onClose={() => palette.setOpen(false)} onPick={(s) => go(s.id)} />
-
-          {/* Cursor glow */}
-          <div style={{
-            position: 'absolute', pointerEvents: 'none',
-            left: mouse.x, top: mouse.y, width: 360, height: 360, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167,139,250,0.09), transparent 60%)',
-            transform: 'translate(-50%, -50%)', filter: 'blur(10px)', zIndex: 1,
-          }}></div>
-
-          {/* Title — pointer-events only on interactive bits so the SVG beneath is clickable */}
-          <div style={{ position: 'absolute', left: 48, top: 92, zIndex: 5, maxWidth: 280, pointerEvents: 'none' }}>
-            <div style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 9, letterSpacing: '0.3em',
-              color: 'rgba(196,181,253,0.6)', marginBottom: 14,
-            }}>CONSTELLATION · ZS-001</div>
-            <h1 style={{
-              fontFamily: '"Space Grotesk", sans-serif', fontSize: 52, fontWeight: 500,
-              letterSpacing: '-0.03em', lineHeight: 1.05, margin: 0, paddingBottom: 6,
-              background: 'linear-gradient(180deg, #fff 0%, #c4b5fd 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>zymstar.</h1>
-            <div style={{
-              marginTop: 8, fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 10, letterSpacing: '0.25em', color: 'rgba(230,225,255,0.5)',
-            }}>ZEYNEP YILDIZ</div>
-            <p style={{
-              marginTop: 16, fontSize: 12, lineHeight: 1.55,
-              color: 'rgba(230,225,255,0.6)', maxWidth: 280,
+        <SectionFrame sectionId="writing" theme="paper" background="#faf8f4">
+          <article style={{ maxWidth: 880, margin: '0 auto', padding: '32px 32px 100px' }}>
+            {/* Masthead */}
+            <header style={{
+              borderBottom: '1px solid #e3ddd0', paddingBottom: 32, marginBottom: 40,
+              textAlign: 'left', position: 'relative',
             }}>
-              A map of everything I make, mapped as stars. Hover a node to see what&apos;s
-              there — click to enter. Press <kbd id="modkey" style={{
-                fontFamily: 'JetBrains Mono, monospace',
-                padding: '1px 6px', borderRadius: 3, background: 'rgba(255,255,255,0.1)',
-                fontSize: 10, color: 'rgba(230,225,255,0.85)',
-              }}>Ctrl K</kbd> to search.
-            </p>
-          </div>
-
-          <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"
-               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 2 }}>
-            {/* Subtle "personal projects" cluster ring around finance/hardware/ml */}
-            <ellipse cx={397} cy={230} rx={220} ry={130} transform="rotate(-12 397 230)"
-              fill="none" stroke="rgba(167,139,250,0.12)" strokeWidth="0.6"
-              strokeDasharray="3 4" />
-            <text x={520} y={50}
-              fontFamily="JetBrains Mono, monospace" fontSize={9}
-              fill="rgba(167,139,250,0.4)" letterSpacing="0.3em"
-              style={{ textTransform: 'uppercase' }}>
-              · personal projects ·
-            </text>
-            {connections.map(([a, b], i) => {
-              const na = byId[a], nb = byId[b];
-              const isActive = hovered && (hovered === a || hovered === b);
-              return (
-                <line key={i} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
-                  stroke={isActive ? `oklch(75% 0.16 ${secById[hovered].hue})` : 'rgba(167,139,250,0.18)'}
-                  strokeWidth={isActive ? 1.2 : 0.5}
-                  style={{ transition: 'stroke .25s, stroke-width .25s' }} />
-              );
-            })}
-            {nodes.map(n => {
-              const sec = secById[n.id];
-              const isHovered = hovered === n.id;
-              const isRelated = hovered && byId[hovered]?.near?.includes(n.id);
-              const glow = isHovered ? 22 : isRelated ? 12 : 6;
-              return (
-                <g key={n.id}
-                   style={{ cursor: 'pointer' }}
-                   onMouseEnter={() => setHovered(n.id)}
-                   onMouseLeave={() => setHovered(null)}
-                   onClick={() => go(n.id)}>
-                  {/* Invisible larger hit target so labels don't eat the click */}
-                  <circle cx={n.x} cy={n.y} r={40}
-                    fill="transparent" style={{ pointerEvents: 'all' }} />
-                  <circle cx={n.x} cy={n.y} r={n.size + glow}
-                    fill={`oklch(70% 0.18 ${sec.hue})`}
-                    opacity={isHovered ? 0.3 : isRelated ? 0.15 : 0.08}
-                    style={{ transition: 'r .25s, opacity .25s', pointerEvents: 'none' }} />
-                  <circle cx={n.x} cy={n.y} r={isHovered ? n.size + 2 : n.size}
-                    fill={isHovered ? '#fff' : `oklch(85% 0.1 ${sec.hue})`}
-                    style={{ transition: 'r .2s, fill .2s', pointerEvents: 'none' }} />
-                  <text x={n.x + n.size + 10} y={n.y + 4}
-                    fontFamily="JetBrains Mono, monospace" fontSize={11}
-                    fill={isHovered ? '#fff' : isRelated ? `oklch(85% 0.1 ${sec.hue})` : 'rgba(230,225,255,0.5)'}
-                    letterSpacing="0.12em"
-                    style={{ textTransform: 'uppercase', transition: 'fill .2s', pointerEvents: 'none' }}>
-                    {sec.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Hovered detail */}
-          <div style={{
-            position: 'absolute', right: 32, bottom: 32, zIndex: 5,
-            width: 240, minHeight: 120, padding: '14px 16px',
-            background: 'rgba(10,6,28,0.72)', backdropFilter: 'blur(14px)',
-            border: `1px solid ${hovered ? `oklch(70% 0.16 ${secById[hovered].hue} / 0.5)` : 'rgba(167,139,250,0.15)'}`,
-            borderRadius: 10, transition: 'border .25s',
-          }}>
-            {hovered ? (
-              <>
-                <div style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  color: `oklch(75% 0.16 ${secById[hovered].hue})`,
-                  letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: 6,
-                }}>/{hovered}</div>
-                <div style={{
-                  fontFamily: '"Space Grotesk", sans-serif', fontSize: 20,
-                  fontWeight: 500, marginBottom: 6,
-                }}>{secById[hovered].label}</div>
-                <div style={{ fontSize: 11, color: 'rgba(230,225,255,0.62)', lineHeight: 1.45, marginBottom: 12 }}>
-                  {secById[hovered].desc}
-                </div>
-                <button onClick={() => go(hovered)} style={{
-                  padding: '6px 12px', borderRadius: 30, cursor: 'pointer',
-                  background: `oklch(70% 0.16 ${secById[hovered].hue} / 0.15)`,
-                  border: `1px solid oklch(70% 0.16 ${secById[hovered].hue} / 0.5)`,
-                  color: `oklch(90% 0.06 ${secById[hovered].hue})`,
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  letterSpacing: '0.2em', textTransform: 'uppercase',
-                }}>enter /{hovered} →</button>
-              </>
-            ) : (
               <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                color: 'rgba(230,225,255,0.35)', letterSpacing: '0.12em', lineHeight: 1.55,
+                fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 500,
+                letterSpacing: '0.3em', textTransform: 'uppercase',
+                color: '#7a6f5e', marginBottom: 22,
+              }}>by zeynep yıldız &middot; est. 2024 &middot; updated weekly-ish</div>
+              <h1 style={{
+                fontFamily: 'Fraunces, serif',
+                fontSize: 96, fontWeight: 400, lineHeight: 0.92,
+                letterSpacing: '-0.04em', margin: 0, color: '#1a1a1a',
+              }}>field<br/><em style={{ fontWeight: 300, color: '#5d4f3a' }}>notes,</em></h1>
+              <p style={{
+                fontFamily: 'Fraunces, serif', fontStyle: 'italic',
+                fontSize: 19, color: '#5d4f3a', maxWidth: 520,
+                lineHeight: 1.5, marginTop: 22, marginBottom: 0,
               }}>
-                {'> HOVER A STAR'}<br/>
-                {'> CLICK TO ENTER'}<br/>
-                {'> ' + (typeof MOD_KEY !== 'undefined' ? MOD_KEY : 'Ctrl') + ' K TO SEARCH'}<br/>
-                <span style={{ color: 'rgba(230,225,255,0.2)' }}>{'// ↑↑↓↓←→←→ba'}</span>
-              </div>
-            )}
-          </div>
+                a slow blog. essays, half-thoughts, and the occasional confession.
+                no comments, no feed, no algorithm. just dates and paragraphs.
+              </p>
+            </header>
 
-          <div style={{
-            position: 'absolute', left: 56, bottom: 32,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-            letterSpacing: '0.25em', color: 'rgba(230,225,255,0.3)',
-          }}>WEST · 21:04 UTC · MAG 4.2</div>
-
-          {konami && (
+            {/* Tags */}
             <div style={{
-              position: 'fixed', inset: 0, zIndex: 500,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.85)',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
-              letterSpacing: '0.1em', pointerEvents: 'none',
-            }}>⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾</div>
-          )}
+              display: 'flex', gap: 16, marginBottom: 56,
+              fontFamily: 'Inter, sans-serif', fontSize: 12,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              color: '#7a6f5e',
+            }}>
+              {ALL_TAGS.map(t => (
+                <button key={t} onClick={() => setTag(t)} style={{
+                  padding: '4px 0', background: 'transparent',
+                  border: 'none', cursor: 'pointer',
+                  fontSize: 'inherit', fontFamily: 'inherit',
+                  letterSpacing: 'inherit', textTransform: 'inherit',
+                  color: tag === t ? '#1a1a1a' : '#a89b85',
+                  borderBottom: `1px solid ${tag === t ? '#1a1a1a' : 'transparent'}`,
+                  transition: 'color .2s, border-color .2s',
+                }}>{t}</button>
+              ))}
+              <span style={{ marginLeft: 'auto', color: '#a89b85', textTransform: 'none', letterSpacing: '0.05em' }}>
+                {list.length} {list.length === 1 ? 'entry' : 'entries'}
+              </span>
+            </div>
+
+            {/* Featured */}
+            {featured && (
+              <a href="#" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+                <div style={{
+                  display: 'grid', gridTemplateColumns: '120px 1fr', gap: 32,
+                  padding: '0 0 56px', borderBottom: '1px solid #e3ddd0', marginBottom: 56,
+                  cursor: 'pointer',
+                }}>
+                  <div style={{
+                    fontFamily: 'Inter, sans-serif', fontSize: 11,
+                    letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7a6f5e',
+                    paddingTop: 18,
+                  }}>
+                    <DateBlock d={featured.date} />
+                  </div>
+                  <div>
+                    <div style={{
+                      fontFamily: 'Inter, sans-serif', fontSize: 10,
+                      letterSpacing: '0.3em', textTransform: 'uppercase',
+                      color: '#a08054', marginBottom: 14,
+                    }}>★ featured</div>
+                    <h2 style={{
+                      fontFamily: 'Fraunces, serif',
+                      fontSize: 48, fontWeight: 400, lineHeight: 1.1,
+                      letterSpacing: '-0.02em', margin: '0 0 18px',
+                      color: '#1a1a1a',
+                    }}>{featured.title}</h2>
+                    <p style={{
+                      fontFamily: 'Fraunces, serif', fontSize: 18, lineHeight: 1.6,
+                      color: '#3a3528', maxWidth: 620, margin: '0 0 18px',
+                    }}>{featured.excerpt}</p>
+                    <div style={{
+                      fontFamily: 'Inter, sans-serif', fontSize: 12,
+                      letterSpacing: '0.06em', color: '#7a6f5e',
+                      display: 'flex', gap: 14, alignItems: 'center',
+                    }}>
+                      <span>{featured.readMin} min read</span>
+                      <span>·</span>
+                      {featured.tags.map(t => <span key={t}>#{t}</span>)}
+                      <span style={{ marginLeft: 'auto', color: '#1a1a1a' }}>read &rarr;</span>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            )}
+
+            {/* Entry list */}
+            <div>
+              {rest.map(p => (
+                <a key={p.slug} href="#" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+                  <article style={{
+                    display: 'grid', gridTemplateColumns: '120px 1fr',
+                    gap: 32, padding: '32px 0',
+                    borderBottom: '1px solid #ece6da',
+                    transition: 'background .15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.015)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <div style={{
+                      fontFamily: 'Inter, sans-serif', fontSize: 11,
+                      letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7a6f5e',
+                      paddingTop: 4,
+                    }}>
+                      <DateBlock d={p.date} />
+                    </div>
+                    <div>
+                      <h3 style={{
+                        fontFamily: 'Fraunces, serif',
+                        fontSize: 28, fontWeight: 400, lineHeight: 1.2,
+                        letterSpacing: '-0.01em', margin: '0 0 10px',
+                        color: '#1a1a1a',
+                      }}>{p.title}</h3>
+                      <p style={{
+                        fontFamily: 'Fraunces, serif', fontSize: 16, lineHeight: 1.55,
+                        color: '#5d4f3a', maxWidth: 620, margin: '0 0 12px',
+                      }}>{p.excerpt}</p>
+                      <div style={{
+                        fontFamily: 'Inter, sans-serif', fontSize: 11,
+                        letterSpacing: '0.05em', color: '#a89b85',
+                        display: 'flex', gap: 12, alignItems: 'center',
+                      }}>
+                        <span>{p.readMin} min read</span>
+                        <span>·</span>
+                        {p.tags.map(t => <span key={t}>#{t}</span>)}
+                      </div>
+                    </div>
+                  </article>
+                </a>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <footer style={{
+              marginTop: 80, paddingTop: 40, borderTop: '1px solid #e3ddd0',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+              fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#7a6f5e',
+              letterSpacing: '0.05em',
+            }}>
+              <span style={{ fontFamily: 'Fraunces, serif', fontStyle: 'italic', fontSize: 16 }}>
+                — that&rsquo;s all for now.
+              </span>
+              <span>rss · email · ←&nbsp;<a href="index.html" style={{ color: '#1a1a1a' }}>back to map</a></span>
+            </footer>
+          </article>
+        </SectionFrame>
+      );
+    }
+
+    function DateBlock({ d }) {
+      const date = new Date(d);
+      const m = date.toLocaleString('en', { month: 'short' }).toUpperCase();
+      const day = date.getDate();
+      const y = date.getFullYear();
+      return (
+        <div>
+          <div style={{ fontSize: 11, color: '#7a6f5e' }}>{m}</div>
+          <div style={{ fontFamily: 'Fraunces, serif', fontSize: 32, lineHeight: 1, color: '#1a1a1a', letterSpacing: '-0.02em', margin: '2px 0' }}>{day}</div>
+          <div style={{ fontSize: 10, color: '#a89b85', letterSpacing: '0.15em' }}>{y}</div>
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<ConstellationHome />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<WritingPage />);
   </script>
 </body>
 </html>

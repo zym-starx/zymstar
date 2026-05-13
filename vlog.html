@@ -3,23 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>zymstar — Zeynep Yıldız</title>
+  <title>zymstar / vlog — coming soon, maybe never</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; padding: 0; background: #040214; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; height: 100vh; }
+    html, body { margin: 0; padding: 0; background: #0a0a0a; font-family: 'VT323', monospace; color: #e8eaed; }
     * { box-sizing: border-box; }
-    kbd { font-family: 'JetBrains Mono', monospace; }
+    ::selection { background: #ff2e63; color: #0a0a0a; }
+    @keyframes scan { 0% { transform: translateY(-100%);} 100% { transform: translateY(100vh);} }
+    @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.92; } }
+    @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes jitter { 0%, 100% { transform: translate(0,0);} 25% { transform: translate(0.5px, -0.3px);} 75% { transform: translate(-0.5px, 0.3px);} }
+    .crt {
+      position: fixed; inset: 0; pointer-events: none; z-index: 30;
+      background: repeating-linear-gradient(0deg,
+        rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 3px);
+    }
+    .crt::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.55) 100%);
+    }
+    .scanbar {
+      position: fixed; left: 0; right: 0; height: 80px;
+      background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+      z-index: 31; pointer-events: none; animation: scan 8s linear infinite;
+    }
+    .crt-content { animation: flicker 4s infinite; }
+    .vhs-shadow { box-shadow: 2px 0 0 rgba(255,46,99,0.4), -2px 0 0 rgba(0,255,255,0.4); }
   </style>
 </head>
 <body>
   <div id="root"></div>
-
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-
   <script type="text/babel" data-presets="env,react">
 // Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
 // These are meant to feel consistent across every section of zymstar.com
@@ -390,220 +408,251 @@ function Starfield({ density = 100, twinkle = true }) {
 Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCommandPalette, useKonami, Starfield, SECTIONS });
 
 </script>
-
   <script type="text/babel" data-presets="env,react">
-    // Live home: constellation — each star routes to its section page.
-    function ConstellationHome() {
-      const palette = useCommandPalette();
-      const [hovered, setHovered] = React.useState(null);
-      const [mouse, setMouse] = React.useState({ x: 0, y: 0 });
-      const [konami, setKonami] = React.useState(false);
-      useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
-      const ref = React.useRef(null);
+// Section scaffold — shared layout for every section page.
+// Provides: consistent top nav, command palette with routing, back-to-home link,
+// fonts preloaded. Each section wraps its content in <SectionFrame>.
 
-      const nodes = [
-        // personal-projects cluster — finance / hardware / ml — visually grouped via dotted ring
-        { id: 'finance',     x: 430, y: 260, size: 6, near: ['hardware','ml','tools'], group: 'project' },
-        { id: 'hardware',    x: 240, y: 310, size: 5, near: ['finance','tools'],       group: 'project' },
-        { id: 'ml',          x: 520, y: 150, size: 5, near: ['finance','thesis'],      group: 'project' },
-        { id: 'thesis',      x: 640, y: 180, size: 7, near: ['ml','writing'] },
-        { id: 'writing',     x: 760, y: 260, size: 4, near: ['thesis','reading','vlog'] },
-        { id: 'reading',     x: 900, y: 360, size: 4, near: ['writing'] },
-        { id: 'vlog',        x: 700, y: 380, size: 5, near: ['writing','photography'] },
-        { id: 'photography', x: 540, y: 430, size: 4, near: ['vlog','dumdum'] },
-        { id: 'dumdum',      x: 380, y: 400, size: 5, near: ['photography','tools'] },
-        { id: 'tools',       x: 120, y: 410, size: 4, near: ['finance','hardware','dumdum'] },
-        { id: 'cv',          x: 880, y: 180, size: 3, near: ['thesis'] },
-        { id: 'guestbook',   x: 220, y: 450, size: 3, near: ['dumdum'] },
-      ];
-      const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
-      const secById = Object.fromEntries(SECTIONS.map(s => [s.id, s]));
-      const connections = [];
-      const seen = new Set();
-      nodes.forEach(n => n.near.forEach(m => {
-        const key = [n.id, m].sort().join('|');
-        if (!seen.has(key)) { seen.add(key); connections.push([n.id, m]); }
-      }));
+// Route a section id to its html file.
+function routeToSection(id) {
+  // Map any special cases here. Default: {id}.html
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
 
+function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
+  const palette = useCommandPalette();
+  const [konami, setKonami] = React.useState(false);
+  useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
+
+  return (
+    <div style={{
+      position: 'relative', minHeight: '100vh', overflow: 'hidden auto',
+      background: background || '#0a0e27',
+      color: '#e9e6ff', fontFamily: 'Inter, sans-serif',
+    }}>
+      <TopNav theme={theme} onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        onClose={() => palette.setOpen(false)}
+        onPick={(s) => routeToSection(s.id)}
+      />
+      <div style={{ paddingTop: 68 }}>
+        {children}
+      </div>
+      {konami && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
+          letterSpacing: '0.1em', pointerEvents: 'none',
+        }}>
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+        </div>
+      )}
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
+
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '28px 56px 40px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+      letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
+      gap: 12, flexWrap: 'wrap',
+    }}>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
+
+const footerLink = {
+  color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+  letterSpacing: '0.15em', fontSize: 11,
+};
+
+Object.assign(window, { SectionFrame, routeToSection });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+    function VlogPage() {
+      const [time, setTime] = React.useState('00:00:00:00');
       React.useEffect(() => {
-        const onMove = (e) => {
-          const rect = ref.current?.getBoundingClientRect();
-          if (!rect) return;
-          setMouse({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-        };
-        const el = ref.current;
-        el?.addEventListener('mousemove', onMove);
-        return () => el?.removeEventListener('mousemove', onMove);
+        const start = Date.now();
+        const id = setInterval(() => {
+          const e = Date.now() - start;
+          const f = Math.floor((e % 1000) / 33);
+          const s = Math.floor(e / 1000) % 60;
+          const m = Math.floor(e / 60000) % 60;
+          const h = Math.floor(e / 3600000);
+          setTime(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(f).padStart(2,'0')}`);
+        }, 50);
+        return () => clearInterval(id);
       }, []);
 
-      const go = (id) => { window.location.href = `${id}.html`; };
-
       return (
-        <div ref={ref} style={{
-          position: 'relative', width: '100vw', height: '100vh',
-          background: 'radial-gradient(ellipse at 30% 20%, #0f0a2e 0%, #050318 60%, #020108 100%)',
-          overflow: 'hidden', color: '#e9e6ff', cursor: 'crosshair',
-        }}>
-          <Starfield density={140} />
-          <TopNav theme="cosmic" onOpenPalette={() => palette.setOpen(true)} />
-          <CommandPalette open={palette.open} onClose={() => palette.setOpen(false)} onPick={(s) => go(s.id)} />
+        <SectionFrame sectionId="vlog" theme="cosmic" background="#0a0a0a">
+          <div className="crt"></div>
+          <div className="scanbar"></div>
 
-          {/* Cursor glow */}
-          <div style={{
-            position: 'absolute', pointerEvents: 'none',
-            left: mouse.x, top: mouse.y, width: 360, height: 360, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167,139,250,0.09), transparent 60%)',
-            transform: 'translate(-50%, -50%)', filter: 'blur(10px)', zIndex: 1,
-          }}></div>
-
-          {/* Title — pointer-events only on interactive bits so the SVG beneath is clickable */}
-          <div style={{ position: 'absolute', left: 48, top: 92, zIndex: 5, maxWidth: 280, pointerEvents: 'none' }}>
-            <div style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 9, letterSpacing: '0.3em',
-              color: 'rgba(196,181,253,0.6)', marginBottom: 14,
-            }}>CONSTELLATION · ZS-001</div>
-            <h1 style={{
-              fontFamily: '"Space Grotesk", sans-serif', fontSize: 52, fontWeight: 500,
-              letterSpacing: '-0.03em', lineHeight: 1.05, margin: 0, paddingBottom: 6,
-              background: 'linear-gradient(180deg, #fff 0%, #c4b5fd 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>zymstar.</h1>
-            <div style={{
-              marginTop: 8, fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 10, letterSpacing: '0.25em', color: 'rgba(230,225,255,0.5)',
-            }}>ZEYNEP YILDIZ</div>
-            <p style={{
-              marginTop: 16, fontSize: 12, lineHeight: 1.55,
-              color: 'rgba(230,225,255,0.6)', maxWidth: 280,
-            }}>
-              A map of everything I make, mapped as stars. Hover a node to see what&apos;s
-              there — click to enter. Press <kbd id="modkey" style={{
-                fontFamily: 'JetBrains Mono, monospace',
-                padding: '1px 6px', borderRadius: 3, background: 'rgba(255,255,255,0.1)',
-                fontSize: 10, color: 'rgba(230,225,255,0.85)',
-              }}>Ctrl K</kbd> to search.
-            </p>
-          </div>
-
-          <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"
-               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 2 }}>
-            {/* Subtle "personal projects" cluster ring around finance/hardware/ml */}
-            <ellipse cx={397} cy={230} rx={220} ry={130} transform="rotate(-12 397 230)"
-              fill="none" stroke="rgba(167,139,250,0.12)" strokeWidth="0.6"
-              strokeDasharray="3 4" />
-            <text x={520} y={50}
-              fontFamily="JetBrains Mono, monospace" fontSize={9}
-              fill="rgba(167,139,250,0.4)" letterSpacing="0.3em"
-              style={{ textTransform: 'uppercase' }}>
-              · personal projects ·
-            </text>
-            {connections.map(([a, b], i) => {
-              const na = byId[a], nb = byId[b];
-              const isActive = hovered && (hovered === a || hovered === b);
-              return (
-                <line key={i} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
-                  stroke={isActive ? `oklch(75% 0.16 ${secById[hovered].hue})` : 'rgba(167,139,250,0.18)'}
-                  strokeWidth={isActive ? 1.2 : 0.5}
-                  style={{ transition: 'stroke .25s, stroke-width .25s' }} />
-              );
-            })}
-            {nodes.map(n => {
-              const sec = secById[n.id];
-              const isHovered = hovered === n.id;
-              const isRelated = hovered && byId[hovered]?.near?.includes(n.id);
-              const glow = isHovered ? 22 : isRelated ? 12 : 6;
-              return (
-                <g key={n.id}
-                   style={{ cursor: 'pointer' }}
-                   onMouseEnter={() => setHovered(n.id)}
-                   onMouseLeave={() => setHovered(null)}
-                   onClick={() => go(n.id)}>
-                  {/* Invisible larger hit target so labels don't eat the click */}
-                  <circle cx={n.x} cy={n.y} r={40}
-                    fill="transparent" style={{ pointerEvents: 'all' }} />
-                  <circle cx={n.x} cy={n.y} r={n.size + glow}
-                    fill={`oklch(70% 0.18 ${sec.hue})`}
-                    opacity={isHovered ? 0.3 : isRelated ? 0.15 : 0.08}
-                    style={{ transition: 'r .25s, opacity .25s', pointerEvents: 'none' }} />
-                  <circle cx={n.x} cy={n.y} r={isHovered ? n.size + 2 : n.size}
-                    fill={isHovered ? '#fff' : `oklch(85% 0.1 ${sec.hue})`}
-                    style={{ transition: 'r .2s, fill .2s', pointerEvents: 'none' }} />
-                  <text x={n.x + n.size + 10} y={n.y + 4}
-                    fontFamily="JetBrains Mono, monospace" fontSize={11}
-                    fill={isHovered ? '#fff' : isRelated ? `oklch(85% 0.1 ${sec.hue})` : 'rgba(230,225,255,0.5)'}
-                    letterSpacing="0.12em"
-                    style={{ textTransform: 'uppercase', transition: 'fill .2s', pointerEvents: 'none' }}>
-                    {sec.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Hovered detail */}
-          <div style={{
-            position: 'absolute', right: 32, bottom: 32, zIndex: 5,
-            width: 240, minHeight: 120, padding: '14px 16px',
-            background: 'rgba(10,6,28,0.72)', backdropFilter: 'blur(14px)',
-            border: `1px solid ${hovered ? `oklch(70% 0.16 ${secById[hovered].hue} / 0.5)` : 'rgba(167,139,250,0.15)'}`,
-            borderRadius: 10, transition: 'border .25s',
+          <div className="crt-content" style={{
+            position: 'relative', zIndex: 5, padding: '24px 32px 80px',
+            maxWidth: 1100, margin: '0 auto',
+            minHeight: 'calc(100vh - 68px)',
+            display: 'flex', flexDirection: 'column',
           }}>
-            {hovered ? (
-              <>
-                <div style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  color: `oklch(75% 0.16 ${secById[hovered].hue})`,
-                  letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: 6,
-                }}>/{hovered}</div>
-                <div style={{
-                  fontFamily: '"Space Grotesk", sans-serif', fontSize: 20,
-                  fontWeight: 500, marginBottom: 6,
-                }}>{secById[hovered].label}</div>
-                <div style={{ fontSize: 11, color: 'rgba(230,225,255,0.62)', lineHeight: 1.45, marginBottom: 12 }}>
-                  {secById[hovered].desc}
-                </div>
-                <button onClick={() => go(hovered)} style={{
-                  padding: '6px 12px', borderRadius: 30, cursor: 'pointer',
-                  background: `oklch(70% 0.16 ${secById[hovered].hue} / 0.15)`,
-                  border: `1px solid oklch(70% 0.16 ${secById[hovered].hue} / 0.5)`,
-                  color: `oklch(90% 0.06 ${secById[hovered].hue})`,
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  letterSpacing: '0.2em', textTransform: 'uppercase',
-                }}>enter /{hovered} →</button>
-              </>
-            ) : (
-              <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                color: 'rgba(230,225,255,0.35)', letterSpacing: '0.12em', lineHeight: 1.55,
-              }}>
-                {'> HOVER A STAR'}<br/>
-                {'> CLICK TO ENTER'}<br/>
-                {'> ' + (typeof MOD_KEY !== 'undefined' ? MOD_KEY : 'Ctrl') + ' K TO SEARCH'}<br/>
-                <span style={{ color: 'rgba(230,225,255,0.2)' }}>{'// ↑↑↓↓←→←→ba'}</span>
-              </div>
-            )}
-          </div>
-
-          <div style={{
-            position: 'absolute', left: 56, bottom: 32,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-            letterSpacing: '0.25em', color: 'rgba(230,225,255,0.3)',
-          }}>WEST · 21:04 UTC · MAG 4.2</div>
-
-          {konami && (
+            {/* Top OSD */}
             <div style={{
-              position: 'fixed', inset: 0, zIndex: 500,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.85)',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
-              letterSpacing: '0.1em', pointerEvents: 'none',
-            }}>⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾</div>
-          )}
-        </div>
+              display: 'flex', justifyContent: 'space-between',
+              fontFamily: 'VT323, monospace', fontSize: 22, color: '#e8eaed',
+              padding: '0 0 16px', borderBottom: '1px dashed rgba(255,255,255,0.18)',
+              marginBottom: 24,
+            }}>
+              <span style={{ color: '#ff2e63', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff2e63', animation: 'blink 1.2s infinite' }}></span>
+                ● NO SIGNAL · CH·08
+              </span>
+              <span style={{ color: '#7df9aa' }}>VOL ▮▮▯▯▯▯▯▯</span>
+              <span>{time}</span>
+            </div>
+
+            {/* Hero placeholder card */}
+            <div style={{
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '40px 0',
+            }}>
+              <div style={{
+                position: 'relative', width: '100%', maxWidth: 820,
+                aspectRatio: '4 / 3', maxHeight: '70vh',
+                background: '#0a0a0a',
+                border: '2px solid rgba(255,255,255,0.18)',
+                display: 'flex', flexDirection: 'column',
+                animation: 'jitter 0.4s infinite',
+              }}>
+                {/* Test pattern bg */}
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
+                  {/* SMPTE-ish color bars */}
+                  <div style={{ display: 'flex', height: '70%' }}>
+                    {['#888','#cc0','#0cc','#0c0','#c0c','#c00','#00c'].map((c, i) => (
+                      <div key={i} style={{ flex: 1, background: c, opacity: 0.42 }}></div>
+                    ))}
+                  </div>
+                  <div style={{ flex: 1, background: '#1a1a1a' }}></div>
+                  {/* Static overlay */}
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.2) 0, rgba(0,0,0,0.2) 1px, transparent 1px, transparent 4px)',
+                    mixBlendMode: 'multiply', opacity: 0.7,
+                  }}></div>
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%)',
+                  }}></div>
+                </div>
+
+                {/* OSD top corners */}
+                <div style={{
+                  position: 'absolute', top: 14, left: 16, right: 16,
+                  display: 'flex', justifyContent: 'space-between',
+                  fontFamily: 'VT323, monospace', fontSize: 22, color: '#fff',
+                  textShadow: '0 0 6px rgba(0,0,0,0.9)',
+                }}>
+                  <span style={{ color: '#ff2e63' }}>⚠ NO TAPE</span>
+                  <span>2026.05.04</span>
+                </div>
+
+                {/* Center content */}
+                <div style={{
+                  position: 'relative', zIndex: 2, flex: 1,
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+                  padding: '0 32px',
+                }}>
+                  <div style={{
+                    fontFamily: '"Press Start 2P", monospace', fontSize: 11,
+                    color: '#7df9aa', letterSpacing: '0.3em', marginBottom: 18,
+                  }}>▶ ZYMSTAR.VLOG · STATUS</div>
+
+                  <h1 className="vhs-shadow" style={{
+                    fontFamily: 'VT323, monospace', fontSize: 'clamp(56px, 9vw, 120px)',
+                    lineHeight: 0.88, margin: 0, fontWeight: 400, letterSpacing: '-0.02em',
+                    color: '#e8eaed',
+                  }}>coming soon</h1>
+                  <h2 className="vhs-shadow" style={{
+                    fontFamily: 'VT323, monospace', fontSize: 'clamp(36px, 6vw, 72px)',
+                    lineHeight: 0.88, margin: '4px 0 0', fontWeight: 400, letterSpacing: '-0.02em',
+                    color: '#ff2e63', fontStyle: 'italic',
+                  }}>maybe never.</h2>
+
+                  <p style={{
+                    fontFamily: 'VT323, monospace', fontSize: 'clamp(18px, 2.4vw, 24px)',
+                    color: 'rgba(232,234,237,0.78)', maxWidth: 540,
+                    lineHeight: 1.35, margin: '24px auto 0',
+                  }}>
+                    i kept this card warm because i love the look of an empty
+                    channel. there&rsquo;s no tape in the deck. there may never
+                    be. if there is, it will be small and on purpose.
+                  </p>
+
+                  <div style={{
+                    marginTop: 28, display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center',
+                    fontFamily: '"Press Start 2P", monospace', fontSize: 9,
+                    color: 'rgba(232,234,237,0.6)', letterSpacing: '0.18em',
+                  }}>
+                    <span>► REC = 0</span>
+                    <span>► QUEUED = 0</span>
+                    <span style={{ color: '#7df9aa' }}>► VIBES ONLY</span>
+                  </div>
+                </div>
+
+                {/* OSD bottom */}
+                <div style={{
+                  position: 'absolute', bottom: 14, left: 16, right: 16,
+                  display: 'flex', justifyContent: 'space-between',
+                  fontFamily: 'VT323, monospace', fontSize: 20, color: '#fff',
+                  textShadow: '0 0 6px rgba(0,0,0,0.9)',
+                }}>
+                  <span>TAPE-000</span>
+                  <span>SP --:--</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom strip */}
+            <div style={{
+              padding: '14px 22px', border: '2px solid rgba(255,255,255,0.18)',
+              background: 'rgba(255,255,255,0.03)',
+              display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap',
+              fontFamily: '"Press Start 2P", monospace', fontSize: 10,
+              color: '#e8eaed', marginTop: 18,
+            }}>
+              <span style={{ color: '#ff2e63' }}>VCR</span>
+              <span style={{ color: 'rgba(232,234,237,0.5)' }}>► PLAY</span>
+              <span style={{ color: 'rgba(232,234,237,0.3)' }}>● REC</span>
+              <span style={{ color: 'rgba(232,234,237,0.3)' }}>⏸ PAUSE</span>
+              <span style={{ marginLeft: 'auto', color: '#7df9aa', letterSpacing: '0.2em' }}>
+                ↺ <a href="index.html" style={{ color: 'inherit', textDecoration: 'none' }}>EJECT &amp; RETURN HOME</a>
+              </span>
+            </div>
+          </div>
+        </SectionFrame>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<ConstellationHome />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<VlogPage />);
   </script>
 </body>
 </html>

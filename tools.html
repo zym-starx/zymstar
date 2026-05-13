@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zymstar / tools — inventory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #0e0f10; font-family: 'JetBrains Mono', monospace; color: #d4d4d4; }
+    * { box-sizing: border-box; }
+    ::selection { background: #d97706; color: #0e0f10; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" data-presets="env,react">
+// Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
+// These are meant to feel consistent across every section of zymstar.com
+// while per-section content uses its own aesthetic underneath.
+
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl';
+
+const SECTIONS = [
+  { id: 'finance',     label: 'Finance',     hue: 140, desc: 'quant, strategies, indicators, backtests', group: 'project' },
+  { id: 'hardware',    label: 'Hardware',    hue: 20,  desc: 'FPGA, Arduino, solder smoke', group: 'project' },
+  { id: 'ml',          label: 'ML / AI',     hue: 180, desc: 'models, experiments, results', group: 'project' },
+  { id: 'dumdum',      label: 'Dumdum',      hue: 330, desc: 'silly ideas with no justification' },
+  { id: 'thesis',      label: 'Thesis',      hue: 240, desc: "master's thesis + related work" },
+  { id: 'writing',     label: 'Writing',     hue: 40,  desc: 'essays, blog posts, notes' },
+  { id: 'vlog',        label: 'Vlog',        hue: 350, desc: 'video, voice, vibes' },
+  { id: 'photography', label: 'Photography', hue: 200, desc: 'images, light, composition' },
+  { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
+  { id: 'tools',       label: 'Tools',       hue: 160, desc: 'utilities I made for myself' },
+  { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
+  { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
+];
+
+function TopNav({ theme = 'cosmic', onOpenPalette }) {
+  const fg = theme === 'cosmic' ? 'rgba(230,225,255,0.92)' : 'rgba(20,20,30,0.9)';
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.55)' : 'rgba(20,20,30,0.55)';
+  const border = theme === 'cosmic' ? 'rgba(167,139,250,0.15)' : 'rgba(0,0,0,0.08)';
+  const bg = theme === 'cosmic' ? 'rgba(10,14,39,0.55)' : 'rgba(255,255,255,0.75)';
+  return (
+    <nav style={{
+      position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '18px 32px',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      fontSize: 13, color: fg,
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      background: bg,
+      borderBottom: `1px solid ${border}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 22, height: 22, borderRadius: '50%',
+          background: 'radial-gradient(circle at 35% 30%, #fff 0%, #c084fc 40%, #6d28d9 90%)',
+          boxShadow: '0 0 18px rgba(167,139,250,0.7)',
+        }}></div>
+        <span style={{
+          fontFamily: '"Space Grotesk", Inter, sans-serif',
+          fontWeight: 600, fontSize: 16, letterSpacing: '-0.02em',
+        }}>zymstar</span>
+        <span style={{ color: dim, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>
+          / Zeynep&nbsp;Yıldız
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <MusicTicker theme={theme} />
+        <NowIndicator theme={theme} />
+        <button
+          onClick={onOpenPalette}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '6px 12px', borderRadius: 8,
+            background: 'transparent',
+            border: `1px solid ${border}`,
+            color: dim, cursor: 'pointer',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+          }}>
+          <span>search</span>
+          <kbd style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            padding: '2px 6px', borderRadius: 4,
+            background: theme === 'cosmic' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            fontSize: 10,
+          }}>{MOD_KEY}&nbsp;K</kbd>
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function NowIndicator({ theme }) {
+  // Realtime-ish "what I'm doing now" indicator. Cycles through states.
+  const states = [
+    { icon: '●', text: 'coding — thesis chapter 3', color: 'oklch(70% 0.15 150)' },
+    { icon: '☕', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
+    { icon: '✎', text: 'writing — on failure', color: 'oklch(70% 0.15 220)' },
+    { icon: '✦', text: 'reading — borges',     color: 'oklch(70% 0.15 280)' },
+  ];
+  const [i, setI] = React.useState(0);
+  React.useEffect(() => {
+    const t = setInterval(() => setI(x => (x + 1) % states.length), 4200);
+    return () => clearInterval(t);
+  }, []);
+  const s = states[i];
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.75)' : 'rgba(20,20,30,0.75)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: dim,
+    }}>
+      <span style={{
+        color: s.color,
+        animation: 'zs-pulse 1.4s ease-in-out infinite',
+        fontSize: 10,
+      }}>{s.icon}</span>
+      <span style={{ minWidth: 170 }}>
+        <span style={{ opacity: 0.55 }}>now: </span>{s.text}
+      </span>
+    </div>
+  );
+}
+
+const TRACKS = [
+  { t: 'Amaze Amaze Amaze',   a: 'Daniel Pemberton',   c: '#ff6b9d' },
+  { t: 'Time Go Fishing',     a: 'Daniel Pemberton',   c: '#4fb8ff' },
+  { t: 'See You Tomorrow',    a: 'John Powell',        c: '#7d6cff' },
+  { t: "Forbidden Friendship",a: 'John Powell',        c: '#5fd9c4' },
+  { t: "It's OK I'm OK",      a: 'Tate McRae',         c: '#ff8aae' },
+  { t: 'Non-Stop',            a: 'Lin-Manuel Miranda', c: '#ffb84d' },
+  { t: 'Spider-Man Loves You',a: 'Daniel Pemberton',   c: '#e84545' },
+  { t: 'What It Sounds Like', a: 'HUNTR/X',            c: '#c084fc' },
+  { t: "How It's Done",       a: 'HUNTR/X',            c: '#a855f7' },
+  { t: 'No Time For Caution', a: 'Hans Zimmer',        c: '#3a86ff' },
+  { t: 'The Seed',            a: 'AURORA',             c: '#06d6a0' },
+  { t: 'The Other Side',      a: 'Hugh Jackman',       c: '#ffd23f' },
+  { t: 'Cross My Heart',      a: 'Marianas Trench',    c: '#fb5607' },
+  { t: 'Desperate Measures',  a: 'Marianas Trench',    c: '#ff006e' },
+];
+
+function MusicTicker({ theme }) {
+  const [i, setI] = React.useState(() => Math.floor(Math.random() * TRACKS.length));
+  const [bars, setBars] = React.useState([0.4, 0.7, 0.5, 0.8]);
+  React.useEffect(() => {
+    const t = setInterval(() => setI(x => (x + 1) % TRACKS.length), 6800);
+    return () => clearInterval(t);
+  }, []);
+  React.useEffect(() => {
+    const t = setInterval(() => {
+      setBars(Array.from({ length: 4 }, () => 0.25 + Math.random() * 0.75));
+    }, 220);
+    return () => clearInterval(t);
+  }, []);
+  const tr = TRACKS[i];
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.75)' : 'rgba(20,20,30,0.75)';
+  const subdim = theme === 'cosmic' ? 'rgba(230,225,255,0.45)' : 'rgba(20,20,30,0.45)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '4px 10px', borderRadius: 20,
+      background: theme === 'cosmic' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+      border: theme === 'cosmic' ? '1px solid rgba(167,139,250,0.18)' : '1px solid rgba(0,0,0,0.08)',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: dim,
+      maxWidth: 280, overflow: 'hidden',
+    }}>
+      {/* equalizer bars */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 14, flexShrink: 0 }}>
+        {bars.map((h, j) => (
+          <div key={j} style={{
+            width: 2, height: `${h * 14}px`,
+            background: tr.c, borderRadius: 1,
+            transition: 'height .2s',
+          }}></div>
+        ))}
+      </div>
+      <div style={{
+        display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', flex: 1,
+        lineHeight: 1.2,
+      }}>
+        <span style={{
+          color: dim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          fontSize: 11, fontWeight: 500,
+        }}>{tr.t}</span>
+        <span style={{
+          color: subdim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          fontSize: 9.5,
+        }}>{tr.a}</span>
+      </div>
+    </div>
+  );
+}
+
+function CommandPalette({ open, onClose, onPick }) {
+  const [q, setQ] = React.useState('');
+  const inputRef = React.useRef(null);
+  React.useEffect(() => {
+    if (open && inputRef.current) {
+      setQ('');
+      setTimeout(() => inputRef.current?.focus(), 10);
+    }
+  }, [open]);
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  const results = SECTIONS.filter(s =>
+    !q || s.label.toLowerCase().includes(q.toLowerCase()) ||
+          s.desc.toLowerCase().includes(q.toLowerCase()));
+
+  if (!open) return null;
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'absolute', inset: 0, zIndex: 100,
+        background: 'rgba(5,3,20,0.55)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        paddingTop: 120,
+      }}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 'min(540px, 90%)',
+          background: 'rgba(16,12,32,0.95)',
+          border: '1px solid rgba(167,139,250,0.3)',
+          borderRadius: 14,
+          boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+          overflow: 'hidden',
+          fontFamily: 'Inter, sans-serif',
+        }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '14px 18px',
+          borderBottom: '1px solid rgba(167,139,250,0.15)',
+        }}>
+          <span style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            color: 'oklch(75% 0.15 290)', fontSize: 13,
+          }}>▸</span>
+          <input
+            ref={inputRef}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="jump to section, project, or idea…"
+            style={{
+              flex: 1, background: 'transparent', border: 'none', outline: 'none',
+              color: 'rgba(230,225,255,0.95)', fontSize: 15,
+              fontFamily: 'Inter, sans-serif',
+            }}
+          />
+          <kbd style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            color: 'rgba(230,225,255,0.5)',
+            padding: '3px 7px', borderRadius: 4,
+            background: 'rgba(255,255,255,0.06)',
+          }}>esc</kbd>
+        </div>
+        <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+          {results.length === 0 && (
+            <div style={{ padding: 24, color: 'rgba(230,225,255,0.5)', fontSize: 13 }}>
+              nothing here. maybe it's a dumdum idea waiting to happen.
+            </div>
+          )}
+          {results.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => { onPick?.(s); onClose(); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                padding: '10px 18px', background: 'transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left',
+                color: 'rgba(230,225,255,0.9)',
+                fontFamily: 'Inter, sans-serif', fontSize: 14,
+                transition: 'background .12s',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(167,139,250,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: `oklch(70% 0.16 ${s.hue})`,
+                boxShadow: `0 0 10px oklch(70% 0.16 ${s.hue} / 0.6)`,
+              }}></span>
+              <span style={{ fontWeight: 500, minWidth: 110 }}>{s.label}</span>
+              <span style={{
+                color: 'rgba(230,225,255,0.45)', fontSize: 12,
+                fontFamily: 'JetBrains Mono, monospace',
+              }}>{s.desc}</span>
+            </button>
+          ))}
+        </div>
+        <div style={{
+          padding: '10px 18px',
+          borderTop: '1px solid rgba(167,139,250,0.15)',
+          display: 'flex', gap: 14,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+          color: 'rgba(230,225,255,0.4)',
+        }}>
+          <span>↑↓ navigate</span>
+          <span>↵ open</span>
+          <span>esc close</span>
+          <span style={{ marginLeft: 'auto' }}>{MOD_KEY} K anywhere</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function useCommandPalette() {
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setOpen(o => !o);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+  return { open, setOpen };
+}
+
+// Konami easter egg — ↑↑↓↓←→←→ba. Flips the page briefly and shows a message.
+function useKonami(onTrigger) {
+  React.useEffect(() => {
+    const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let i = 0;
+    const onKey = (e) => {
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (k === seq[i]) {
+        i++;
+        if (i === seq.length) { onTrigger?.(); i = 0; }
+      } else {
+        i = k === seq[0] ? 1 : 0;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onTrigger]);
+}
+
+// Starfield background for cosmic theme. Lightweight; pure CSS-positioned divs.
+function Starfield({ density = 100, twinkle = true }) {
+  const stars = React.useMemo(() => {
+    return Array.from({ length: density }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 1.6 + 0.4,
+      delay: Math.random() * 3,
+      dur: Math.random() * 3 + 2,
+      opacity: Math.random() * 0.6 + 0.2,
+    }));
+  }, [density]);
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      {stars.map(s => (
+        <div key={s.id} style={{
+          position: 'absolute',
+          left: `${s.x}%`, top: `${s.y}%`,
+          width: s.size, height: s.size, borderRadius: '50%',
+          background: '#fff',
+          opacity: s.opacity,
+          animation: twinkle ? `zs-twinkle ${s.dur}s ease-in-out ${s.delay}s infinite` : 'none',
+        }}></div>
+      ))}
+    </div>
+  );
+}
+
+Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCommandPalette, useKonami, Starfield, SECTIONS });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+// Section scaffold — shared layout for every section page.
+// Provides: consistent top nav, command palette with routing, back-to-home link,
+// fonts preloaded. Each section wraps its content in <SectionFrame>.
+
+// Route a section id to its html file.
+function routeToSection(id) {
+  // Map any special cases here. Default: {id}.html
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
+
+function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
+  const palette = useCommandPalette();
+  const [konami, setKonami] = React.useState(false);
+  useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
+
+  return (
+    <div style={{
+      position: 'relative', minHeight: '100vh', overflow: 'hidden auto',
+      background: background || '#0a0e27',
+      color: '#e9e6ff', fontFamily: 'Inter, sans-serif',
+    }}>
+      <TopNav theme={theme} onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        onClose={() => palette.setOpen(false)}
+        onPick={(s) => routeToSection(s.id)}
+      />
+      <div style={{ paddingTop: 68 }}>
+        {children}
+      </div>
+      {konami && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
+          letterSpacing: '0.1em', pointerEvents: 'none',
+        }}>
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+        </div>
+      )}
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
+
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '28px 56px 40px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+      letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
+      gap: 12, flexWrap: 'wrap',
+    }}>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
+
+const footerLink = {
+  color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+  letterSpacing: '0.15em', fontSize: 11,
+};
+
+Object.assign(window, { SectionFrame, routeToSection });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+    // Tools / Stack — terminal-style inventory.
+    // What I work on with: editor, langs, hardware, libs, services.
+    // Filter pills, command-line search, package-manager listing aesthetic.
+    const ITEMS = [
+      // Editor / shell
+      { name: 'Neovim',          v: '0.10',   cat: 'editor',  use: 'main editor · LazyVim base · custom which-key',     since: 2022, since_label: '4y', heart: 5 },
+      { name: 'tmux',            v: '3.4',    cat: 'editor',  use: 'shell multiplexing · split panes everywhere',     since: 2022, since_label: '4y', heart: 5 },
+      { name: 'fish',            v: '3.7',    cat: 'editor',  use: 'shell · with starship prompt',                    since: 2023, since_label: '3y', heart: 4 },
+      { name: 'fzf · ripgrep',   v: 'latest', cat: 'editor',  use: 'fuzzy file & content search · everywhere',        since: 2023, since_label: '3y', heart: 5 },
+
+      // Languages
+      { name: 'Python',          v: '3.11',   cat: 'lang',    use: 'ml, scripts, life',                                since: 2019, since_label: '7y', heart: 5 },
+      { name: 'Rust',            v: '1.78',   cat: 'lang',    use: 'when i want to suffer in the right way',          since: 2024, since_label: '2y', heart: 4 },
+      { name: 'TypeScript',      v: '5.4',    cat: 'lang',    use: 'web prototypes & dashboards',                     since: 2022, since_label: '4y', heart: 4 },
+      { name: 'Go',              v: '1.22',   cat: 'lang',    use: 'small services · the back-of-the-envelope tool',  since: 2024, since_label: '2y', heart: 3 },
+      { name: 'SQL · DuckDB',    v: '1.0',    cat: 'lang',    use: 'every analysis is a SELECT statement first',       since: 2023, since_label: '3y', heart: 5 },
+
+      // ML stack
+      { name: 'PyTorch',         v: '2.3',    cat: 'ml',      use: 'thesis · everything model-shaped',                since: 2022, since_label: '4y', heart: 5 },
+      { name: 'transformer-lens',v: '1.17',   cat: 'ml',      use: 'mechanistic interp · activation patching',         since: 2025, since_label: '1y', heart: 5 },
+      { name: 'jax',             v: '0.4',    cat: 'ml',      use: 'when pytorch fights back',                         since: 2024, since_label: '2y', heart: 3 },
+      { name: 'pandas · polars', v: '2.2',    cat: 'ml',      use: 'data wrangling · polars when honest about scale',  since: 2020, since_label: '6y', heart: 4 },
+      { name: 'matplotlib + altair', v: '3.8',cat: 'ml',      use: 'plot once in matplotlib, polish in altair',        since: 2020, since_label: '6y', heart: 4 },
+
+      // Hardware
+      { name: 'M1 MacBook Air',  v: '16gb',   cat: 'hardware',use: 'daily driver · the one that survives travel',     since: 2022, since_label: '4y', heart: 5 },
+      { name: 'university cluster', v: '8×A100', cat: 'hardware', use: 'thesis training runs · slurm queues',          since: 2025, since_label: '1y', heart: 4 },
+      { name: 'Sony ZV-1',       v: 'mk1',    cat: 'hardware',use: 'vlog cam · graded badly on purpose',               since: 2024, since_label: '2y', heart: 4 },
+      { name: 'Field Notes',     v: 'kraft',  cat: 'hardware',use: 'thinking happens here first',                       since: 2019, since_label: '7y', heart: 5 },
+      { name: 'Kindle Paperwhite', v: '11g',  cat: 'hardware',use: 'reading on the bus · home screen disabled',        since: 2023, since_label: '3y', heart: 4 },
+
+      // Services
+      { name: 'GitHub',          v: '—',      cat: 'service', use: 'code home + issues as a todo system',              since: 2019, since_label: '7y', heart: 4 },
+      { name: 'Obsidian',        v: '1.6',    cat: 'service', use: 'second brain · daily notes · graph view',           since: 2022, since_label: '4y', heart: 5 },
+      { name: 'Linear',          v: 'latest', cat: 'service', use: 'when a project needs more than a notebook',         since: 2024, since_label: '2y', heart: 3 },
+      { name: 'Notion · 3 dbs',  v: 'latest', cat: 'service', use: 'reading list · films · recipes',                    since: 2021, since_label: '5y', heart: 4 },
+      { name: 'Discord (3 servers)', v: '—',  cat: 'service', use: 'where most of my friends live now',                 since: 2020, since_label: '6y', heart: 4 },
+
+      // Misc
+      { name: 'pour-over kettle',v: 'fellow',  cat: 'misc',   use: 'morning ritual · kept simple',                      since: 2023, since_label: '3y', heart: 5 },
+      { name: 'mechanical kbd',  v: 'lily58',  cat: 'misc',   use: 'hand-built · still wrong layout sometimes',         since: 2025, since_label: '1y', heart: 4 },
+    ];
+
+    const CATS = [
+      { id: 'all',      label: 'all',       color: '#d4d4d4' },
+      { id: 'editor',   label: 'editor·sh', color: '#7dd3fc' },
+      { id: 'lang',     label: 'lang',      color: '#fde047' },
+      { id: 'ml',       label: 'ml',        color: '#c084fc' },
+      { id: 'hardware', label: 'hardware',  color: '#86efac' },
+      { id: 'service',  label: 'service',   color: '#fda4af' },
+      { id: 'misc',     label: 'misc',      color: '#f59e0b' },
+    ];
+
+    const CAT_COLOR = Object.fromEntries(CATS.map(c => [c.id, c.color]));
+
+    function ToolsPage() {
+      const [filter, setFilter] = React.useState('all');
+      const [q, setQ] = React.useState('');
+
+      const list = ITEMS.filter(i => (filter === 'all' || i.cat === filter)
+        && (q === '' || (i.name + ' ' + i.use).toLowerCase().includes(q.toLowerCase())));
+
+      const counts = ITEMS.reduce((acc, i) => { acc[i.cat] = (acc[i.cat] || 0) + 1; return acc; }, {});
+
+      return (
+        <SectionFrame sectionId="tools" theme="terminal" background="#0e0f10">
+          <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 32px 80px' }}>
+            {/* Terminal-window header */}
+            <div style={{
+              border: '1px solid #2a2d2e', borderRadius: 6, overflow: 'hidden',
+              background: '#1a1c1e', boxShadow: '0 12px 36px rgba(0,0,0,0.5)',
+            }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '8px 14px', background: '#222426',
+                borderBottom: '1px solid #2a2d2e', fontSize: 11, color: '#888',
+              }}>
+                <span style={{ display: 'flex', gap: 6 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f57' }}></span>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffbd2e' }}></span>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c941' }}></span>
+                </span>
+                <span style={{ marginLeft: 8 }}>~/zymstar/tools — fish — 132×42</span>
+                <span style={{ marginLeft: 'auto', color: '#666' }}>tab 1 of 1</span>
+              </div>
+
+              <div style={{ padding: '24px 28px 32px' }}>
+                {/* Banner */}
+                <pre style={{
+                  margin: 0, color: '#d97706', fontSize: 12, lineHeight: 1.3,
+                }}>{String.raw`
+ _____ _____ _____ __    _____
+|__   |   __|     |  |  |   __|     ★ zymstar / tools
+|   __|__   | | | |  |__|__   |     pkg-mgr v0.4.1 · ${ITEMS.length} entries
+|_____|_____|_|_|_|_____|_____|     local index updated 2026-04-28
+`}</pre>
+
+                <div style={{ marginTop: 14, color: '#7dd3fc', fontSize: 13, lineHeight: 1.6 }}>
+                  $ <span style={{ color: '#d4d4d4' }}>cat README.md</span>
+                </div>
+                <div style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
+                  color: '#a8a8a8', lineHeight: 1.7, marginTop: 6, maxWidth: 720,
+                }}>
+                  every tool i actually use, with a sentence on what for and how long.
+                  no affiliate links. no superlatives. things i can pick up after a
+                  six-month gap and still remember where the keys are.
+                </div>
+
+                {/* Search prompt */}
+                <div style={{ marginTop: 26, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ color: '#86efac' }}>zeynep@zymstar</span>
+                  <span style={{ color: '#7dd3fc' }}>~/tools</span>
+                  <span style={{ color: '#d4d4d4' }}>$ tool search</span>
+                  <input value={q} onChange={e => setQ(e.target.value)}
+                    placeholder="--query"
+                    style={{
+                      flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                      fontFamily: 'inherit', fontSize: 14, color: '#fde047',
+                      borderBottom: '1px solid #2a2d2e', padding: '4px 0',
+                    }}/>
+                  <span style={{ color: '#666', fontSize: 11 }}>{list.length} match{list.length === 1 ? '' : 'es'}</span>
+                </div>
+
+                {/* Filter pills */}
+                <div style={{ display: 'flex', gap: 6, marginTop: 18, flexWrap: 'wrap' }}>
+                  {CATS.map(c => (
+                    <button key={c.id} onClick={() => setFilter(c.id)} style={{
+                      padding: '5px 12px',
+                      background: filter === c.id ? c.color : 'transparent',
+                      color: filter === c.id ? '#0e0f10' : c.color,
+                      border: `1px solid ${c.color}`,
+                      fontFamily: 'inherit', fontSize: 11,
+                      cursor: 'pointer', letterSpacing: '0.05em',
+                    }}>
+                      [{c.id === 'all' ? ITEMS.length : (counts[c.id] || 0)}] {c.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Inventory listing */}
+                <div style={{ marginTop: 28 }}>
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: '1.4fr 0.6fr 0.7fr 2.2fr 0.5fr 0.4fr',
+                    gap: 16, padding: '8px 12px',
+                    fontSize: 11, color: '#666',
+                    borderBottom: '1px solid #2a2d2e', letterSpacing: '0.1em',
+                  }}>
+                    <span>NAME</span>
+                    <span>VERSION</span>
+                    <span>CATEGORY</span>
+                    <span>USE</span>
+                    <span>SINCE</span>
+                    <span>♥</span>
+                  </div>
+                  {list.map((i, idx) => (
+                    <div key={i.name} style={{
+                      display: 'grid', gridTemplateColumns: '1.4fr 0.6fr 0.7fr 2.2fr 0.5fr 0.4fr',
+                      gap: 16, padding: '10px 12px',
+                      background: idx % 2 ? 'rgba(255,255,255,0.015)' : 'transparent',
+                      fontSize: 13, alignItems: 'baseline',
+                      borderLeft: `3px solid ${CAT_COLOR[i.cat]}`,
+                    }}>
+                      <span style={{ color: '#d4d4d4', fontWeight: 500 }}>{i.name}</span>
+                      <span style={{ color: '#fde047' }}>{i.v}</span>
+                      <span style={{ color: CAT_COLOR[i.cat] }}>{i.cat}</span>
+                      <span style={{ color: '#a8a8a8' }}>{i.use}</span>
+                      <span style={{ color: '#7dd3fc' }}>{i.since_label}</span>
+                      <span style={{ color: '#fda4af' }}>
+                        {'♥'.repeat(i.heart)}<span style={{ color: '#3a3a3a' }}>{'·'.repeat(5 - i.heart)}</span>
+                      </span>
+                    </div>
+                  ))}
+                  {list.length === 0 && (
+                    <div style={{ padding: 32, textAlign: 'center', color: '#666' }}>
+                      <span style={{ color: '#fda4af' }}>error:</span> no tools match.
+                      try widening the filter, or rest your eyes.
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer prompt */}
+                <div style={{ marginTop: 30, fontSize: 13, lineHeight: 1.7, color: '#a8a8a8' }}>
+                  <div>$ <span style={{ color: '#d4d4d4' }}>tool stats --by category</span></div>
+                  <div style={{ display: 'flex', gap: 18, marginTop: 8, flexWrap: 'wrap' }}>
+                    {CATS.filter(c => c.id !== 'all').map(c => (
+                      <span key={c.id} style={{ color: '#a8a8a8' }}>
+                        <span style={{ color: c.color }}>{c.label}</span>
+                        <span style={{ color: '#666', margin: '0 6px' }}>=</span>
+                        <span style={{ color: '#fde047' }}>{counts[c.id] || 0}</span>
+                      </span>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ color: '#86efac' }}>zeynep@zymstar</span>
+                    <span style={{ color: '#7dd3fc' }}>~/tools</span>
+                    <span style={{ color: '#d4d4d4' }}>$</span>
+                    <span style={{
+                      width: 9, height: 16, background: '#d4d4d4', display: 'inline-block',
+                      animation: 'blink 1s steps(2, start) infinite',
+                    }}></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <style>{`@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }`}</style>
+        </SectionFrame>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<ToolsPage />);
+  </script>
+</body>
+</html>

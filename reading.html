@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zymstar / reading — library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Special+Elite&family=Courier+Prime:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #2b1d12; font-family: 'Cormorant Garamond', serif; color: #f5e6c8; }
+    * { box-sizing: border-box; }
+    ::selection { background: #8c281e; color: #f5e6c8; }
+    .wood {
+      background:
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.06) 0px, transparent 2px, transparent 80px, rgba(0,0,0,0.05) 82px),
+        repeating-linear-gradient(0deg,
+          rgba(0,0,0,0.04) 0px, transparent 1px, transparent 4px),
+        linear-gradient(180deg, #4a2e1a 0%, #2b1d12 100%);
+    }
+    .shelf {
+      background: linear-gradient(180deg, #5a3a22 0%, #3d2614 100%);
+      box-shadow:
+        inset 0 -3px 0 rgba(0,0,0,0.4),
+        inset 0 2px 0 rgba(255,200,140,0.1),
+        0 6px 12px rgba(0,0,0,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" data-presets="env,react">
+// Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
+// These are meant to feel consistent across every section of zymstar.com
+// while per-section content uses its own aesthetic underneath.
+
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl';
+
+const SECTIONS = [
+  { id: 'finance',     label: 'Finance',     hue: 140, desc: 'quant, strategies, indicators, backtests', group: 'project' },
+  { id: 'hardware',    label: 'Hardware',    hue: 20,  desc: 'FPGA, Arduino, solder smoke', group: 'project' },
+  { id: 'ml',          label: 'ML / AI',     hue: 180, desc: 'models, experiments, results', group: 'project' },
+  { id: 'dumdum',      label: 'Dumdum',      hue: 330, desc: 'silly ideas with no justification' },
+  { id: 'thesis',      label: 'Thesis',      hue: 240, desc: "master's thesis + related work" },
+  { id: 'writing',     label: 'Writing',     hue: 40,  desc: 'essays, blog posts, notes' },
+  { id: 'vlog',        label: 'Vlog',        hue: 350, desc: 'video, voice, vibes' },
+  { id: 'photography', label: 'Photography', hue: 200, desc: 'images, light, composition' },
+  { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
+  { id: 'tools',       label: 'Tools',       hue: 160, desc: 'utilities I made for myself' },
+  { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
+  { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
+];
+
+function TopNav({ theme = 'cosmic', onOpenPalette }) {
+  const fg = theme === 'cosmic' ? 'rgba(230,225,255,0.92)' : 'rgba(20,20,30,0.9)';
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.55)' : 'rgba(20,20,30,0.55)';
+  const border = theme === 'cosmic' ? 'rgba(167,139,250,0.15)' : 'rgba(0,0,0,0.08)';
+  const bg = theme === 'cosmic' ? 'rgba(10,14,39,0.55)' : 'rgba(255,255,255,0.75)';
+  return (
+    <nav style={{
+      position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '18px 32px',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      fontSize: 13, color: fg,
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      background: bg,
+      borderBottom: `1px solid ${border}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 22, height: 22, borderRadius: '50%',
+          background: 'radial-gradient(circle at 35% 30%, #fff 0%, #c084fc 40%, #6d28d9 90%)',
+          boxShadow: '0 0 18px rgba(167,139,250,0.7)',
+        }}></div>
+        <span style={{
+          fontFamily: '"Space Grotesk", Inter, sans-serif',
+          fontWeight: 600, fontSize: 16, letterSpacing: '-0.02em',
+        }}>zymstar</span>
+        <span style={{ color: dim, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>
+          / Zeynep&nbsp;Yıldız
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <MusicTicker theme={theme} />
+        <NowIndicator theme={theme} />
+        <button
+          onClick={onOpenPalette}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '6px 12px', borderRadius: 8,
+            background: 'transparent',
+            border: `1px solid ${border}`,
+            color: dim, cursor: 'pointer',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+          }}>
+          <span>search</span>
+          <kbd style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            padding: '2px 6px', borderRadius: 4,
+            background: theme === 'cosmic' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            fontSize: 10,
+          }}>{MOD_KEY}&nbsp;K</kbd>
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function NowIndicator({ theme }) {
+  // Realtime-ish "what I'm doing now" indicator. Cycles through states.
+  const states = [
+    { icon: '●', text: 'coding — thesis chapter 3', color: 'oklch(70% 0.15 150)' },
+    { icon: '☕', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
+    { icon: '✎', text: 'writing — on failure', color: 'oklch(70% 0.15 220)' },
+    { icon: '✦', text: 'reading — borges',     color: 'oklch(70% 0.15 280)' },
+  ];
+  const [i, setI] = React.useState(0);
+  React.useEffect(() => {
+    const t = setInterval(() => setI(x => (x + 1) % states.length), 4200);
+    return () => clearInterval(t);
+  }, []);
+  const s = states[i];
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.75)' : 'rgba(20,20,30,0.75)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: dim,
+    }}>
+      <span style={{
+        color: s.color,
+        animation: 'zs-pulse 1.4s ease-in-out infinite',
+        fontSize: 10,
+      }}>{s.icon}</span>
+      <span style={{ minWidth: 170 }}>
+        <span style={{ opacity: 0.55 }}>now: </span>{s.text}
+      </span>
+    </div>
+  );
+}
+
+const TRACKS = [
+  { t: 'Amaze Amaze Amaze',   a: 'Daniel Pemberton',   c: '#ff6b9d' },
+  { t: 'Time Go Fishing',     a: 'Daniel Pemberton',   c: '#4fb8ff' },
+  { t: 'See You Tomorrow',    a: 'John Powell',        c: '#7d6cff' },
+  { t: "Forbidden Friendship",a: 'John Powell',        c: '#5fd9c4' },
+  { t: "It's OK I'm OK",      a: 'Tate McRae',         c: '#ff8aae' },
+  { t: 'Non-Stop',            a: 'Lin-Manuel Miranda', c: '#ffb84d' },
+  { t: 'Spider-Man Loves You',a: 'Daniel Pemberton',   c: '#e84545' },
+  { t: 'What It Sounds Like', a: 'HUNTR/X',            c: '#c084fc' },
+  { t: "How It's Done",       a: 'HUNTR/X',            c: '#a855f7' },
+  { t: 'No Time For Caution', a: 'Hans Zimmer',        c: '#3a86ff' },
+  { t: 'The Seed',            a: 'AURORA',             c: '#06d6a0' },
+  { t: 'The Other Side',      a: 'Hugh Jackman',       c: '#ffd23f' },
+  { t: 'Cross My Heart',      a: 'Marianas Trench',    c: '#fb5607' },
+  { t: 'Desperate Measures',  a: 'Marianas Trench',    c: '#ff006e' },
+];
+
+function MusicTicker({ theme }) {
+  const [i, setI] = React.useState(() => Math.floor(Math.random() * TRACKS.length));
+  const [bars, setBars] = React.useState([0.4, 0.7, 0.5, 0.8]);
+  React.useEffect(() => {
+    const t = setInterval(() => setI(x => (x + 1) % TRACKS.length), 6800);
+    return () => clearInterval(t);
+  }, []);
+  React.useEffect(() => {
+    const t = setInterval(() => {
+      setBars(Array.from({ length: 4 }, () => 0.25 + Math.random() * 0.75));
+    }, 220);
+    return () => clearInterval(t);
+  }, []);
+  const tr = TRACKS[i];
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.75)' : 'rgba(20,20,30,0.75)';
+  const subdim = theme === 'cosmic' ? 'rgba(230,225,255,0.45)' : 'rgba(20,20,30,0.45)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '4px 10px', borderRadius: 20,
+      background: theme === 'cosmic' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+      border: theme === 'cosmic' ? '1px solid rgba(167,139,250,0.18)' : '1px solid rgba(0,0,0,0.08)',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: dim,
+      maxWidth: 280, overflow: 'hidden',
+    }}>
+      {/* equalizer bars */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 14, flexShrink: 0 }}>
+        {bars.map((h, j) => (
+          <div key={j} style={{
+            width: 2, height: `${h * 14}px`,
+            background: tr.c, borderRadius: 1,
+            transition: 'height .2s',
+          }}></div>
+        ))}
+      </div>
+      <div style={{
+        display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', flex: 1,
+        lineHeight: 1.2,
+      }}>
+        <span style={{
+          color: dim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          fontSize: 11, fontWeight: 500,
+        }}>{tr.t}</span>
+        <span style={{
+          color: subdim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          fontSize: 9.5,
+        }}>{tr.a}</span>
+      </div>
+    </div>
+  );
+}
+
+function CommandPalette({ open, onClose, onPick }) {
+  const [q, setQ] = React.useState('');
+  const inputRef = React.useRef(null);
+  React.useEffect(() => {
+    if (open && inputRef.current) {
+      setQ('');
+      setTimeout(() => inputRef.current?.focus(), 10);
+    }
+  }, [open]);
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  const results = SECTIONS.filter(s =>
+    !q || s.label.toLowerCase().includes(q.toLowerCase()) ||
+          s.desc.toLowerCase().includes(q.toLowerCase()));
+
+  if (!open) return null;
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'absolute', inset: 0, zIndex: 100,
+        background: 'rgba(5,3,20,0.55)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        paddingTop: 120,
+      }}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 'min(540px, 90%)',
+          background: 'rgba(16,12,32,0.95)',
+          border: '1px solid rgba(167,139,250,0.3)',
+          borderRadius: 14,
+          boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+          overflow: 'hidden',
+          fontFamily: 'Inter, sans-serif',
+        }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '14px 18px',
+          borderBottom: '1px solid rgba(167,139,250,0.15)',
+        }}>
+          <span style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            color: 'oklch(75% 0.15 290)', fontSize: 13,
+          }}>▸</span>
+          <input
+            ref={inputRef}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="jump to section, project, or idea…"
+            style={{
+              flex: 1, background: 'transparent', border: 'none', outline: 'none',
+              color: 'rgba(230,225,255,0.95)', fontSize: 15,
+              fontFamily: 'Inter, sans-serif',
+            }}
+          />
+          <kbd style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            color: 'rgba(230,225,255,0.5)',
+            padding: '3px 7px', borderRadius: 4,
+            background: 'rgba(255,255,255,0.06)',
+          }}>esc</kbd>
+        </div>
+        <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+          {results.length === 0 && (
+            <div style={{ padding: 24, color: 'rgba(230,225,255,0.5)', fontSize: 13 }}>
+              nothing here. maybe it's a dumdum idea waiting to happen.
+            </div>
+          )}
+          {results.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => { onPick?.(s); onClose(); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                padding: '10px 18px', background: 'transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left',
+                color: 'rgba(230,225,255,0.9)',
+                fontFamily: 'Inter, sans-serif', fontSize: 14,
+                transition: 'background .12s',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(167,139,250,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: `oklch(70% 0.16 ${s.hue})`,
+                boxShadow: `0 0 10px oklch(70% 0.16 ${s.hue} / 0.6)`,
+              }}></span>
+              <span style={{ fontWeight: 500, minWidth: 110 }}>{s.label}</span>
+              <span style={{
+                color: 'rgba(230,225,255,0.45)', fontSize: 12,
+                fontFamily: 'JetBrains Mono, monospace',
+              }}>{s.desc}</span>
+            </button>
+          ))}
+        </div>
+        <div style={{
+          padding: '10px 18px',
+          borderTop: '1px solid rgba(167,139,250,0.15)',
+          display: 'flex', gap: 14,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+          color: 'rgba(230,225,255,0.4)',
+        }}>
+          <span>↑↓ navigate</span>
+          <span>↵ open</span>
+          <span>esc close</span>
+          <span style={{ marginLeft: 'auto' }}>{MOD_KEY} K anywhere</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function useCommandPalette() {
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setOpen(o => !o);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+  return { open, setOpen };
+}
+
+// Konami easter egg — ↑↑↓↓←→←→ba. Flips the page briefly and shows a message.
+function useKonami(onTrigger) {
+  React.useEffect(() => {
+    const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let i = 0;
+    const onKey = (e) => {
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (k === seq[i]) {
+        i++;
+        if (i === seq.length) { onTrigger?.(); i = 0; }
+      } else {
+        i = k === seq[0] ? 1 : 0;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onTrigger]);
+}
+
+// Starfield background for cosmic theme. Lightweight; pure CSS-positioned divs.
+function Starfield({ density = 100, twinkle = true }) {
+  const stars = React.useMemo(() => {
+    return Array.from({ length: density }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 1.6 + 0.4,
+      delay: Math.random() * 3,
+      dur: Math.random() * 3 + 2,
+      opacity: Math.random() * 0.6 + 0.2,
+    }));
+  }, [density]);
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      {stars.map(s => (
+        <div key={s.id} style={{
+          position: 'absolute',
+          left: `${s.x}%`, top: `${s.y}%`,
+          width: s.size, height: s.size, borderRadius: '50%',
+          background: '#fff',
+          opacity: s.opacity,
+          animation: twinkle ? `zs-twinkle ${s.dur}s ease-in-out ${s.delay}s infinite` : 'none',
+        }}></div>
+      ))}
+    </div>
+  );
+}
+
+Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCommandPalette, useKonami, Starfield, SECTIONS });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+// Section scaffold — shared layout for every section page.
+// Provides: consistent top nav, command palette with routing, back-to-home link,
+// fonts preloaded. Each section wraps its content in <SectionFrame>.
+
+// Route a section id to its html file.
+function routeToSection(id) {
+  // Map any special cases here. Default: {id}.html
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
+
+function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
+  const palette = useCommandPalette();
+  const [konami, setKonami] = React.useState(false);
+  useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
+
+  return (
+    <div style={{
+      position: 'relative', minHeight: '100vh', overflow: 'hidden auto',
+      background: background || '#0a0e27',
+      color: '#e9e6ff', fontFamily: 'Inter, sans-serif',
+    }}>
+      <TopNav theme={theme} onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        onClose={() => palette.setOpen(false)}
+        onPick={(s) => routeToSection(s.id)}
+      />
+      <div style={{ paddingTop: 68 }}>
+        {children}
+      </div>
+      {konami && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
+          letterSpacing: '0.1em', pointerEvents: 'none',
+        }}>
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+        </div>
+      )}
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
+
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '28px 56px 40px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+      letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
+      gap: 12, flexWrap: 'wrap',
+    }}>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
+
+const footerLink = {
+  color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+  letterSpacing: '0.15em', fontSize: 11,
+};
+
+Object.assign(window, { SectionFrame, routeToSection });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+    // Reading — actual library. Bookshelves with spines + card catalog.
+    // Shelves grouped by section (FIC, NF, REF, POE), each spine clickable.
+    const SHELVES = [
+      {
+        label: 'FICTION', code: 'FIC', span: '813.6',
+        books: [
+          { t: 'Project Hail Mary',          a: 'Andy Weir',            color: '#8c281e', light: '#f5e6c8', h: 200, w: 38, year: 2021, status: 'finished' },
+          { t: 'The Goldfinch',              a: 'Donna Tartt',          color: '#3a5d3e', light: '#e6d8a8', h: 215, w: 44, year: 2024, status: 'finished' },
+          { t: 'A Little Life',              a: 'Hanya Yanagihara',     color: '#1c1810', light: '#c9a55a', h: 220, w: 50, year: 2025, status: 'finished' },
+          { t: 'Piranesi',                   a: 'Susanna Clarke',       color: '#6b8fbf', light: '#f5e6c8', h: 180, w: 30, year: 2024, status: 'finished' },
+          { t: 'Klara and the Sun',          a: 'Kazuo Ishiguro',       color: '#d9a441', light: '#1c1810', h: 195, w: 32, year: 2023, status: 'finished' },
+          { t: 'Tomorrow & Tomorrow & Tomorrow', a: 'Gabrielle Zevin',  color: '#9a7fce', light: '#f5e6c8', h: 205, w: 36, year: 2024, status: 'reading' },
+          { t: 'The Bee Sting',              a: 'Paul Murray',          color: '#d9a441', light: '#1c1810', h: 220, w: 48, year: 2026, status: 'reading' },
+        ],
+      },
+      {
+        label: 'SCIENCE & MIND', code: 'SCI', span: '500.QC',
+        books: [
+          { t: 'Gödel, Escher, Bach',        a: 'Hofstadter',           color: '#5d4a2a', light: '#d9a441', h: 230, w: 60, year: 2022, status: 'reread' },
+          { t: 'The Information',            a: 'James Gleick',         color: '#2e3a4a', light: '#6b8fbf', h: 210, w: 36, year: 2023, status: 'finished' },
+          { t: 'Thinking Fast and Slow',     a: 'Kahneman',             color: '#1c1810', light: '#f5e6c8', h: 215, w: 46, year: 2022, status: 'finished' },
+          { t: 'A Brief History of Time',    a: 'Stephen Hawking',      color: '#0a0d28', light: '#f5e6c8', h: 195, w: 26, year: 2021, status: 'finished' },
+          { t: 'The Code Breaker',           a: 'Walter Isaacson',      color: '#3a5d6b', light: '#e6d8a8', h: 220, w: 44, year: 2024, status: 'finished' },
+          { t: 'Why We Sleep',               a: 'Matthew Walker',       color: '#1c2238', light: '#9a7fce', h: 200, w: 32, year: 2024, status: 'finished' },
+        ],
+      },
+      {
+        label: 'TECHNICAL', code: 'TEC', span: '004.QA',
+        books: [
+          { t: 'Pattern Recognition & ML',   a: 'Bishop',               color: '#3a5d3e', light: '#f5e6c8', h: 240, w: 52, year: 2023, status: 'reference' },
+          { t: 'Deep Learning',              a: 'Goodfellow et al.',    color: '#1c1810', light: '#d9a441', h: 235, w: 50, year: 2023, status: 'reference' },
+          { t: 'The Elements of Stat. Lrn.', a: 'Hastie · Tibshirani',  color: '#3a5d6b', light: '#f5e6c8', h: 235, w: 48, year: 2024, status: 'reference' },
+          { t: 'Information Theory',         a: 'MacKay',               color: '#5d4a2a', light: '#f5e6c8', h: 230, w: 44, year: 2024, status: 'reading' },
+          { t: 'Designing Data-Intensive…',  a: 'Kleppmann',            color: '#1c2238', light: '#d9a441', h: 215, w: 36, year: 2025, status: 'finished' },
+          { t: 'Crafting Interpreters',      a: 'Robert Nystrom',       color: '#8c281e', light: '#f5e6c8', h: 210, w: 34, year: 2025, status: 'reading' },
+        ],
+      },
+      {
+        label: 'FINANCE & MISC', code: 'FIN', span: '332.HG',
+        books: [
+          { t: 'Options · Futures',          a: 'Hull',                 color: '#1c1810', light: '#d9a441', h: 230, w: 50, year: 2023, status: 'reference' },
+          { t: 'Advances in Financial ML',   a: 'López de Prado',       color: '#3a5d3e', light: '#f5e6c8', h: 220, w: 38, year: 2024, status: 'reference' },
+          { t: 'When Genius Failed',         a: 'Roger Lowenstein',     color: '#5d2a2a', light: '#f5e6c8', h: 200, w: 30, year: 2025, status: 'finished' },
+          { t: 'The Man Who Solved the Mkt', a: 'Gregory Zuckerman',    color: '#1c2238', light: '#d9a441', h: 205, w: 32, year: 2024, status: 'finished' },
+          { t: 'Pale Fire',                  a: 'Nabokov',              color: '#9a7fce', light: '#1c1810', h: 195, w: 28, year: 2026, status: 'wishlist' },
+          { t: 'Borges · Labyrinths',        a: 'Jorge Luis Borges',    color: '#5d4a2a', light: '#d9a441', h: 200, w: 26, year: 2025, status: 'finished' },
+        ],
+      },
+    ];
+
+    const STATUS_TINT = {
+      reading:   '#d9a441',
+      finished:  '#7fae6c',
+      reread:    '#9a7fce',
+      reference: '#6b8fbf',
+      wishlist:  '#a89b85',
+    };
+
+    function ReadingPage() {
+      const [hovered, setHovered] = React.useState(null);
+      const [card, setCard] = React.useState(null);
+
+      const flat = SHELVES.flatMap((s, si) => s.books.map((b, bi) => ({ ...b, shelf: s, idx: `${s.code}-${String(bi+1).padStart(3,'0')}`, si, bi })));
+      const total = flat.length;
+      const counts = flat.reduce((acc, b) => { acc[b.status] = (acc[b.status] || 0) + 1; return acc; }, {});
+
+      return (
+        <SectionFrame sectionId="reading" theme="paper" background="#2b1d12">
+          <div className="wood" style={{ position: 'fixed', inset: 0, zIndex: 0 }}></div>
+          {/* Vignette */}
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse at 30% 20%, transparent 30%, rgba(0,0,0,0.55) 100%)',
+          }}></div>
+
+          <div style={{ position: 'relative', zIndex: 2, padding: '32px 40px 80px', maxWidth: 1280, margin: '0 auto' }}>
+            {/* Brass plaque header */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 40, alignItems: 'flex-end',
+              marginBottom: 36, paddingBottom: 24,
+              borderBottom: '1px solid rgba(245,230,200,0.2)',
+            }}>
+              <div>
+                <div style={{
+                  fontFamily: 'Special Elite, monospace', fontSize: 11,
+                  letterSpacing: '0.3em', color: '#d9a441', marginBottom: 14,
+                }}>★ THE ZYMSTAR LIBRARY · WING B · {total} VOLUMES</div>
+                <h1 style={{
+                  fontFamily: '"Cormorant Garamond", serif',
+                  fontSize: 96, fontWeight: 500, fontStyle: 'italic',
+                  letterSpacing: '-0.03em', lineHeight: 0.92, margin: 0,
+                  color: '#f5e6c8',
+                  textShadow: '2px 4px 14px rgba(0,0,0,0.6)',
+                }}>reading.</h1>
+                <p style={{
+                  fontFamily: '"Cormorant Garamond", serif',
+                  fontSize: 18, lineHeight: 1.55, color: 'rgba(245,230,200,0.75)',
+                  maxWidth: 540, marginTop: 14, fontStyle: 'italic',
+                }}>
+                  a real library, kept in a small apartment.
+                  hover a spine to read its card; click to open it.
+                </p>
+              </div>
+              <div style={{
+                fontFamily: 'Special Elite, monospace', fontSize: 12,
+                color: 'rgba(245,230,200,0.7)', lineHeight: 1.9,
+                paddingLeft: 22, borderLeft: '1px solid rgba(245,230,200,0.2)',
+              }}>
+                ↳ READING <span style={{ color: STATUS_TINT.reading, marginLeft: 10 }}>{counts.reading || 0}</span><br/>
+                ↳ FINISHED <span style={{ color: STATUS_TINT.finished, marginLeft: 8 }}>{counts.finished || 0}</span><br/>
+                ↳ REREAD <span style={{ color: STATUS_TINT.reread, marginLeft: 18 }}>{counts.reread || 0}</span><br/>
+                ↳ REFERENCE <span style={{ color: STATUS_TINT.reference, marginLeft: 4 }}>{counts.reference || 0}</span><br/>
+                ↳ WISHLIST <span style={{ color: STATUS_TINT.wishlist, marginLeft: 14 }}>{counts.wishlist || 0}</span>
+              </div>
+            </div>
+
+            {/* Shelves */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+              {SHELVES.map((shelf, si) => (
+                <div key={shelf.code}>
+                  <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                    marginBottom: 8, padding: '0 4px',
+                    fontFamily: 'Special Elite, monospace', fontSize: 11,
+                    letterSpacing: '0.3em', color: 'rgba(245,230,200,0.6)',
+                  }}>
+                    <span>▸ {shelf.code} &mdash; {shelf.label}</span>
+                    <span>{shelf.span} &middot; {shelf.books.length} vol.</span>
+                  </div>
+                  <div style={{
+                    position: 'relative', display: 'flex', alignItems: 'flex-end',
+                    minHeight: 256, padding: '0 16px',
+                    background: 'rgba(0,0,0,0.2)',
+                    borderTop: '1px solid rgba(245,230,200,0.1)',
+                  }}>
+                    {shelf.books.map((b, bi) => {
+                      const id = `${shelf.code}-${bi}`;
+                      const isHover = hovered === id;
+                      return (
+                        <div key={id}
+                          onMouseEnter={() => setHovered(id)}
+                          onMouseLeave={() => setHovered(null)}
+                          onClick={() => setCard({ book: b, shelf })}
+                          style={{
+                            position: 'relative', cursor: 'pointer',
+                            width: b.w, height: b.h,
+                            marginRight: 2,
+                            background: `linear-gradient(180deg, ${b.color}f0 0%, ${b.color} 50%, ${b.color}c0 100%)`,
+                            boxShadow: isHover
+                              ? `0 0 22px rgba(255,210,130,0.5), inset 0 0 0 1px rgba(255,255,255,0.1), inset -3px 0 8px rgba(0,0,0,0.3)`
+                              : `inset 0 0 0 1px rgba(255,255,255,0.08), inset -3px 0 8px rgba(0,0,0,0.3), inset 3px 0 4px rgba(255,255,255,0.05)`,
+                            transform: isHover ? 'translateY(-12px)' : 'none',
+                            transition: 'transform .2s, box-shadow .2s',
+                            color: b.light,
+                            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                            padding: '10px 4px 8px',
+                          }}>
+                          {/* Top decoration */}
+                          <div style={{
+                            height: 2, background: b.light, opacity: 0.4, margin: '0 4px',
+                          }}></div>
+                          {/* Vertical title */}
+                          <div style={{
+                            writingMode: 'vertical-rl', transform: 'rotate(180deg)',
+                            fontFamily: '"Cormorant Garamond", serif',
+                            fontSize: b.w > 40 ? 14 : 12, fontWeight: 500,
+                            letterSpacing: '0.04em', textAlign: 'center',
+                            margin: '4px auto', flex: 1,
+                            display: 'flex', alignItems: 'center',
+                            textTransform: 'uppercase',
+                          }}>{b.t}</div>
+                          {/* Bottom decoration */}
+                          <div style={{
+                            height: 2, background: b.light, opacity: 0.4, margin: '0 4px',
+                          }}></div>
+                          {/* Status dot */}
+                          <div style={{
+                            width: 6, height: 6, borderRadius: '50%',
+                            background: STATUS_TINT[b.status] || '#a89b85',
+                            margin: '4px auto 0',
+                          }}></div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Shelf board */}
+                  <div className="shelf" style={{ height: 16 }}></div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quote */}
+            <div style={{
+              marginTop: 56, padding: '32px 40px',
+              background: 'rgba(245,230,200,0.05)',
+              borderLeft: '3px solid #d9a441',
+              maxWidth: 720,
+            }}>
+              <div style={{
+                fontFamily: '"Cormorant Garamond", serif',
+                fontStyle: 'italic', fontSize: 24, lineHeight: 1.5,
+                color: 'rgba(245,230,200,0.92)',
+              }}>
+                &ldquo;a library is not a luxury but one of the necessities of life.&rdquo;
+              </div>
+              <div style={{
+                marginTop: 8, fontFamily: 'Special Elite, monospace',
+                fontSize: 11, letterSpacing: '0.2em', color: 'rgba(245,230,200,0.5)',
+              }}>— HENRY WARD BEECHER (and the librarian agrees)</div>
+            </div>
+          </div>
+
+          {/* Card catalog modal */}
+          {card && <CardCatalog card={card} onClose={() => setCard(null)} />}
+
+          {/* Hovered spine label */}
+          {hovered && (() => {
+            const [code, idx] = hovered.split('-');
+            const shelf = SHELVES.find(s => s.code === code);
+            const book = shelf.books[parseInt(idx)];
+            return (
+              <div style={{
+                position: 'fixed', bottom: 24, right: 24, zIndex: 30,
+                padding: '12px 18px', background: 'rgba(20,12,6,0.92)',
+                border: '1px solid rgba(245,230,200,0.2)',
+                fontFamily: '"Cormorant Garamond", serif',
+                color: '#f5e6c8', maxWidth: 280,
+                boxShadow: '0 6px 20px rgba(0,0,0,0.6)',
+              }}>
+                <div style={{ fontSize: 18, fontStyle: 'italic', marginBottom: 4 }}>{book.t}</div>
+                <div style={{ fontFamily: 'Special Elite, monospace', fontSize: 11, letterSpacing: '0.15em', color: 'rgba(245,230,200,0.6)' }}>
+                  {book.a} · {book.year} · {book.status}
+                </div>
+              </div>
+            );
+          })()}
+        </SectionFrame>
+      );
+    }
+
+    function CardCatalog({ card, onClose }) {
+      const { book, shelf } = card;
+      return (
+        <div onClick={onClose} style={{
+          position: 'fixed', inset: 0, zIndex: 100,
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40,
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: 460, padding: '36px 36px 28px',
+            background: '#f5e6c8', color: '#2b1d12',
+            transform: 'rotate(-0.6deg)',
+            boxShadow: '0 30px 60px rgba(0,0,0,0.6), 4px 4px 0 rgba(140,40,30,0.15)',
+            position: 'relative',
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent 0, transparent 27px, rgba(140,40,30,0.08) 27px, rgba(140,40,30,0.08) 28px)',
+          }}>
+            {/* Hole punch */}
+            <div style={{
+              position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)',
+              width: 12, height: 12, borderRadius: '50%',
+              background: '#2b1d12', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.4)',
+            }}></div>
+            <div style={{
+              fontFamily: 'Special Elite, monospace', fontSize: 11,
+              letterSpacing: '0.3em', color: '#5d4a2a',
+              borderBottom: '1px solid #2b1d12', paddingBottom: 6, marginBottom: 16,
+              display: 'flex', justifyContent: 'space-between',
+            }}>
+              <span>↳ {shelf.code}/{shelf.span}</span>
+              <span>CARD CATALOG</span>
+            </div>
+            <div style={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontSize: 32, fontWeight: 500, fontStyle: 'italic',
+              lineHeight: 1.1, color: '#1c1810', marginBottom: 6,
+            }}>{book.t}</div>
+            <div style={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontSize: 18, color: '#5d4a2a', marginBottom: 22,
+            }}>by {book.a}</div>
+            <CardRow k="STATUS"   v={<span style={{ color: STATUS_TINT[book.status], fontWeight: 700 }}>{book.status.toUpperCase()}</span>} />
+            <CardRow k="READ"     v={book.year} />
+            <CardRow k="SHELF"    v={`${shelf.label} · ${shelf.span}`} />
+            <CardRow k="PAGES"    v={`${120 + book.h} (give or take)`} />
+            <div style={{
+              marginTop: 22, paddingTop: 14, borderTop: '1px dashed #2b1d12',
+              fontFamily: '"Cormorant Garamond", serif', fontStyle: 'italic',
+              fontSize: 14, color: '#5d4a2a', lineHeight: 1.5,
+            }}>
+              {NOTES[book.t] || 'a book i lived inside for a while.'}
+            </div>
+            <div style={{ marginTop: 18, textAlign: 'center', fontFamily: 'Special Elite, monospace', fontSize: 10, letterSpacing: '0.3em', color: '#8c281e' }}>
+              ★ click outside to return to the shelf ★
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const NOTES = {
+      'Project Hail Mary': 'made me think building useless things on purpose was, in fact, the point. rocky lives rent-free.',
+      'A Little Life':     'put it down for a week. picked it up again. cried in three different cafes.',
+      'Gödel, Escher, Bach': 'the only book i\u2019ve started, abandoned, and started again four times. each pass i understand a different chapter.',
+      'Tomorrow & Tomorrow & Tomorrow': 'a love story disguised as a videogame studio post-mortem.',
+      'Piranesi':          'cathedral built out of a single lonely sentence.',
+      'The Goldfinch':     'too long. perfect.',
+      'Pale Fire':         'still on the wishlist. i keep getting talked out of it & talked back in.',
+    };
+
+    function CardRow({ k, v }) {
+      return (
+        <div style={{
+          display: 'grid', gridTemplateColumns: '90px 1fr', gap: 10,
+          padding: '4px 0',
+          fontFamily: 'Courier Prime, monospace', fontSize: 12, color: '#1c1810',
+        }}>
+          <span style={{ color: '#5d4a2a', letterSpacing: '0.2em' }}>{k}</span>
+          <span>{v}</span>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<ReadingPage />);
+  </script>
+</body>
+</html>

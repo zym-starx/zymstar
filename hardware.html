@@ -3,23 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>zymstar — Zeynep Yıldız</title>
+  <title>zymstar / hardware</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; padding: 0; background: #040214; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; height: 100vh; }
+    html, body { margin: 0; padding: 0; font-family: 'JetBrains Mono', monospace; background: #080a08; color: #c8ffcc; }
     * { box-sizing: border-box; }
-    kbd { font-family: 'JetBrains Mono', monospace; }
+    ::selection { background: #00ff88; color: #000; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-
   <script type="text/babel" data-presets="env,react">
 // Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
 // These are meant to feel consistent across every section of zymstar.com
@@ -390,220 +388,268 @@ function Starfield({ density = 100, twinkle = true }) {
 Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCommandPalette, useKonami, Starfield, SECTIONS });
 
 </script>
-
   <script type="text/babel" data-presets="env,react">
-    // Live home: constellation — each star routes to its section page.
-    function ConstellationHome() {
-      const palette = useCommandPalette();
-      const [hovered, setHovered] = React.useState(null);
-      const [mouse, setMouse] = React.useState({ x: 0, y: 0 });
-      const [konami, setKonami] = React.useState(false);
-      useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
-      const ref = React.useRef(null);
+// Section scaffold — shared layout for every section page.
+// Provides: consistent top nav, command palette with routing, back-to-home link,
+// fonts preloaded. Each section wraps its content in <SectionFrame>.
 
-      const nodes = [
-        // personal-projects cluster — finance / hardware / ml — visually grouped via dotted ring
-        { id: 'finance',     x: 430, y: 260, size: 6, near: ['hardware','ml','tools'], group: 'project' },
-        { id: 'hardware',    x: 240, y: 310, size: 5, near: ['finance','tools'],       group: 'project' },
-        { id: 'ml',          x: 520, y: 150, size: 5, near: ['finance','thesis'],      group: 'project' },
-        { id: 'thesis',      x: 640, y: 180, size: 7, near: ['ml','writing'] },
-        { id: 'writing',     x: 760, y: 260, size: 4, near: ['thesis','reading','vlog'] },
-        { id: 'reading',     x: 900, y: 360, size: 4, near: ['writing'] },
-        { id: 'vlog',        x: 700, y: 380, size: 5, near: ['writing','photography'] },
-        { id: 'photography', x: 540, y: 430, size: 4, near: ['vlog','dumdum'] },
-        { id: 'dumdum',      x: 380, y: 400, size: 5, near: ['photography','tools'] },
-        { id: 'tools',       x: 120, y: 410, size: 4, near: ['finance','hardware','dumdum'] },
-        { id: 'cv',          x: 880, y: 180, size: 3, near: ['thesis'] },
-        { id: 'guestbook',   x: 220, y: 450, size: 3, near: ['dumdum'] },
-      ];
-      const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
-      const secById = Object.fromEntries(SECTIONS.map(s => [s.id, s]));
-      const connections = [];
-      const seen = new Set();
-      nodes.forEach(n => n.near.forEach(m => {
-        const key = [n.id, m].sort().join('|');
-        if (!seen.has(key)) { seen.add(key); connections.push([n.id, m]); }
-      }));
+// Route a section id to its html file.
+function routeToSection(id) {
+  // Map any special cases here. Default: {id}.html
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
 
+function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
+  const palette = useCommandPalette();
+  const [konami, setKonami] = React.useState(false);
+  useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
+
+  return (
+    <div style={{
+      position: 'relative', minHeight: '100vh', overflow: 'hidden auto',
+      background: background || '#0a0e27',
+      color: '#e9e6ff', fontFamily: 'Inter, sans-serif',
+    }}>
+      <TopNav theme={theme} onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        onClose={() => palette.setOpen(false)}
+        onPick={(s) => routeToSection(s.id)}
+      />
+      <div style={{ paddingTop: 68 }}>
+        {children}
+      </div>
+      {konami && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
+          letterSpacing: '0.1em', pointerEvents: 'none',
+        }}>
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+        </div>
+      )}
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
+
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '28px 56px 40px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+      letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
+      gap: 12, flexWrap: 'wrap',
+    }}>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
+
+const footerLink = {
+  color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+  letterSpacing: '0.15em', fontSize: 11,
+};
+
+Object.assign(window, { SectionFrame, routeToSection });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+    // Hardware section — terminal-green CRT aesthetic. FPGA + Arduino + solder.
+    // Uses a mono-only type system, scanlines overlay, green phosphor accent.
+    const GREEN = '#7cff9a';
+    const GREEN_DIM = '#3da85a';
+    const GREEN_FAINT = '#1a3d22';
+
+    const HW_PROJECTS = [
+      { id: 'synth-fpga', name: 'fpga-synth', board: 'Lattice iCE40 UP5K', status: 'RUNNING',
+        log: '8-voice polyphonic synth on an UP5K. PDM DAC, SPI CV out, ~4k LUT.',
+        tags: ['verilog', 'yosys', 'ice40'], year: 2026, leds: 4 },
+      { id: 'gpu-tile', name: 'tile-gpu', board: 'Xilinx Spartan-7', status: 'HALTED',
+        log: 'Tile-based 2D GPU for a handheld. Stalled on memory bandwidth.',
+        tags: ['vhdl', 'vivado', 'spartan'], year: 2025, leds: 2 },
+      { id: 'plant-mon', name: 'plant-monitor', board: 'Arduino Nano 33 BLE',
+        status: 'RUNNING', log: 'Soil moisture + light + ambient. Sends BLE every 10m. Saved 3 plants. Killed 1.',
+        tags: ['arduino', 'ble', 'c++'], year: 2025, leds: 3 },
+      { id: 'keeb', name: 'zymkeeb', board: 'RP2040',
+        status: 'RUNNING', log: 'Split 42-key keyboard. KMK. Per-finger force curves.',
+        tags: ['rp2040', 'kmk', 'pcb'], year: 2024, leds: 4 },
+      { id: 'glitch', name: 'glitch-box', board: 'Atmega328 + 555',
+        status: 'DEBUG',  log: 'Circuit-bent Speak & Spell clone. Frightening children since 2024.',
+        tags: ['analog', 'cursed'], year: 2024, leds: 1 },
+    ];
+
+    function HardwarePage() {
+      const [tick, setTick] = React.useState(0);
       React.useEffect(() => {
-        const onMove = (e) => {
-          const rect = ref.current?.getBoundingClientRect();
-          if (!rect) return;
-          setMouse({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-        };
-        const el = ref.current;
-        el?.addEventListener('mousemove', onMove);
-        return () => el?.removeEventListener('mousemove', onMove);
+        const t = setInterval(() => setTick(x => x + 1), 800);
+        return () => clearInterval(t);
       }, []);
-
-      const go = (id) => { window.location.href = `${id}.html`; };
+      const now = new Date();
+      const ts = now.toISOString().replace('T', ' ').slice(0, 19);
 
       return (
-        <div ref={ref} style={{
-          position: 'relative', width: '100vw', height: '100vh',
-          background: 'radial-gradient(ellipse at 30% 20%, #0f0a2e 0%, #050318 60%, #020108 100%)',
-          overflow: 'hidden', color: '#e9e6ff', cursor: 'crosshair',
-        }}>
-          <Starfield density={140} />
-          <TopNav theme="cosmic" onOpenPalette={() => palette.setOpen(true)} />
-          <CommandPalette open={palette.open} onClose={() => palette.setOpen(false)} onPick={(s) => go(s.id)} />
-
-          {/* Cursor glow */}
+        <SectionFrame
+          sectionId="hardware"
+          theme="cosmic"
+          background="#080a08"
+        >
+          {/* Scanlines overlay */}
           <div style={{
-            position: 'absolute', pointerEvents: 'none',
-            left: mouse.x, top: mouse.y, width: 360, height: 360, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167,139,250,0.09), transparent 60%)',
-            transform: 'translate(-50%, -50%)', filter: 'blur(10px)', zIndex: 1,
+            position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9,
+            background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0 1px, transparent 1px 3px)',
+          }}></div>
+          {/* CRT vignette */}
+          <div style={{
+            position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 8,
+            background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%)',
           }}></div>
 
-          {/* Title — pointer-events only on interactive bits so the SVG beneath is clickable */}
-          <div style={{ position: 'absolute', left: 48, top: 92, zIndex: 5, maxWidth: 280, pointerEvents: 'none' }}>
+          <div style={{ position: 'relative', padding: '32px 56px 60px', maxWidth: 1200, margin: '0 auto' }}>
+            {/* Terminal header */}
             <div style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 9, letterSpacing: '0.3em',
-              color: 'rgba(196,181,253,0.6)', marginBottom: 14,
-            }}>CONSTELLATION · ZS-001</div>
-            <h1 style={{
-              fontFamily: '"Space Grotesk", sans-serif', fontSize: 52, fontWeight: 500,
-              letterSpacing: '-0.03em', lineHeight: 1.05, margin: 0, paddingBottom: 6,
-              background: 'linear-gradient(180deg, #fff 0%, #c4b5fd 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>zymstar.</h1>
-            <div style={{
-              marginTop: 8, fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 10, letterSpacing: '0.25em', color: 'rgba(230,225,255,0.5)',
-            }}>ZEYNEP YILDIZ</div>
-            <p style={{
-              marginTop: 16, fontSize: 12, lineHeight: 1.55,
-              color: 'rgba(230,225,255,0.6)', maxWidth: 280,
+              fontSize: 11, letterSpacing: '0.15em', color: GREEN_DIM, marginBottom: 36,
+              display: 'flex', gap: 20, flexWrap: 'wrap',
             }}>
-              A map of everything I make, mapped as stars. Hover a node to see what&apos;s
-              there — click to enter. Press <kbd id="modkey" style={{
-                fontFamily: 'JetBrains Mono, monospace',
-                padding: '1px 6px', borderRadius: 3, background: 'rgba(255,255,255,0.1)',
-                fontSize: 10, color: 'rgba(230,225,255,0.85)',
-              }}>Ctrl K</kbd> to search.
-            </p>
-          </div>
+              <span style={{ color: GREEN }}>● ONLINE</span>
+              <span>PID 0x{Math.floor(Math.random()*65536).toString(16).padStart(4,'0')}</span>
+              <span>UPTIME 14d:07h</span>
+              <span>{ts}</span>
+              <span style={{ marginLeft: 'auto' }}>zymstar@workbench:~$</span>
+            </div>
 
-          <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"
-               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 2 }}>
-            {/* Subtle "personal projects" cluster ring around finance/hardware/ml */}
-            <ellipse cx={397} cy={230} rx={220} ry={130} transform="rotate(-12 397 230)"
-              fill="none" stroke="rgba(167,139,250,0.12)" strokeWidth="0.6"
-              strokeDasharray="3 4" />
-            <text x={520} y={50}
-              fontFamily="JetBrains Mono, monospace" fontSize={9}
-              fill="rgba(167,139,250,0.4)" letterSpacing="0.3em"
-              style={{ textTransform: 'uppercase' }}>
-              · personal projects ·
-            </text>
-            {connections.map(([a, b], i) => {
-              const na = byId[a], nb = byId[b];
-              const isActive = hovered && (hovered === a || hovered === b);
-              return (
-                <line key={i} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
-                  stroke={isActive ? `oklch(75% 0.16 ${secById[hovered].hue})` : 'rgba(167,139,250,0.18)'}
-                  strokeWidth={isActive ? 1.2 : 0.5}
-                  style={{ transition: 'stroke .25s, stroke-width .25s' }} />
-              );
-            })}
-            {nodes.map(n => {
-              const sec = secById[n.id];
-              const isHovered = hovered === n.id;
-              const isRelated = hovered && byId[hovered]?.near?.includes(n.id);
-              const glow = isHovered ? 22 : isRelated ? 12 : 6;
-              return (
-                <g key={n.id}
-                   style={{ cursor: 'pointer' }}
-                   onMouseEnter={() => setHovered(n.id)}
-                   onMouseLeave={() => setHovered(null)}
-                   onClick={() => go(n.id)}>
-                  {/* Invisible larger hit target so labels don't eat the click */}
-                  <circle cx={n.x} cy={n.y} r={40}
-                    fill="transparent" style={{ pointerEvents: 'all' }} />
-                  <circle cx={n.x} cy={n.y} r={n.size + glow}
-                    fill={`oklch(70% 0.18 ${sec.hue})`}
-                    opacity={isHovered ? 0.3 : isRelated ? 0.15 : 0.08}
-                    style={{ transition: 'r .25s, opacity .25s', pointerEvents: 'none' }} />
-                  <circle cx={n.x} cy={n.y} r={isHovered ? n.size + 2 : n.size}
-                    fill={isHovered ? '#fff' : `oklch(85% 0.1 ${sec.hue})`}
-                    style={{ transition: 'r .2s, fill .2s', pointerEvents: 'none' }} />
-                  <text x={n.x + n.size + 10} y={n.y + 4}
-                    fontFamily="JetBrains Mono, monospace" fontSize={11}
-                    fill={isHovered ? '#fff' : isRelated ? `oklch(85% 0.1 ${sec.hue})` : 'rgba(230,225,255,0.5)'}
-                    letterSpacing="0.12em"
-                    style={{ textTransform: 'uppercase', transition: 'fill .2s', pointerEvents: 'none' }}>
-                    {sec.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+            {/* Big ASCII title */}
+            <pre style={{
+              color: GREEN, fontSize: 14, lineHeight: 1.1, margin: '0 0 20px',
+              textShadow: `0 0 12px ${GREEN}`,
+              whiteSpace: 'pre', overflow: 'auto',
+            }}>{
+`╔═══════════════════════════════════════════════╗
+║   H A R D W A R E                             ║
+║   fpga · arduino · pcb · smoke                ║
+╚═══════════════════════════════════════════════╝`
+            }</pre>
 
-          {/* Hovered detail */}
-          <div style={{
-            position: 'absolute', right: 32, bottom: 32, zIndex: 5,
-            width: 240, minHeight: 120, padding: '14px 16px',
-            background: 'rgba(10,6,28,0.72)', backdropFilter: 'blur(14px)',
-            border: `1px solid ${hovered ? `oklch(70% 0.16 ${secById[hovered].hue} / 0.5)` : 'rgba(167,139,250,0.15)'}`,
-            borderRadius: 10, transition: 'border .25s',
-          }}>
-            {hovered ? (
-              <>
-                <div style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  color: `oklch(75% 0.16 ${secById[hovered].hue})`,
-                  letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: 6,
-                }}>/{hovered}</div>
-                <div style={{
-                  fontFamily: '"Space Grotesk", sans-serif', fontSize: 20,
-                  fontWeight: 500, marginBottom: 6,
-                }}>{secById[hovered].label}</div>
-                <div style={{ fontSize: 11, color: 'rgba(230,225,255,0.62)', lineHeight: 1.45, marginBottom: 12 }}>
-                  {secById[hovered].desc}
-                </div>
-                <button onClick={() => go(hovered)} style={{
-                  padding: '6px 12px', borderRadius: 30, cursor: 'pointer',
-                  background: `oklch(70% 0.16 ${secById[hovered].hue} / 0.15)`,
-                  border: `1px solid oklch(70% 0.16 ${secById[hovered].hue} / 0.5)`,
-                  color: `oklch(90% 0.06 ${secById[hovered].hue})`,
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  letterSpacing: '0.2em', textTransform: 'uppercase',
-                }}>enter /{hovered} →</button>
-              </>
-            ) : (
-              <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                color: 'rgba(230,225,255,0.35)', letterSpacing: '0.12em', lineHeight: 1.55,
-              }}>
-                {'> HOVER A STAR'}<br/>
-                {'> CLICK TO ENTER'}<br/>
-                {'> ' + (typeof MOD_KEY !== 'undefined' ? MOD_KEY : 'Ctrl') + ' K TO SEARCH'}<br/>
-                <span style={{ color: 'rgba(230,225,255,0.2)' }}>{'// ↑↑↓↓←→←→ba'}</span>
-              </div>
-            )}
-          </div>
+            <div style={{ fontSize: 13, color: GREEN_DIM, lineHeight: 1.7, maxWidth: 620, marginBottom: 42 }}>
+              Things with pins, traces, and the occasional scorch mark. Everything here has
+              either been soldered by me or synthesized onto an FPGA by me. If it blinks,
+              it probably <span style={{ color: GREEN }}>shouldn't</span>.
+            </div>
 
-          <div style={{
-            position: 'absolute', left: 56, bottom: 32,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-            letterSpacing: '0.25em', color: 'rgba(230,225,255,0.3)',
-          }}>WEST · 21:04 UTC · MAG 4.2</div>
-
-          {konami && (
+            {/* Live system bar */}
             <div style={{
-              position: 'fixed', inset: 0, zIndex: 500,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.85)',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
-              letterSpacing: '0.1em', pointerEvents: 'none',
-            }}>⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾</div>
-          )}
-        </div>
+              border: `1px solid ${GREEN_FAINT}`,
+              padding: '14px 18px', marginBottom: 42,
+              display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24,
+              fontSize: 11, color: GREEN_DIM,
+            }}>
+              <div><div style={{ color: GREEN_DIM, marginBottom: 4 }}>BENCH.TEMP</div><div style={{ color: GREEN, fontSize: 16 }}>23.4°C</div></div>
+              <div><div style={{ color: GREEN_DIM, marginBottom: 4 }}>IRON</div><div style={{ color: GREEN, fontSize: 16 }}>340°C<span style={{ opacity: tick % 2 ? 1 : 0.3 }}> ●</span></div></div>
+              <div><div style={{ color: GREEN_DIM, marginBottom: 4 }}>PSU</div><div style={{ color: GREEN, fontSize: 16 }}>12.03V / 1.24A</div></div>
+              <div><div style={{ color: GREEN_DIM, marginBottom: 4 }}>FLUX.LEVEL</div><div style={{ color: GREEN, fontSize: 16 }}>ADEQUATE</div></div>
+            </div>
+
+            {/* Command: ls */}
+            <div style={{ marginBottom: 14, fontSize: 13 }}>
+              <span style={{ color: GREEN }}>$</span>
+              <span style={{ color: '#fff', marginLeft: 10 }}>ls -la /projects/hardware</span>
+            </div>
+            <div style={{ marginBottom: 20, fontSize: 11, color: GREEN_DIM }}>
+              total {HW_PROJECTS.length} · filter: <span style={{ color: GREEN, background: GREEN_FAINT, padding: '1px 6px' }}>[all]</span> <span style={{ opacity: 0.6 }}>[fpga] [arduino] [pcb]</span>
+            </div>
+
+            {/* Project rows */}
+            <div style={{ border: `1px solid ${GREEN_FAINT}` }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '90px 1fr 200px 110px 90px 60px',
+                gap: 12, padding: '10px 16px',
+                fontSize: 10, letterSpacing: '0.15em',
+                background: '#0c130d', color: GREEN_DIM,
+                borderBottom: `1px solid ${GREEN_FAINT}`,
+              }}>
+                <span>STATUS</span><span>PROJECT / LOG</span><span>BOARD</span><span>TAGS</span><span>YEAR</span><span>LED</span>
+              </div>
+              {HW_PROJECTS.map((p, i) => (
+                <a key={p.id} href={`projects/${p.id}.html`} style={{
+                  display: 'grid',
+                  gridTemplateColumns: '90px 1fr 200px 110px 90px 60px',
+                  gap: 12, padding: '16px', fontSize: 12,
+                  borderBottom: i < HW_PROJECTS.length - 1 ? `1px solid ${GREEN_FAINT}` : 'none',
+                  textDecoration: 'none', color: GREEN_DIM,
+                  alignItems: 'center',
+                  transition: 'background .12s',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#0a170d'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span style={{
+                    display: 'inline-block', padding: '2px 8px', fontSize: 10,
+                    color: p.status === 'RUNNING' ? GREEN : p.status === 'HALTED' ? '#ff6b6b' : '#f3c26b',
+                    border: `1px solid ${p.status === 'RUNNING' ? GREEN : p.status === 'HALTED' ? '#ff6b6b' : '#f3c26b'}`,
+                  }}>{p.status}</span>
+                  <div>
+                    <div style={{ color: GREEN, fontSize: 14, marginBottom: 4, textShadow: `0 0 4px ${GREEN}` }}>
+                      <span style={{ opacity: 0.5 }}>./</span>{p.name}
+                    </div>
+                    <div style={{ color: GREEN_DIM, fontSize: 11 }}>{p.log}</div>
+                  </div>
+                  <span style={{ fontSize: 11 }}>{p.board}</span>
+                  <span style={{ fontSize: 10 }}>{p.tags.map(t => `#${t}`).join(' ')}</span>
+                  <span>{p.year}</span>
+                  <span>
+                    {Array.from({ length: p.leds }).map((_, j) => (
+                      <span key={j} style={{
+                        display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
+                        background: GREEN, boxShadow: `0 0 6px ${GREEN}`, marginRight: 2,
+                        opacity: (tick + j) % 3 === 0 ? 1 : 0.5,
+                      }}></span>
+                    ))}
+                  </span>
+                </a>
+              ))}
+            </div>
+
+            {/* Prompt */}
+            <div style={{ marginTop: 28, fontSize: 13, color: GREEN_DIM }}>
+              <span style={{ color: GREEN }}>$</span>
+              <span style={{ color: '#fff', marginLeft: 10 }}>cat README.md</span>
+            </div>
+            <div style={{
+              marginTop: 10, padding: 18, border: `1px solid ${GREEN_FAINT}`,
+              fontSize: 12, lineHeight: 1.7, color: GREEN_DIM,
+              background: 'rgba(0,255,136,0.015)',
+            }}>
+              <span style={{ color: GREEN }}># why hardware?</span><br/>
+              because software is too forgiving. here, if you get the polarity wrong,<br/>
+              the capacitor tells you with its whole body. click any project to see<br/>
+              schematics, synthesis logs, demo videos, and the things that went wrong.
+            </div>
+
+            <div style={{ marginTop: 24, fontSize: 13 }}>
+              <span style={{ color: GREEN }}>$</span>
+              <span style={{ color: '#fff', marginLeft: 10 }}>_</span>
+              <span style={{ color: GREEN, opacity: tick % 2 ? 1 : 0, marginLeft: 2 }}>▊</span>
+            </div>
+          </div>
+        </SectionFrame>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<ConstellationHome />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<HardwarePage />);
   </script>
 </body>
 </html>

@@ -3,23 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>zymstar — Zeynep Yıldız</title>
+  <title>zymstar / thesis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; padding: 0; background: #040214; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; height: 100vh; }
+    html, body { margin: 0; padding: 0; background: #f5f1e8; font-family: 'EB Garamond', Georgia, serif; color: #1c1a15; }
     * { box-sizing: border-box; }
-    kbd { font-family: 'JetBrains Mono', monospace; }
+    ::selection { background: #d4c5a0; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-
   <script type="text/babel" data-presets="env,react">
 // Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
 // These are meant to feel consistent across every section of zymstar.com
@@ -390,220 +388,262 @@ function Starfield({ density = 100, twinkle = true }) {
 Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCommandPalette, useKonami, Starfield, SECTIONS });
 
 </script>
-
   <script type="text/babel" data-presets="env,react">
-    // Live home: constellation — each star routes to its section page.
-    function ConstellationHome() {
-      const palette = useCommandPalette();
-      const [hovered, setHovered] = React.useState(null);
-      const [mouse, setMouse] = React.useState({ x: 0, y: 0 });
-      const [konami, setKonami] = React.useState(false);
-      useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
-      const ref = React.useRef(null);
+// Section scaffold — shared layout for every section page.
+// Provides: consistent top nav, command palette with routing, back-to-home link,
+// fonts preloaded. Each section wraps its content in <SectionFrame>.
 
-      const nodes = [
-        // personal-projects cluster — finance / hardware / ml — visually grouped via dotted ring
-        { id: 'finance',     x: 430, y: 260, size: 6, near: ['hardware','ml','tools'], group: 'project' },
-        { id: 'hardware',    x: 240, y: 310, size: 5, near: ['finance','tools'],       group: 'project' },
-        { id: 'ml',          x: 520, y: 150, size: 5, near: ['finance','thesis'],      group: 'project' },
-        { id: 'thesis',      x: 640, y: 180, size: 7, near: ['ml','writing'] },
-        { id: 'writing',     x: 760, y: 260, size: 4, near: ['thesis','reading','vlog'] },
-        { id: 'reading',     x: 900, y: 360, size: 4, near: ['writing'] },
-        { id: 'vlog',        x: 700, y: 380, size: 5, near: ['writing','photography'] },
-        { id: 'photography', x: 540, y: 430, size: 4, near: ['vlog','dumdum'] },
-        { id: 'dumdum',      x: 380, y: 400, size: 5, near: ['photography','tools'] },
-        { id: 'tools',       x: 120, y: 410, size: 4, near: ['finance','hardware','dumdum'] },
-        { id: 'cv',          x: 880, y: 180, size: 3, near: ['thesis'] },
-        { id: 'guestbook',   x: 220, y: 450, size: 3, near: ['dumdum'] },
-      ];
-      const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
-      const secById = Object.fromEntries(SECTIONS.map(s => [s.id, s]));
-      const connections = [];
-      const seen = new Set();
-      nodes.forEach(n => n.near.forEach(m => {
-        const key = [n.id, m].sort().join('|');
-        if (!seen.has(key)) { seen.add(key); connections.push([n.id, m]); }
-      }));
+// Route a section id to its html file.
+function routeToSection(id) {
+  // Map any special cases here. Default: {id}.html
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
 
-      React.useEffect(() => {
-        const onMove = (e) => {
-          const rect = ref.current?.getBoundingClientRect();
-          if (!rect) return;
-          setMouse({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-        };
-        const el = ref.current;
-        el?.addEventListener('mousemove', onMove);
-        return () => el?.removeEventListener('mousemove', onMove);
-      }, []);
+function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
+  const palette = useCommandPalette();
+  const [konami, setKonami] = React.useState(false);
+  useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
 
-      const go = (id) => { window.location.href = `${id}.html`; };
-
-      return (
-        <div ref={ref} style={{
-          position: 'relative', width: '100vw', height: '100vh',
-          background: 'radial-gradient(ellipse at 30% 20%, #0f0a2e 0%, #050318 60%, #020108 100%)',
-          overflow: 'hidden', color: '#e9e6ff', cursor: 'crosshair',
+  return (
+    <div style={{
+      position: 'relative', minHeight: '100vh', overflow: 'hidden auto',
+      background: background || '#0a0e27',
+      color: '#e9e6ff', fontFamily: 'Inter, sans-serif',
+    }}>
+      <TopNav theme={theme} onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        onClose={() => palette.setOpen(false)}
+        onPick={(s) => routeToSection(s.id)}
+      />
+      <div style={{ paddingTop: 68 }}>
+        {children}
+      </div>
+      {konami && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
+          letterSpacing: '0.1em', pointerEvents: 'none',
         }}>
-          <Starfield density={140} />
-          <TopNav theme="cosmic" onOpenPalette={() => palette.setOpen(true)} />
-          <CommandPalette open={palette.open} onClose={() => palette.setOpen(false)} onPick={(s) => go(s.id)} />
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+        </div>
+      )}
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
 
-          {/* Cursor glow */}
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '28px 56px 40px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+      letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
+      gap: 12, flexWrap: 'wrap',
+    }}>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
+
+const footerLink = {
+  color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+  letterSpacing: '0.15em', fontSize: 11,
+};
+
+Object.assign(window, { SectionFrame, routeToSection });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+    // Thesis — academic editorial. Cream paper, garamond, single column
+    // with marginalia. Feels like a printed monograph.
+    const INK = '#1c1a15';
+    const PAPER = '#f5f1e8';
+    const DIM = '#6b5f48';
+    const ACCENT = '#8a2c2c';
+
+    const TOC = [
+      { n: 'I',   title: 'Introduction',         pages: '1 — 14',   status: 'final' },
+      { n: 'II',  title: 'Background & related work', pages: '15 — 42', status: 'final' },
+      { n: 'III', title: 'Method',               pages: '43 — 78',  status: 'final' },
+      { n: 'IV',  title: 'Results',              pages: '79 — 112', status: 'revising' },
+      { n: 'V',   title: 'Discussion',           pages: '113 — 134', status: 'drafting' },
+      { n: 'VI',  title: 'Conclusion & future work', pages: '135 — 142', status: 'drafting' },
+      { n: '—',   title: 'Bibliography',         pages: '143 — 168', status: 'managed' },
+      { n: '—',   title: 'Appendices',           pages: '169 —',    status: 'open' },
+    ];
+
+    function ThesisPage() {
+      return (
+        <SectionFrame sectionId="thesis" theme="light" background={PAPER}>
+          {/* Subtle paper grain */}
           <div style={{
-            position: 'absolute', pointerEvents: 'none',
-            left: mouse.x, top: mouse.y, width: 360, height: 360, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167,139,250,0.09), transparent 60%)',
-            transform: 'translate(-50%, -50%)', filter: 'blur(10px)', zIndex: 1,
+            position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1, opacity: 0.5,
+            backgroundImage: `radial-gradient(circle at 30% 40%, rgba(120,90,40,0.04) 0, transparent 40%),
+                              radial-gradient(circle at 70% 70%, rgba(120,90,40,0.03) 0, transparent 50%)`,
           }}></div>
 
-          {/* Title — pointer-events only on interactive bits so the SVG beneath is clickable */}
-          <div style={{ position: 'absolute', left: 48, top: 92, zIndex: 5, maxWidth: 280, pointerEvents: 'none' }}>
-            <div style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 9, letterSpacing: '0.3em',
-              color: 'rgba(196,181,253,0.6)', marginBottom: 14,
-            }}>CONSTELLATION · ZS-001</div>
-            <h1 style={{
-              fontFamily: '"Space Grotesk", sans-serif', fontSize: 52, fontWeight: 500,
-              letterSpacing: '-0.03em', lineHeight: 1.05, margin: 0, paddingBottom: 6,
-              background: 'linear-gradient(180deg, #fff 0%, #c4b5fd 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>zymstar.</h1>
-            <div style={{
-              marginTop: 8, fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 10, letterSpacing: '0.25em', color: 'rgba(230,225,255,0.5)',
-            }}>ZEYNEP YILDIZ</div>
-            <p style={{
-              marginTop: 16, fontSize: 12, lineHeight: 1.55,
-              color: 'rgba(230,225,255,0.6)', maxWidth: 280,
-            }}>
-              A map of everything I make, mapped as stars. Hover a node to see what&apos;s
-              there — click to enter. Press <kbd id="modkey" style={{
-                fontFamily: 'JetBrains Mono, monospace',
-                padding: '1px 6px', borderRadius: 3, background: 'rgba(255,255,255,0.1)',
-                fontSize: 10, color: 'rgba(230,225,255,0.85)',
-              }}>Ctrl K</kbd> to search.
-            </p>
-          </div>
-
-          <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"
-               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 2 }}>
-            {/* Subtle "personal projects" cluster ring around finance/hardware/ml */}
-            <ellipse cx={397} cy={230} rx={220} ry={130} transform="rotate(-12 397 230)"
-              fill="none" stroke="rgba(167,139,250,0.12)" strokeWidth="0.6"
-              strokeDasharray="3 4" />
-            <text x={520} y={50}
-              fontFamily="JetBrains Mono, monospace" fontSize={9}
-              fill="rgba(167,139,250,0.4)" letterSpacing="0.3em"
-              style={{ textTransform: 'uppercase' }}>
-              · personal projects ·
-            </text>
-            {connections.map(([a, b], i) => {
-              const na = byId[a], nb = byId[b];
-              const isActive = hovered && (hovered === a || hovered === b);
-              return (
-                <line key={i} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
-                  stroke={isActive ? `oklch(75% 0.16 ${secById[hovered].hue})` : 'rgba(167,139,250,0.18)'}
-                  strokeWidth={isActive ? 1.2 : 0.5}
-                  style={{ transition: 'stroke .25s, stroke-width .25s' }} />
-              );
-            })}
-            {nodes.map(n => {
-              const sec = secById[n.id];
-              const isHovered = hovered === n.id;
-              const isRelated = hovered && byId[hovered]?.near?.includes(n.id);
-              const glow = isHovered ? 22 : isRelated ? 12 : 6;
-              return (
-                <g key={n.id}
-                   style={{ cursor: 'pointer' }}
-                   onMouseEnter={() => setHovered(n.id)}
-                   onMouseLeave={() => setHovered(null)}
-                   onClick={() => go(n.id)}>
-                  {/* Invisible larger hit target so labels don't eat the click */}
-                  <circle cx={n.x} cy={n.y} r={40}
-                    fill="transparent" style={{ pointerEvents: 'all' }} />
-                  <circle cx={n.x} cy={n.y} r={n.size + glow}
-                    fill={`oklch(70% 0.18 ${sec.hue})`}
-                    opacity={isHovered ? 0.3 : isRelated ? 0.15 : 0.08}
-                    style={{ transition: 'r .25s, opacity .25s', pointerEvents: 'none' }} />
-                  <circle cx={n.x} cy={n.y} r={isHovered ? n.size + 2 : n.size}
-                    fill={isHovered ? '#fff' : `oklch(85% 0.1 ${sec.hue})`}
-                    style={{ transition: 'r .2s, fill .2s', pointerEvents: 'none' }} />
-                  <text x={n.x + n.size + 10} y={n.y + 4}
-                    fontFamily="JetBrains Mono, monospace" fontSize={11}
-                    fill={isHovered ? '#fff' : isRelated ? `oklch(85% 0.1 ${sec.hue})` : 'rgba(230,225,255,0.5)'}
-                    letterSpacing="0.12em"
-                    style={{ textTransform: 'uppercase', transition: 'fill .2s', pointerEvents: 'none' }}>
-                    {sec.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Hovered detail */}
-          <div style={{
-            position: 'absolute', right: 32, bottom: 32, zIndex: 5,
-            width: 240, minHeight: 120, padding: '14px 16px',
-            background: 'rgba(10,6,28,0.72)', backdropFilter: 'blur(14px)',
-            border: `1px solid ${hovered ? `oklch(70% 0.16 ${secById[hovered].hue} / 0.5)` : 'rgba(167,139,250,0.15)'}`,
-            borderRadius: 10, transition: 'border .25s',
-          }}>
-            {hovered ? (
-              <>
-                <div style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  color: `oklch(75% 0.16 ${secById[hovered].hue})`,
-                  letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: 6,
-                }}>/{hovered}</div>
-                <div style={{
-                  fontFamily: '"Space Grotesk", sans-serif', fontSize: 20,
-                  fontWeight: 500, marginBottom: 6,
-                }}>{secById[hovered].label}</div>
-                <div style={{ fontSize: 11, color: 'rgba(230,225,255,0.62)', lineHeight: 1.45, marginBottom: 12 }}>
-                  {secById[hovered].desc}
-                </div>
-                <button onClick={() => go(hovered)} style={{
-                  padding: '6px 12px', borderRadius: 30, cursor: 'pointer',
-                  background: `oklch(70% 0.16 ${secById[hovered].hue} / 0.15)`,
-                  border: `1px solid oklch(70% 0.16 ${secById[hovered].hue} / 0.5)`,
-                  color: `oklch(90% 0.06 ${secById[hovered].hue})`,
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  letterSpacing: '0.2em', textTransform: 'uppercase',
-                }}>enter /{hovered} →</button>
-              </>
-            ) : (
+          <div style={{ position: 'relative', zIndex: 2, maxWidth: 960, margin: '0 auto', padding: '56px 56px 80px' }}>
+            {/* Frontispiece */}
+            <div style={{ textAlign: 'center', marginBottom: 72, paddingBottom: 48, borderBottom: `1px solid ${INK}` }}>
               <div style={{
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                color: 'rgba(230,225,255,0.35)', letterSpacing: '0.12em', lineHeight: 1.55,
-              }}>
-                {'> HOVER A STAR'}<br/>
-                {'> CLICK TO ENTER'}<br/>
-                {'> ' + (typeof MOD_KEY !== 'undefined' ? MOD_KEY : 'Ctrl') + ' K TO SEARCH'}<br/>
-                <span style={{ color: 'rgba(230,225,255,0.2)' }}>{'// ↑↑↓↓←→←→ba'}</span>
+                letterSpacing: '0.3em', color: DIM, textTransform: 'uppercase', marginBottom: 28,
+              }}>/thesis — master's dissertation</div>
+              <h1 style={{
+                fontFamily: '"EB Garamond", serif', fontWeight: 500, fontStyle: 'italic',
+                fontSize: 64, lineHeight: 1.1, margin: '0 0 18px',
+                color: INK, letterSpacing: '-0.01em',
+              }}>On the ordering of things<br/>that do not wish to be ordered</h1>
+              <div style={{
+                fontSize: 18, color: DIM, fontStyle: 'italic', marginBottom: 32,
+              }}>A working title. Subtitle pending.</div>
+              <div style={{ fontSize: 16, color: INK }}>
+                <div style={{ marginBottom: 4 }}>Zeynep Yıldız</div>
+                <div style={{ fontSize: 14, color: DIM }}>Advised by Prof. [redacted]</div>
+                <div style={{ fontSize: 14, color: DIM, marginTop: 10 }}>Department of Electrical &amp; Computer Engineering</div>
+                <div style={{ fontSize: 14, color: DIM }}>MMXXVI</div>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div style={{
-            position: 'absolute', left: 56, bottom: 32,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-            letterSpacing: '0.25em', color: 'rgba(230,225,255,0.3)',
-          }}>WEST · 21:04 UTC · MAG 4.2</div>
+            {/* Abstract */}
+            <section style={{ marginBottom: 56 }}>
+              <h2 style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                letterSpacing: '0.3em', color: DIM, textTransform: 'uppercase',
+                margin: '0 0 16px', fontWeight: 400,
+              }}>Abstract</h2>
+              <p style={{
+                fontSize: 18, lineHeight: 1.7, color: INK, margin: 0, textAlign: 'justify',
+                hyphens: 'auto',
+              }}>
+                This thesis investigates <em>[one-sentence summary of what you actually studied]</em>.
+                We propose a method that combines <em>[technique A]</em> with <em>[technique B]</em>
+                and demonstrate, through experiments on <em>[dataset / platform]</em>, improvements
+                of <span style={{ color: ACCENT, fontVariantNumeric: 'tabular-nums' }}>X%</span> over prior work while reducing
+                <em> [resource]</em> by <span style={{ color: ACCENT, fontVariantNumeric: 'tabular-nums' }}>Y%</span>.
+                Implications for <em>[domain]</em> are discussed, alongside limitations
+                and directions for future investigation.
+              </p>
+              <p style={{ marginTop: 14, fontSize: 13, color: DIM, fontStyle: 'italic' }}>
+                Keywords — will be filled in properly later; the Greek is placeholder too.
+              </p>
+            </section>
 
-          {konami && (
+            {/* Progress dial */}
+            <section style={{ marginBottom: 56, padding: '24px 28px', background: 'rgba(28,26,21,0.04)', border: `1px solid rgba(28,26,21,0.15)` }}>
+              <div style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                letterSpacing: '0.25em', color: DIM, textTransform: 'uppercase', marginBottom: 14,
+              }}>PROGRESS · AS OF {new Date().toISOString().slice(0,10).toUpperCase()}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 18, alignItems: 'center' }}>
+                <div style={{ height: 4, background: 'rgba(28,26,21,0.12)', position: 'relative' }}>
+                  <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '74%', background: ACCENT }}></div>
+                </div>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: ACCENT, fontVariantNumeric: 'tabular-nums' }}>0.74 / 1.00</div>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 13, color: DIM, fontStyle: 'italic' }}>
+                Two chapters left. Then defense. Then sleep.
+              </div>
+            </section>
+
+            {/* Table of Contents */}
+            <section style={{ marginBottom: 56 }}>
+              <h2 style={{
+                fontFamily: '"EB Garamond", serif', fontWeight: 500, fontSize: 30,
+                fontStyle: 'italic', margin: '0 0 24px', color: INK,
+              }}>Contents</h2>
+              <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {TOC.map((c, i) => (
+                  <li key={i} style={{
+                    display: 'grid',
+                    gridTemplateColumns: '44px 1fr auto auto',
+                    gap: 14, padding: '12px 0',
+                    borderBottom: '1px dotted rgba(28,26,21,0.15)',
+                    alignItems: 'baseline',
+                    fontSize: 17, color: INK,
+                  }}>
+                    <span style={{ fontFamily: '"EB Garamond", serif', fontStyle: 'italic', color: DIM }}>{c.n}</span>
+                    <a href="#" style={{ color: INK, textDecoration: 'none' }}>{c.title}</a>
+                    <span style={{
+                      fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                      letterSpacing: '0.15em', textTransform: 'uppercase',
+                      padding: '2px 8px',
+                      color: c.status === 'final' ? '#3a6b3a' : c.status === 'revising' ? ACCENT : DIM,
+                      border: `1px solid ${c.status === 'final' ? '#3a6b3a' : c.status === 'revising' ? ACCENT : DIM}`,
+                    }}>{c.status}</span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: DIM, fontVariantNumeric: 'tabular-nums' }}>{c.pages}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            {/* Excerpt with marginalia */}
+            <section style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: 32, marginBottom: 48 }}>
+              <div>
+                <h2 style={{
+                  fontFamily: '"EB Garamond", serif', fontWeight: 500, fontSize: 30,
+                  fontStyle: 'italic', margin: '0 0 8px', color: INK,
+                }}>Excerpt, §III.2</h2>
+                <div style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.2em',
+                  color: DIM, textTransform: 'uppercase', marginBottom: 20,
+                }}>— Method, page 47</div>
+                <p style={{ fontSize: 17, lineHeight: 1.8, color: INK, margin: '0 0 16px', textAlign: 'justify', textIndent: '1.5em' }}>
+                  The difficulty is not that the data resist categorization, but that they resist it
+                  <em> enthusiastically</em>. Each reclassification introduces a new dependency,
+                  and each dependency, in turn, demands its own ontology<sup style={{ color: ACCENT }}>1</sup>.
+                  What begins as a tidy taxonomy unravels into a correspondence.
+                </p>
+                <p style={{ fontSize: 17, lineHeight: 1.8, color: INK, margin: 0, textAlign: 'justify', textIndent: '1.5em' }}>
+                  We therefore propose a weaker commitment: instead of a tree, a scaffolding that
+                  tolerates cycles<sup style={{ color: ACCENT }}>2</sup>. The following sections make this precise.
+                </p>
+              </div>
+              <aside style={{
+                fontSize: 12, color: DIM, lineHeight: 1.6, fontStyle: 'italic',
+                borderLeft: `1px solid ${DIM}`, paddingLeft: 16, alignSelf: 'flex-start',
+                marginTop: 60,
+              }}>
+                <sup style={{ color: ACCENT, fontStyle: 'normal' }}>1</sup> cf. Borges, "The Analytical Language of John Wilkins."<br/><br/>
+                <sup style={{ color: ACCENT, fontStyle: 'normal' }}>2</sup> which is heresy to my committee. we shall see.
+              </aside>
+            </section>
+
+            {/* Download */}
             <div style={{
-              position: 'fixed', inset: 0, zIndex: 500,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.85)',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
-              letterSpacing: '0.1em', pointerEvents: 'none',
-            }}>⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾</div>
-          )}
-        </div>
+              display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center',
+              paddingTop: 24, borderTop: `1px solid ${INK}`,
+            }}>
+              <a href="#" style={downloadBtn}>read current draft (pdf)</a>
+              <a href="#" style={{...downloadBtn, background: 'transparent', color: INK, border: `1px solid ${INK}`}}>view source (latex)</a>
+            </div>
+          </div>
+        </SectionFrame>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<ConstellationHome />);
+    const downloadBtn = {
+      fontFamily: '"EB Garamond", serif', fontStyle: 'italic', fontSize: 17,
+      padding: '10px 24px', background: INK, color: PAPER,
+      textDecoration: 'none', border: `1px solid ${INK}`,
+      letterSpacing: '0.01em',
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<ThesisPage />);
   </script>
 </body>
 </html>

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zymstar / guestbook — voicemails &amp; replies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #0e1015; font-family: 'Inter', sans-serif; color: #e3e6ec; }
+    * { box-sizing: border-box; }
+    ::selection { background: #f59e0b; color: #0e1015; }
+    @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.15); } }
+    @keyframes wave-anim { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" data-presets="env,react">
+// Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
+// These are meant to feel consistent across every section of zymstar.com
+// while per-section content uses its own aesthetic underneath.
+
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl';
+
+const SECTIONS = [
+  { id: 'finance',     label: 'Finance',     hue: 140, desc: 'quant, strategies, indicators, backtests', group: 'project' },
+  { id: 'hardware',    label: 'Hardware',    hue: 20,  desc: 'FPGA, Arduino, solder smoke', group: 'project' },
+  { id: 'ml',          label: 'ML / AI',     hue: 180, desc: 'models, experiments, results', group: 'project' },
+  { id: 'dumdum',      label: 'Dumdum',      hue: 330, desc: 'silly ideas with no justification' },
+  { id: 'thesis',      label: 'Thesis',      hue: 240, desc: "master's thesis + related work" },
+  { id: 'writing',     label: 'Writing',     hue: 40,  desc: 'essays, blog posts, notes' },
+  { id: 'vlog',        label: 'Vlog',        hue: 350, desc: 'video, voice, vibes' },
+  { id: 'photography', label: 'Photography', hue: 200, desc: 'images, light, composition' },
+  { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
+  { id: 'tools',       label: 'Tools',       hue: 160, desc: 'utilities I made for myself' },
+  { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
+  { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
+];
+
+function TopNav({ theme = 'cosmic', onOpenPalette }) {
+  const fg = theme === 'cosmic' ? 'rgba(230,225,255,0.92)' : 'rgba(20,20,30,0.9)';
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.55)' : 'rgba(20,20,30,0.55)';
+  const border = theme === 'cosmic' ? 'rgba(167,139,250,0.15)' : 'rgba(0,0,0,0.08)';
+  const bg = theme === 'cosmic' ? 'rgba(10,14,39,0.55)' : 'rgba(255,255,255,0.75)';
+  return (
+    <nav style={{
+      position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '18px 32px',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      fontSize: 13, color: fg,
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      background: bg,
+      borderBottom: `1px solid ${border}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 22, height: 22, borderRadius: '50%',
+          background: 'radial-gradient(circle at 35% 30%, #fff 0%, #c084fc 40%, #6d28d9 90%)',
+          boxShadow: '0 0 18px rgba(167,139,250,0.7)',
+        }}></div>
+        <span style={{
+          fontFamily: '"Space Grotesk", Inter, sans-serif',
+          fontWeight: 600, fontSize: 16, letterSpacing: '-0.02em',
+        }}>zymstar</span>
+        <span style={{ color: dim, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>
+          / Zeynep&nbsp;Yıldız
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <MusicTicker theme={theme} />
+        <NowIndicator theme={theme} />
+        <button
+          onClick={onOpenPalette}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '6px 12px', borderRadius: 8,
+            background: 'transparent',
+            border: `1px solid ${border}`,
+            color: dim, cursor: 'pointer',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+          }}>
+          <span>search</span>
+          <kbd style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            padding: '2px 6px', borderRadius: 4,
+            background: theme === 'cosmic' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            fontSize: 10,
+          }}>{MOD_KEY}&nbsp;K</kbd>
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function NowIndicator({ theme }) {
+  // Realtime-ish "what I'm doing now" indicator. Cycles through states.
+  const states = [
+    { icon: '●', text: 'coding — thesis chapter 3', color: 'oklch(70% 0.15 150)' },
+    { icon: '☕', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
+    { icon: '✎', text: 'writing — on failure', color: 'oklch(70% 0.15 220)' },
+    { icon: '✦', text: 'reading — borges',     color: 'oklch(70% 0.15 280)' },
+  ];
+  const [i, setI] = React.useState(0);
+  React.useEffect(() => {
+    const t = setInterval(() => setI(x => (x + 1) % states.length), 4200);
+    return () => clearInterval(t);
+  }, []);
+  const s = states[i];
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.75)' : 'rgba(20,20,30,0.75)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: dim,
+    }}>
+      <span style={{
+        color: s.color,
+        animation: 'zs-pulse 1.4s ease-in-out infinite',
+        fontSize: 10,
+      }}>{s.icon}</span>
+      <span style={{ minWidth: 170 }}>
+        <span style={{ opacity: 0.55 }}>now: </span>{s.text}
+      </span>
+    </div>
+  );
+}
+
+const TRACKS = [
+  { t: 'Amaze Amaze Amaze',   a: 'Daniel Pemberton',   c: '#ff6b9d' },
+  { t: 'Time Go Fishing',     a: 'Daniel Pemberton',   c: '#4fb8ff' },
+  { t: 'See You Tomorrow',    a: 'John Powell',        c: '#7d6cff' },
+  { t: "Forbidden Friendship",a: 'John Powell',        c: '#5fd9c4' },
+  { t: "It's OK I'm OK",      a: 'Tate McRae',         c: '#ff8aae' },
+  { t: 'Non-Stop',            a: 'Lin-Manuel Miranda', c: '#ffb84d' },
+  { t: 'Spider-Man Loves You',a: 'Daniel Pemberton',   c: '#e84545' },
+  { t: 'What It Sounds Like', a: 'HUNTR/X',            c: '#c084fc' },
+  { t: "How It's Done",       a: 'HUNTR/X',            c: '#a855f7' },
+  { t: 'No Time For Caution', a: 'Hans Zimmer',        c: '#3a86ff' },
+  { t: 'The Seed',            a: 'AURORA',             c: '#06d6a0' },
+  { t: 'The Other Side',      a: 'Hugh Jackman',       c: '#ffd23f' },
+  { t: 'Cross My Heart',      a: 'Marianas Trench',    c: '#fb5607' },
+  { t: 'Desperate Measures',  a: 'Marianas Trench',    c: '#ff006e' },
+];
+
+function MusicTicker({ theme }) {
+  const [i, setI] = React.useState(() => Math.floor(Math.random() * TRACKS.length));
+  const [bars, setBars] = React.useState([0.4, 0.7, 0.5, 0.8]);
+  React.useEffect(() => {
+    const t = setInterval(() => setI(x => (x + 1) % TRACKS.length), 6800);
+    return () => clearInterval(t);
+  }, []);
+  React.useEffect(() => {
+    const t = setInterval(() => {
+      setBars(Array.from({ length: 4 }, () => 0.25 + Math.random() * 0.75));
+    }, 220);
+    return () => clearInterval(t);
+  }, []);
+  const tr = TRACKS[i];
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.75)' : 'rgba(20,20,30,0.75)';
+  const subdim = theme === 'cosmic' ? 'rgba(230,225,255,0.45)' : 'rgba(20,20,30,0.45)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '4px 10px', borderRadius: 20,
+      background: theme === 'cosmic' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+      border: theme === 'cosmic' ? '1px solid rgba(167,139,250,0.18)' : '1px solid rgba(0,0,0,0.08)',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: dim,
+      maxWidth: 280, overflow: 'hidden',
+    }}>
+      {/* equalizer bars */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 14, flexShrink: 0 }}>
+        {bars.map((h, j) => (
+          <div key={j} style={{
+            width: 2, height: `${h * 14}px`,
+            background: tr.c, borderRadius: 1,
+            transition: 'height .2s',
+          }}></div>
+        ))}
+      </div>
+      <div style={{
+        display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', flex: 1,
+        lineHeight: 1.2,
+      }}>
+        <span style={{
+          color: dim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          fontSize: 11, fontWeight: 500,
+        }}>{tr.t}</span>
+        <span style={{
+          color: subdim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          fontSize: 9.5,
+        }}>{tr.a}</span>
+      </div>
+    </div>
+  );
+}
+
+function CommandPalette({ open, onClose, onPick }) {
+  const [q, setQ] = React.useState('');
+  const inputRef = React.useRef(null);
+  React.useEffect(() => {
+    if (open && inputRef.current) {
+      setQ('');
+      setTimeout(() => inputRef.current?.focus(), 10);
+    }
+  }, [open]);
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  const results = SECTIONS.filter(s =>
+    !q || s.label.toLowerCase().includes(q.toLowerCase()) ||
+          s.desc.toLowerCase().includes(q.toLowerCase()));
+
+  if (!open) return null;
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'absolute', inset: 0, zIndex: 100,
+        background: 'rgba(5,3,20,0.55)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        paddingTop: 120,
+      }}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 'min(540px, 90%)',
+          background: 'rgba(16,12,32,0.95)',
+          border: '1px solid rgba(167,139,250,0.3)',
+          borderRadius: 14,
+          boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+          overflow: 'hidden',
+          fontFamily: 'Inter, sans-serif',
+        }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '14px 18px',
+          borderBottom: '1px solid rgba(167,139,250,0.15)',
+        }}>
+          <span style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            color: 'oklch(75% 0.15 290)', fontSize: 13,
+          }}>▸</span>
+          <input
+            ref={inputRef}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="jump to section, project, or idea…"
+            style={{
+              flex: 1, background: 'transparent', border: 'none', outline: 'none',
+              color: 'rgba(230,225,255,0.95)', fontSize: 15,
+              fontFamily: 'Inter, sans-serif',
+            }}
+          />
+          <kbd style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            color: 'rgba(230,225,255,0.5)',
+            padding: '3px 7px', borderRadius: 4,
+            background: 'rgba(255,255,255,0.06)',
+          }}>esc</kbd>
+        </div>
+        <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+          {results.length === 0 && (
+            <div style={{ padding: 24, color: 'rgba(230,225,255,0.5)', fontSize: 13 }}>
+              nothing here. maybe it's a dumdum idea waiting to happen.
+            </div>
+          )}
+          {results.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => { onPick?.(s); onClose(); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                padding: '10px 18px', background: 'transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left',
+                color: 'rgba(230,225,255,0.9)',
+                fontFamily: 'Inter, sans-serif', fontSize: 14,
+                transition: 'background .12s',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(167,139,250,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: `oklch(70% 0.16 ${s.hue})`,
+                boxShadow: `0 0 10px oklch(70% 0.16 ${s.hue} / 0.6)`,
+              }}></span>
+              <span style={{ fontWeight: 500, minWidth: 110 }}>{s.label}</span>
+              <span style={{
+                color: 'rgba(230,225,255,0.45)', fontSize: 12,
+                fontFamily: 'JetBrains Mono, monospace',
+              }}>{s.desc}</span>
+            </button>
+          ))}
+        </div>
+        <div style={{
+          padding: '10px 18px',
+          borderTop: '1px solid rgba(167,139,250,0.15)',
+          display: 'flex', gap: 14,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+          color: 'rgba(230,225,255,0.4)',
+        }}>
+          <span>↑↓ navigate</span>
+          <span>↵ open</span>
+          <span>esc close</span>
+          <span style={{ marginLeft: 'auto' }}>{MOD_KEY} K anywhere</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function useCommandPalette() {
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setOpen(o => !o);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+  return { open, setOpen };
+}
+
+// Konami easter egg — ↑↑↓↓←→←→ba. Flips the page briefly and shows a message.
+function useKonami(onTrigger) {
+  React.useEffect(() => {
+    const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let i = 0;
+    const onKey = (e) => {
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (k === seq[i]) {
+        i++;
+        if (i === seq.length) { onTrigger?.(); i = 0; }
+      } else {
+        i = k === seq[0] ? 1 : 0;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onTrigger]);
+}
+
+// Starfield background for cosmic theme. Lightweight; pure CSS-positioned divs.
+function Starfield({ density = 100, twinkle = true }) {
+  const stars = React.useMemo(() => {
+    return Array.from({ length: density }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 1.6 + 0.4,
+      delay: Math.random() * 3,
+      dur: Math.random() * 3 + 2,
+      opacity: Math.random() * 0.6 + 0.2,
+    }));
+  }, [density]);
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      {stars.map(s => (
+        <div key={s.id} style={{
+          position: 'absolute',
+          left: `${s.x}%`, top: `${s.y}%`,
+          width: s.size, height: s.size, borderRadius: '50%',
+          background: '#fff',
+          opacity: s.opacity,
+          animation: twinkle ? `zs-twinkle ${s.dur}s ease-in-out ${s.delay}s infinite` : 'none',
+        }}></div>
+      ))}
+    </div>
+  );
+}
+
+Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCommandPalette, useKonami, Starfield, SECTIONS });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+// Section scaffold — shared layout for every section page.
+// Provides: consistent top nav, command palette with routing, back-to-home link,
+// fonts preloaded. Each section wraps its content in <SectionFrame>.
+
+// Route a section id to its html file.
+function routeToSection(id) {
+  // Map any special cases here. Default: {id}.html
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
+
+function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
+  const palette = useCommandPalette();
+  const [konami, setKonami] = React.useState(false);
+  useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
+
+  return (
+    <div style={{
+      position: 'relative', minHeight: '100vh', overflow: 'hidden auto',
+      background: background || '#0a0e27',
+      color: '#e9e6ff', fontFamily: 'Inter, sans-serif',
+    }}>
+      <TopNav theme={theme} onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        onClose={() => palette.setOpen(false)}
+        onPick={(s) => routeToSection(s.id)}
+      />
+      <div style={{ paddingTop: 68 }}>
+        {children}
+      </div>
+      {konami && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
+          letterSpacing: '0.1em', pointerEvents: 'none',
+        }}>
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+        </div>
+      )}
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
+
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '28px 56px 40px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+      letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
+      gap: 12, flexWrap: 'wrap',
+    }}>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
+
+const footerLink = {
+  color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+  letterSpacing: '0.15em', fontSize: 11,
+};
+
+Object.assign(window, { SectionFrame, routeToSection });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+    // Guestbook v2 — answering machine + chat hybrid.
+    // Left rail: voicemails (with waveform + transcript). Right rail: chat replies.
+    // Selected voicemail expands its transcript and the chat thread under it.
+    const STORE_KEY = 'zymstar.guestbook.v2';
+
+    const VOICEMAILS = [
+      {
+        id: 'vm-09', from: 'Sena',     rel: 'thesis lab',    accent: '#a78bfa',
+        date: 'Apr 21', dur: '0:42', new: true,
+        transcript: "hey it's me. just patched the head we were arguing about. it's the right cluster. i owe you a coffee, also: stop apologizing for being right. ok bye, ok bye, ok bye click",
+        replies: [
+          { from: 'me', t: 'on my way. cihangir, the usual one.', ts: '13:08' },
+          { from: 'Sena', t: 'i ordered already.', ts: '13:09' },
+        ],
+      },
+      {
+        id: 'vm-08', from: 'Mert',     rel: 'high school',    accent: '#fb923c',
+        date: 'Apr 18', dur: '1:12', new: true,
+        transcript: "ok the girl who could not solve a quadratic is now writing papers about transformers. i am calling to formally apologize for the time i told you to take a different major. proud of you, scientist.",
+        replies: [
+          { from: 'me', t: 'apology accepted, on the record.', ts: '22:14' },
+          { from: 'Mert', t: 'put it on the website.', ts: '22:14' },
+          { from: 'me', t: 'don&rsquo;t tempt me.', ts: '22:15' },
+        ],
+      },
+      {
+        id: 'vm-07', from: 'Asya',     rel: 'roommate · NYC', accent: '#34d399',
+        date: 'Mar 30', dur: '0:28', new: false,
+        transcript: "the bread was better the second time. you sent me three paragraphs about loss surfaces while i was kneading. i loved every word. come visit. spare key under the same plant.",
+        replies: [
+          { from: 'me', t: 'booking the flight tonight.', ts: '09:01' },
+        ],
+      },
+      {
+        id: 'vm-06', from: 'Prof. Arslan', rel: 'advisor',    accent: '#7dd3fc',
+        date: 'Apr 02', dur: '0:55', new: false,
+        transcript: "your draft has the structure of a real paper for the first time. i marked section three. let us discuss it tuesday over tea. and zeynep, this is good work. not bad. good.",
+        replies: [
+          { from: 'me', t: 'thank you, professor. tuesday 3pm?', ts: '08:30' },
+          { from: 'Prof. Arslan', t: 'confirmed.', ts: '08:42' },
+        ],
+      },
+      {
+        id: 'vm-05', from: 'Bora',     rel: 'co-founder of nothing', accent: '#f472b6',
+        date: 'Apr 18', dur: '1:33', new: false,
+        transcript: "ok new plan. useless tools as a service. you do the math, i bring the hype, we both bring the snacks. also a metronome that hates you. that's the mvp. call me back when you stop laughing.",
+        replies: [
+          { from: 'me', t: 'still laughing. counter: a calendar for yesterday.', ts: '20:10' },
+          { from: 'Bora', t: 'WE&rsquo;RE COOKING.', ts: '20:11' },
+        ],
+      },
+      {
+        id: 'vm-04', from: 'Dad',      rel: 'home',           accent: '#fde047',
+        date: 'Mar 14', dur: '0:36', new: false,
+        transcript: "kızım, annen sana üzüm gönderdi. çantanı kontrol et. ve kalbini de. seni seviyoruz. sağol kızım. sağol. tıkk.",
+        replies: [
+          { from: 'me', t: 'çantamı kontrol ettim. üzümler güvende. seni seviyorum baba.', ts: '19:00' },
+        ],
+      },
+      {
+        id: 'vm-03', from: 'İrem',     rel: 'datathon team',  accent: '#c084fc',
+        date: 'Feb 28', dur: '0:19', new: false,
+        transcript: "we got 3rd. that is podium. that is not nothing. stop calling it &lsquo;just&rsquo; 3rd, please &amp; thank you. that is all. click",
+        replies: [
+          { from: 'me', t: 'noted. proud of us.', ts: '01:22' },
+        ],
+      },
+      {
+        id: 'vm-02', from: 'a stranger', rel: 'github issue #41', accent: '#f59e0b',
+        date: 'Mar 06', dur: '0:14', new: false,
+        transcript: "your numpy cnn taught me what backprop actually does. opening this issue just to say thank you. closing it now. that&rsquo;s it. bye.",
+        replies: [
+          { from: 'me', t: 'thank you. that means a lot.', ts: '14:00' },
+        ],
+      },
+      {
+        id: 'vm-01', from: 'you', rel: 'visiting',           accent: '#5e9eff',
+        date: '— ', dur: '— ', new: false, isCTA: true,
+        transcript: "leave one of your own. it&rsquo;ll show up here, with a fake waveform and your own thread next to it.",
+        replies: [],
+      },
+    ];
+
+    function GuestbookPage() {
+      const [userVMs, setUserVMs] = React.useState(() => {
+        try { const raw = localStorage.getItem(STORE_KEY); return raw ? JSON.parse(raw) : []; } catch (_) { return []; }
+      });
+      const all = [...userVMs, ...VOICEMAILS];
+      const [selected, setSelected] = React.useState(all[0].id);
+      const [draftOpen, setDraftOpen] = React.useState(false);
+      const [draft, setDraft] = React.useState({ from: '', rel: '', msg: '' });
+
+      const current = all.find(v => v.id === selected) || all[0];
+
+      const submit = () => {
+        if (!draft.from.trim() || !draft.msg.trim()) return;
+        const accents = ['#5e9eff', '#a78bfa', '#34d399', '#fb923c', '#f472b6', '#fde047'];
+        const newVM = {
+          id: 'user-' + Date.now(),
+          from: draft.from, rel: draft.rel || 'visiting',
+          accent: accents[Math.floor(Math.random() * accents.length)],
+          date: 'today', dur: `0:${String(15 + Math.floor(Math.random() * 30)).padStart(2,'0')}`,
+          new: true, transcript: draft.msg, replies: [],
+        };
+        const next = [newVM, ...userVMs].slice(0, 8);
+        setUserVMs(next);
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(next)); } catch (_) {}
+        setSelected(newVM.id);
+        setDraft({ from: '', rel: '', msg: '' });
+        setDraftOpen(false);
+      };
+
+      const newCount = all.filter(v => v.new && !v.isCTA).length;
+
+      return (
+        <SectionFrame sectionId="guestbook" theme="cosmic" background="#0e1015">
+          {/* soft glow */}
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse 700px 500px at 25% 20%, rgba(245,158,11,0.05) 0%, transparent 60%), radial-gradient(ellipse 600px 400px at 80% 80%, rgba(167,139,250,0.04) 0%, transparent 60%)',
+          }}></div>
+
+          <div style={{ position: 'relative', zIndex: 2, padding: '20px 24px 60px', maxWidth: 1240, margin: '0 auto' }}>
+            {/* Header */}
+            <div style={{
+              padding: '12px 0 18px', borderBottom: '1px solid rgba(255,255,255,0.06)',
+              marginBottom: 22,
+              display: 'flex', alignItems: 'flex-end', gap: 24, flexWrap: 'wrap',
+            }}>
+              <div style={{ flex: 1, minWidth: 280 }}>
+                <div style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                  letterSpacing: '0.32em', textTransform: 'uppercase',
+                  color: '#f59e0b', marginBottom: 10,
+                }}>★ answering machine · {newCount} new {newCount === 1 ? 'message' : 'messages'}</div>
+                <h1 style={{
+                  fontSize: 40, fontWeight: 600, lineHeight: 1.05,
+                  margin: 0, letterSpacing: '-0.02em', color: '#e3e6ec',
+                }}>guestbook<span style={{ color: '#f59e0b' }}>.</span></h1>
+                <p style={{
+                  fontSize: 13, color: 'rgba(227,230,236,0.55)', maxWidth: 540,
+                  lineHeight: 1.55, marginTop: 8, marginBottom: 0,
+                }}>
+                  voicemails from people who keep me, with the replies that came after.
+                  pick one on the left to listen — the transcript and the conversation
+                  unspool on the right.
+                </p>
+              </div>
+              <button onClick={() => setDraftOpen(true)} style={{
+                padding: '10px 18px', background: '#f59e0b', color: '#0e1015',
+                border: 'none', borderRadius: 6, cursor: 'pointer',
+                fontSize: 12, fontWeight: 600, letterSpacing: '0.08em',
+                fontFamily: 'JetBrains Mono, monospace',
+              }}>● LEAVE A MESSAGE</button>
+            </div>
+
+            {/* Two-pane */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: '320px 1fr', gap: 22,
+              alignItems: 'flex-start',
+            }}>
+              {/* LEFT: voicemail list */}
+              <div style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 10, overflow: 'hidden',
+              }}>
+                <div style={{
+                  padding: '8px 14px', background: 'rgba(255,255,255,0.03)',
+                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                  display: 'flex', justifyContent: 'space-between',
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                  letterSpacing: '0.16em', color: 'rgba(227,230,236,0.45)',
+                }}>
+                  <span>★ INBOX</span>
+                  <span>{all.length} TOTAL</span>
+                </div>
+                <div>
+                  {all.map(vm => (
+                    <VMRow key={vm.id} vm={vm} active={vm.id === selected} onClick={() => setSelected(vm.id)} />
+                  ))}
+                </div>
+              </div>
+
+              {/* RIGHT: detail */}
+              <div style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 10, padding: '20px 24px',
+              }}>
+                <VMDetail vm={current} />
+              </div>
+            </div>
+
+            {/* Footnote */}
+            <p style={{
+              fontSize: 11, color: 'rgba(227,230,236,0.35)',
+              fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.05em',
+              marginTop: 26, lineHeight: 1.6, textAlign: 'center',
+            }}>
+              ★ everyone in here is a real person, lightly anonymized. messages you leave stay on this device only.
+            </p>
+          </div>
+
+          {draftOpen && (
+            <DraftModal draft={draft} setDraft={setDraft} onClose={() => setDraftOpen(false)} onSubmit={submit} />
+          )}
+        </SectionFrame>
+      );
+    }
+
+    function VMRow({ vm, active, onClick }) {
+      return (
+        <div onClick={onClick} style={{
+          padding: '10px 14px', cursor: 'pointer',
+          background: active ? 'rgba(245,158,11,0.08)' : 'transparent',
+          borderLeft: '3px solid ' + (active ? vm.accent : 'transparent'),
+          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          transition: 'background .12s',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+            gap: 10, marginBottom: 3,
+          }}>
+            <span style={{
+              fontSize: 13, fontWeight: 600, color: active ? '#fff' : '#e3e6ec',
+              display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              {vm.new && !vm.isCTA && (
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%', background: vm.accent,
+                  animation: 'pulse 1.6s infinite', flexShrink: 0,
+                }}></span>
+              )}
+              {vm.isCTA && <span style={{ color: vm.accent }}>＋</span>}
+              {vm.from}
+            </span>
+            <span style={{
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+              color: 'rgba(227,230,236,0.45)',
+            }}>{vm.dur}</span>
+          </div>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', gap: 10,
+            fontSize: 10, fontFamily: 'JetBrains Mono, monospace',
+            color: 'rgba(227,230,236,0.4)', letterSpacing: '0.06em',
+          }}>
+            <span>{vm.rel}</span>
+            <span>{vm.date}</span>
+          </div>
+        </div>
+      );
+    }
+
+    function Waveform({ accent, count = 48 }) {
+      // Stable pseudo-random heights based on index
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2, height: 36 }}>
+          {Array.from({ length: count }).map((_, i) => {
+            const seed = (Math.sin(i * 1.7) + 1) / 2;
+            const h = 6 + seed * 28;
+            return (
+              <div key={i} style={{
+                width: 3, height: h, background: accent,
+                opacity: 0.45 + seed * 0.4, borderRadius: 1,
+                animation: `wave-anim ${1 + (i % 5) * 0.2}s ease-in-out infinite`,
+                animationDelay: `${i * 0.04}s`,
+              }}></div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function VMDetail({ vm }) {
+      const [playing, setPlaying] = React.useState(false);
+      // Reset play state on vm change
+      React.useEffect(() => { setPlaying(false); }, [vm.id]);
+
+      return (
+        <div>
+          {/* Header */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8,
+          }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: '50%',
+              background: vm.accent, color: '#0e1015',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18, fontWeight: 700, flexShrink: 0,
+            }}>{vm.from.charAt(0).toUpperCase()}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>{vm.from}</div>
+              <div style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                letterSpacing: '0.1em', color: 'rgba(227,230,236,0.5)', marginTop: 2,
+              }}>{vm.rel} · {vm.date} · {vm.dur}</div>
+            </div>
+            {!vm.isCTA && (
+              <button onClick={() => setPlaying(!playing)} style={{
+                width: 44, height: 44, borderRadius: '50%',
+                background: playing ? vm.accent : 'rgba(255,255,255,0.08)',
+                color: playing ? '#0e1015' : '#fff',
+                border: '1px solid ' + (playing ? vm.accent : 'rgba(255,255,255,0.15)'),
+                cursor: 'pointer', fontSize: 14, paddingLeft: playing ? 0 : 3,
+              }}>{playing ? '❚❚' : '▶'}</button>
+            )}
+          </div>
+
+          {/* Waveform */}
+          {!vm.isCTA && (
+            <div style={{
+              padding: '10px 0', borderTop: '1px solid rgba(255,255,255,0.05)',
+              borderBottom: '1px solid rgba(255,255,255,0.05)',
+              opacity: playing ? 1 : 0.55,
+            }}>
+              <Waveform accent={vm.accent} />
+            </div>
+          )}
+
+          {/* Transcript */}
+          <div style={{ marginTop: 16 }}>
+            <div style={{
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+              letterSpacing: '0.18em', color: 'rgba(227,230,236,0.45)',
+              marginBottom: 8,
+            }}>{vm.isCTA ? '↳ NOTE' : '↳ TRANSCRIPT'}</div>
+            <p style={{
+              fontSize: 14, lineHeight: 1.65, color: '#e3e6ec',
+              margin: 0, fontStyle: 'italic', maxWidth: 640,
+            }} dangerouslySetInnerHTML={{ __html: '“' + vm.transcript + '”' }}/>
+          </div>
+
+          {/* Replies */}
+          {vm.replies.length > 0 && (
+            <div style={{
+              marginTop: 22, paddingTop: 16,
+              borderTop: '1px dashed rgba(255,255,255,0.08)',
+            }}>
+              <div style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                letterSpacing: '0.18em', color: 'rgba(227,230,236,0.45)',
+                marginBottom: 12,
+              }}>↳ THE THREAD AFTER</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {vm.replies.map((r, i) => {
+                  const isMe = r.from === 'me';
+                  return (
+                    <div key={i} style={{
+                      display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row',
+                      gap: 10, alignItems: 'flex-end',
+                    }}>
+                      <div style={{ maxWidth: '70%' }}>
+                        <div style={{
+                          padding: '7px 12px',
+                          background: isMe
+                            ? 'linear-gradient(180deg, #f59e0b 0%, #d97706 100%)'
+                            : 'rgba(255,255,255,0.06)',
+                          color: isMe ? '#0e1015' : '#e3e6ec',
+                          borderRadius: 14,
+                          borderTopLeftRadius: !isMe ? 4 : 14,
+                          borderTopRightRadius: isMe ? 4 : 14,
+                          fontSize: 13, lineHeight: 1.4, fontWeight: isMe ? 500 : 400,
+                        }} dangerouslySetInnerHTML={{ __html: r.t }}/>
+                        <div style={{
+                          fontSize: 9, color: 'rgba(227,230,236,0.35)',
+                          fontFamily: 'JetBrains Mono, monospace',
+                          textAlign: isMe ? 'right' : 'left',
+                          marginTop: 2, padding: '0 6px',
+                        }}>{isMe ? 'me' : vm.from} · {r.ts}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {vm.isCTA && (
+            <div style={{
+              marginTop: 22, padding: 18, borderRadius: 8,
+              background: 'rgba(94,158,255,0.05)',
+              border: '1px dashed rgba(94,158,255,0.3)',
+              fontSize: 13, color: 'rgba(227,230,236,0.7)',
+            }}>
+              press the orange ● button up top to record one. it&rsquo;ll show up at the
+              top of this inbox.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function DraftModal({ draft, setDraft, onClose, onSubmit }) {
+      return (
+        <div onClick={onClose} style={{
+          position: 'fixed', inset: 0, zIndex: 100,
+          background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 30,
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: 460, padding: '26px 26px 22px',
+            background: '#15181f', color: '#e3e6ec',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 12, boxShadow: '0 30px 60px rgba(0,0,0,0.6)',
+            fontFamily: 'Inter, sans-serif',
+          }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16,
+            }}>
+              <span style={{
+                width: 10, height: 10, borderRadius: '50%', background: '#f59e0b',
+                animation: 'pulse 1.4s infinite',
+              }}></span>
+              <div style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                letterSpacing: '0.2em', color: '#f59e0b',
+              }}>● RECORDING — leave a message</div>
+            </div>
+            <Field label="who's calling">
+              <input value={draft.from} onChange={e => setDraft({ ...draft, from: e.target.value })}
+                placeholder="your name" maxLength={32} style={inp}/>
+            </Field>
+            <Field label="how do we know each other">
+              <input value={draft.rel} onChange={e => setDraft({ ...draft, rel: e.target.value })}
+                placeholder="optional · e.g. internet stranger" maxLength={48} style={inp}/>
+            </Field>
+            <Field label="message">
+              <textarea value={draft.msg} onChange={e => setDraft({ ...draft, msg: e.target.value })}
+                placeholder="say it like you would on a voicemail..."
+                rows={4} maxLength={300}
+                style={{ ...inp, resize: 'vertical', fontFamily: 'inherit' }}/>
+              <div style={{ fontSize: 10, color: 'rgba(227,230,236,0.35)', textAlign: 'right', marginTop: 2, fontFamily: 'JetBrains Mono, monospace' }}>
+                {draft.msg.length} / 300
+              </div>
+            </Field>
+            <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+              <button onClick={onSubmit} disabled={!draft.from.trim() || !draft.msg.trim()} style={{
+                flex: 1, padding: '11px 18px',
+                background: (!draft.from.trim() || !draft.msg.trim()) ? 'rgba(245,158,11,0.3)' : '#f59e0b',
+                color: '#0e1015', border: 'none', borderRadius: 6,
+                cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                letterSpacing: '0.08em', fontFamily: 'JetBrains Mono, monospace',
+              }}>● SAVE TO INBOX</button>
+              <button onClick={onClose} style={{
+                padding: '11px 18px', background: 'transparent',
+                color: 'rgba(227,230,236,0.7)', cursor: 'pointer',
+                border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6,
+                fontSize: 12, fontFamily: 'JetBrains Mono, monospace',
+              }}>cancel</button>
+            </div>
+            <div style={{
+              marginTop: 12, fontSize: 10, color: 'rgba(227,230,236,0.35)',
+              fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.05em',
+              textAlign: 'center',
+            }}>
+              kept on this device only · not posted publicly
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const inp = {
+      width: '100%', padding: '8px 10px',
+      background: 'rgba(255,255,255,0.04)',
+      border: '1px solid rgba(255,255,255,0.1)', borderRadius: 5,
+      fontSize: 13, color: '#e3e6ec', outline: 'none',
+      fontFamily: 'inherit',
+    };
+    function Field({ label, children }) {
+      return (
+        <label style={{ display: 'block', marginBottom: 12 }}>
+          <div style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+            color: 'rgba(227,230,236,0.5)', marginBottom: 4,
+          }}>{label}</div>
+          {children}
+        </label>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<GuestbookPage />);
+  </script>
+</body>
+</html>

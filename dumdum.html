@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zymstar / dumdum — group chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #0b0d10; font-family: 'Inter', -apple-system, sans-serif; color: #e8eaed; }
+    * { box-sizing: border-box; }
+    ::selection { background: #5e9eff; color: #0b0d10; }
+    @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" data-presets="env,react">
+// Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
+// These are meant to feel consistent across every section of zymstar.com
+// while per-section content uses its own aesthetic underneath.
+
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl';
+
+const SECTIONS = [
+  { id: 'finance',     label: 'Finance',     hue: 140, desc: 'quant, strategies, indicators, backtests', group: 'project' },
+  { id: 'hardware',    label: 'Hardware',    hue: 20,  desc: 'FPGA, Arduino, solder smoke', group: 'project' },
+  { id: 'ml',          label: 'ML / AI',     hue: 180, desc: 'models, experiments, results', group: 'project' },
+  { id: 'dumdum',      label: 'Dumdum',      hue: 330, desc: 'silly ideas with no justification' },
+  { id: 'thesis',      label: 'Thesis',      hue: 240, desc: "master's thesis + related work" },
+  { id: 'writing',     label: 'Writing',     hue: 40,  desc: 'essays, blog posts, notes' },
+  { id: 'vlog',        label: 'Vlog',        hue: 350, desc: 'video, voice, vibes' },
+  { id: 'photography', label: 'Photography', hue: 200, desc: 'images, light, composition' },
+  { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
+  { id: 'tools',       label: 'Tools',       hue: 160, desc: 'utilities I made for myself' },
+  { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
+  { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
+];
+
+function TopNav({ theme = 'cosmic', onOpenPalette }) {
+  const fg = theme === 'cosmic' ? 'rgba(230,225,255,0.92)' : 'rgba(20,20,30,0.9)';
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.55)' : 'rgba(20,20,30,0.55)';
+  const border = theme === 'cosmic' ? 'rgba(167,139,250,0.15)' : 'rgba(0,0,0,0.08)';
+  const bg = theme === 'cosmic' ? 'rgba(10,14,39,0.55)' : 'rgba(255,255,255,0.75)';
+  return (
+    <nav style={{
+      position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '18px 32px',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      fontSize: 13, color: fg,
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      background: bg,
+      borderBottom: `1px solid ${border}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 22, height: 22, borderRadius: '50%',
+          background: 'radial-gradient(circle at 35% 30%, #fff 0%, #c084fc 40%, #6d28d9 90%)',
+          boxShadow: '0 0 18px rgba(167,139,250,0.7)',
+        }}></div>
+        <span style={{
+          fontFamily: '"Space Grotesk", Inter, sans-serif',
+          fontWeight: 600, fontSize: 16, letterSpacing: '-0.02em',
+        }}>zymstar</span>
+        <span style={{ color: dim, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>
+          / Zeynep&nbsp;Yıldız
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <MusicTicker theme={theme} />
+        <NowIndicator theme={theme} />
+        <button
+          onClick={onOpenPalette}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '6px 12px', borderRadius: 8,
+            background: 'transparent',
+            border: `1px solid ${border}`,
+            color: dim, cursor: 'pointer',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+          }}>
+          <span>search</span>
+          <kbd style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            padding: '2px 6px', borderRadius: 4,
+            background: theme === 'cosmic' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            fontSize: 10,
+          }}>{MOD_KEY}&nbsp;K</kbd>
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function NowIndicator({ theme }) {
+  // Realtime-ish "what I'm doing now" indicator. Cycles through states.
+  const states = [
+    { icon: '●', text: 'coding — thesis chapter 3', color: 'oklch(70% 0.15 150)' },
+    { icon: '☕', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
+    { icon: '✎', text: 'writing — on failure', color: 'oklch(70% 0.15 220)' },
+    { icon: '✦', text: 'reading — borges',     color: 'oklch(70% 0.15 280)' },
+  ];
+  const [i, setI] = React.useState(0);
+  React.useEffect(() => {
+    const t = setInterval(() => setI(x => (x + 1) % states.length), 4200);
+    return () => clearInterval(t);
+  }, []);
+  const s = states[i];
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.75)' : 'rgba(20,20,30,0.75)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: dim,
+    }}>
+      <span style={{
+        color: s.color,
+        animation: 'zs-pulse 1.4s ease-in-out infinite',
+        fontSize: 10,
+      }}>{s.icon}</span>
+      <span style={{ minWidth: 170 }}>
+        <span style={{ opacity: 0.55 }}>now: </span>{s.text}
+      </span>
+    </div>
+  );
+}
+
+const TRACKS = [
+  { t: 'Amaze Amaze Amaze',   a: 'Daniel Pemberton',   c: '#ff6b9d' },
+  { t: 'Time Go Fishing',     a: 'Daniel Pemberton',   c: '#4fb8ff' },
+  { t: 'See You Tomorrow',    a: 'John Powell',        c: '#7d6cff' },
+  { t: "Forbidden Friendship",a: 'John Powell',        c: '#5fd9c4' },
+  { t: "It's OK I'm OK",      a: 'Tate McRae',         c: '#ff8aae' },
+  { t: 'Non-Stop',            a: 'Lin-Manuel Miranda', c: '#ffb84d' },
+  { t: 'Spider-Man Loves You',a: 'Daniel Pemberton',   c: '#e84545' },
+  { t: 'What It Sounds Like', a: 'HUNTR/X',            c: '#c084fc' },
+  { t: "How It's Done",       a: 'HUNTR/X',            c: '#a855f7' },
+  { t: 'No Time For Caution', a: 'Hans Zimmer',        c: '#3a86ff' },
+  { t: 'The Seed',            a: 'AURORA',             c: '#06d6a0' },
+  { t: 'The Other Side',      a: 'Hugh Jackman',       c: '#ffd23f' },
+  { t: 'Cross My Heart',      a: 'Marianas Trench',    c: '#fb5607' },
+  { t: 'Desperate Measures',  a: 'Marianas Trench',    c: '#ff006e' },
+];
+
+function MusicTicker({ theme }) {
+  const [i, setI] = React.useState(() => Math.floor(Math.random() * TRACKS.length));
+  const [bars, setBars] = React.useState([0.4, 0.7, 0.5, 0.8]);
+  React.useEffect(() => {
+    const t = setInterval(() => setI(x => (x + 1) % TRACKS.length), 6800);
+    return () => clearInterval(t);
+  }, []);
+  React.useEffect(() => {
+    const t = setInterval(() => {
+      setBars(Array.from({ length: 4 }, () => 0.25 + Math.random() * 0.75));
+    }, 220);
+    return () => clearInterval(t);
+  }, []);
+  const tr = TRACKS[i];
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.75)' : 'rgba(20,20,30,0.75)';
+  const subdim = theme === 'cosmic' ? 'rgba(230,225,255,0.45)' : 'rgba(20,20,30,0.45)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '4px 10px', borderRadius: 20,
+      background: theme === 'cosmic' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+      border: theme === 'cosmic' ? '1px solid rgba(167,139,250,0.18)' : '1px solid rgba(0,0,0,0.08)',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: dim,
+      maxWidth: 280, overflow: 'hidden',
+    }}>
+      {/* equalizer bars */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 14, flexShrink: 0 }}>
+        {bars.map((h, j) => (
+          <div key={j} style={{
+            width: 2, height: `${h * 14}px`,
+            background: tr.c, borderRadius: 1,
+            transition: 'height .2s',
+          }}></div>
+        ))}
+      </div>
+      <div style={{
+        display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', flex: 1,
+        lineHeight: 1.2,
+      }}>
+        <span style={{
+          color: dim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          fontSize: 11, fontWeight: 500,
+        }}>{tr.t}</span>
+        <span style={{
+          color: subdim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          fontSize: 9.5,
+        }}>{tr.a}</span>
+      </div>
+    </div>
+  );
+}
+
+function CommandPalette({ open, onClose, onPick }) {
+  const [q, setQ] = React.useState('');
+  const inputRef = React.useRef(null);
+  React.useEffect(() => {
+    if (open && inputRef.current) {
+      setQ('');
+      setTimeout(() => inputRef.current?.focus(), 10);
+    }
+  }, [open]);
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  const results = SECTIONS.filter(s =>
+    !q || s.label.toLowerCase().includes(q.toLowerCase()) ||
+          s.desc.toLowerCase().includes(q.toLowerCase()));
+
+  if (!open) return null;
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'absolute', inset: 0, zIndex: 100,
+        background: 'rgba(5,3,20,0.55)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        paddingTop: 120,
+      }}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 'min(540px, 90%)',
+          background: 'rgba(16,12,32,0.95)',
+          border: '1px solid rgba(167,139,250,0.3)',
+          borderRadius: 14,
+          boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+          overflow: 'hidden',
+          fontFamily: 'Inter, sans-serif',
+        }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '14px 18px',
+          borderBottom: '1px solid rgba(167,139,250,0.15)',
+        }}>
+          <span style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            color: 'oklch(75% 0.15 290)', fontSize: 13,
+          }}>▸</span>
+          <input
+            ref={inputRef}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="jump to section, project, or idea…"
+            style={{
+              flex: 1, background: 'transparent', border: 'none', outline: 'none',
+              color: 'rgba(230,225,255,0.95)', fontSize: 15,
+              fontFamily: 'Inter, sans-serif',
+            }}
+          />
+          <kbd style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            color: 'rgba(230,225,255,0.5)',
+            padding: '3px 7px', borderRadius: 4,
+            background: 'rgba(255,255,255,0.06)',
+          }}>esc</kbd>
+        </div>
+        <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+          {results.length === 0 && (
+            <div style={{ padding: 24, color: 'rgba(230,225,255,0.5)', fontSize: 13 }}>
+              nothing here. maybe it's a dumdum idea waiting to happen.
+            </div>
+          )}
+          {results.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => { onPick?.(s); onClose(); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                padding: '10px 18px', background: 'transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left',
+                color: 'rgba(230,225,255,0.9)',
+                fontFamily: 'Inter, sans-serif', fontSize: 14,
+                transition: 'background .12s',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(167,139,250,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: `oklch(70% 0.16 ${s.hue})`,
+                boxShadow: `0 0 10px oklch(70% 0.16 ${s.hue} / 0.6)`,
+              }}></span>
+              <span style={{ fontWeight: 500, minWidth: 110 }}>{s.label}</span>
+              <span style={{
+                color: 'rgba(230,225,255,0.45)', fontSize: 12,
+                fontFamily: 'JetBrains Mono, monospace',
+              }}>{s.desc}</span>
+            </button>
+          ))}
+        </div>
+        <div style={{
+          padding: '10px 18px',
+          borderTop: '1px solid rgba(167,139,250,0.15)',
+          display: 'flex', gap: 14,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+          color: 'rgba(230,225,255,0.4)',
+        }}>
+          <span>↑↓ navigate</span>
+          <span>↵ open</span>
+          <span>esc close</span>
+          <span style={{ marginLeft: 'auto' }}>{MOD_KEY} K anywhere</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function useCommandPalette() {
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setOpen(o => !o);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+  return { open, setOpen };
+}
+
+// Konami easter egg — ↑↑↓↓←→←→ba. Flips the page briefly and shows a message.
+function useKonami(onTrigger) {
+  React.useEffect(() => {
+    const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let i = 0;
+    const onKey = (e) => {
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (k === seq[i]) {
+        i++;
+        if (i === seq.length) { onTrigger?.(); i = 0; }
+      } else {
+        i = k === seq[0] ? 1 : 0;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onTrigger]);
+}
+
+// Starfield background for cosmic theme. Lightweight; pure CSS-positioned divs.
+function Starfield({ density = 100, twinkle = true }) {
+  const stars = React.useMemo(() => {
+    return Array.from({ length: density }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 1.6 + 0.4,
+      delay: Math.random() * 3,
+      dur: Math.random() * 3 + 2,
+      opacity: Math.random() * 0.6 + 0.2,
+    }));
+  }, [density]);
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      {stars.map(s => (
+        <div key={s.id} style={{
+          position: 'absolute',
+          left: `${s.x}%`, top: `${s.y}%`,
+          width: s.size, height: s.size, borderRadius: '50%',
+          background: '#fff',
+          opacity: s.opacity,
+          animation: twinkle ? `zs-twinkle ${s.dur}s ease-in-out ${s.delay}s infinite` : 'none',
+        }}></div>
+      ))}
+    </div>
+  );
+}
+
+Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCommandPalette, useKonami, Starfield, SECTIONS });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+// Section scaffold — shared layout for every section page.
+// Provides: consistent top nav, command palette with routing, back-to-home link,
+// fonts preloaded. Each section wraps its content in <SectionFrame>.
+
+// Route a section id to its html file.
+function routeToSection(id) {
+  // Map any special cases here. Default: {id}.html
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
+
+function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
+  const palette = useCommandPalette();
+  const [konami, setKonami] = React.useState(false);
+  useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
+
+  return (
+    <div style={{
+      position: 'relative', minHeight: '100vh', overflow: 'hidden auto',
+      background: background || '#0a0e27',
+      color: '#e9e6ff', fontFamily: 'Inter, sans-serif',
+    }}>
+      <TopNav theme={theme} onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        onClose={() => palette.setOpen(false)}
+        onPick={(s) => routeToSection(s.id)}
+      />
+      <div style={{ paddingTop: 68 }}>
+        {children}
+      </div>
+      {konami && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
+          letterSpacing: '0.1em', pointerEvents: 'none',
+        }}>
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+        </div>
+      )}
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
+
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '28px 56px 40px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+      letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
+      gap: 12, flexWrap: 'wrap',
+    }}>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
+
+const footerLink = {
+  color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+  letterSpacing: '0.15em', fontSize: 11,
+};
+
+Object.assign(window, { SectionFrame, routeToSection });
+
+</script>
+  <script type="text/babel" data-presets="env,react">
+    // Dumdum — group chat thread of small dumb things.
+    // iMessage-ish but cooler palette: deep midnight + electric blue.
+    // Smaller type, denser, less precious. The point is: half-thoughts pile up.
+    const ME = 'me';
+    const PEOPLE = {
+      me:    { name: 'me',     color: '#5e9eff', avatar: 'z' },
+      sena:  { name: 'sena',   color: '#a78bfa', avatar: 's' },
+      bora:  { name: 'bora',   color: '#f472b6', avatar: 'b' },
+      asya:  { name: 'asya',   color: '#34d399', avatar: 'a' },
+      mert:  { name: 'mert',   color: '#fb923c', avatar: 'm' },
+    };
+
+    // Thread is a flat list. Day separators inserted automatically.
+    const THREAD = [
+      { day: 'Sun · Apr 27' },
+      { from: 'sena', t: 'guys i finally fixed the activation patching script', ts: '01:14' },
+      { from: 'sena', t: 'turns out i was zeroing the wrong dim for three weeks', ts: '01:14' },
+      { from: 'me',   t: 'three weeks 💀', ts: '01:15' },
+      { from: 'sena', t: 'every senior researcher has done this. nobody admits it.', ts: '01:15' },
+      { from: 'me',   t: 'put that on a t-shirt', ts: '01:16', reactions: [{ e: '😂', from: 'sena' }, { e: '👏', from: 'bora' }] },
+      { from: 'bora', t: 'startup idea', ts: '01:42' },
+      { from: 'bora', t: 'an app that just zeroes the right dim for you', ts: '01:42' },
+      { from: 'me',   t: 'we already have one it&rsquo;s called pytorch', ts: '01:43' },
+      { from: 'bora', t: 'fine. an app that yells at you when you do it wrong', ts: '01:43' },
+
+      { day: 'Mon · Apr 28' },
+      { from: 'asya', t: 'i baked the bread again. third loaf.', ts: '08:02' },
+      { from: 'asya', t: '[image · sourdough boule, slight ear, charred bottom]', ts: '08:02', isMedia: true },
+      { from: 'me',   t: 'absolutely not charred. that&rsquo;s called color', ts: '08:14' },
+      { from: 'mert', t: 'looks like the M1 logic board after i spilled coffee on it', ts: '08:18' },
+      { from: 'asya', t: 'mert i will block you', ts: '08:18' },
+      { from: 'me',   t: 'don&rsquo;t block him he owes me 47 lira', ts: '08:19', reactions: [{ e: '💸', from: 'mert' }] },
+
+      { day: 'Wed · Apr 30' },
+      { from: 'me',   t: 'i think i found the addition cluster', ts: '15:09' },
+      { from: 'me',   t: 'attention heads 11.4 + 11.7 fire on every two-digit problem', ts: '15:09' },
+      { from: 'me',   t: 'ablate them, accuracy drops 78 → 11', ts: '15:09' },
+      { from: 'sena', t: 'ZEYNEP', ts: '15:11' },
+      { from: 'sena', t: 'ZEYNEP THAT IS THE THING', ts: '15:11' },
+      { from: 'sena', t: 'send the notebook NOW', ts: '15:11', reactions: [{ e: '🔥', from: 'me' }, { e: '🔥', from: 'bora' }, { e: '🤯', from: 'asya' }] },
+      { from: 'bora', t: 'congratulations you have invented arithmetic', ts: '15:24' },
+      { from: 'me',   t: 'i&rsquo;m going to cry in a coffee shop now', ts: '15:25' },
+      { from: 'asya', t: 'go to that one in cihangir, the one you like', ts: '15:26' },
+
+      { day: 'Fri · May 02' },
+      { from: 'me',   t: 'half-formed thought:', ts: '23:11' },
+      { from: 'me',   t: 'every paper is just one good plot wearing seven pages of text as a coat', ts: '23:11', reactions: [{ e: '💯', from: 'sena' }, { e: '😭', from: 'mert' }] },
+      { from: 'mert', t: 'that&rsquo;s going on the wall above my desk', ts: '23:14' },
+      { from: 'bora', t: 'imagine reading a paper that&rsquo;s just the plot', ts: '23:18' },
+      { from: 'bora', t: 'no abstract. no lit review. just FIGURE 1.', ts: '23:18' },
+      { from: 'me',   t: 'someone do it', ts: '23:19' },
+      { from: 'sena', t: 'NEURIPS short paper track. go.', ts: '23:20' },
+
+      { day: 'today' },
+      { from: 'me',   t: 'i made a pour over without checking the time and i think it was perfect', ts: '07:42' },
+      { from: 'me',   t: 'this is what trusting yourself looks like', ts: '07:42' },
+      { from: 'asya', t: 'or it was bad and you didn&rsquo;t notice', ts: '07:43' },
+      { from: 'me',   t: 'asya i WAS having a moment', ts: '07:43', reactions: [{ e: '😂', from: 'bora' }, { e: '😂', from: 'sena' }] },
+      { from: 'sena', t: 'send link to website btw, i want to show my advisor', ts: '09:02' },
+      { from: 'me',   t: 'zymstar.com', ts: '09:03' },
+      { from: 'me',   t: 'don&rsquo;t scroll the dumdum tab. that&rsquo;s us.', ts: '09:03', reactions: [{ e: '🤫', from: 'sena' }, { e: '👀', from: 'bora' }] },
+      { typing: ['bora', 'asya'] },
+    ];
+
+    function DumdumPage() {
+      const scrollRef = React.useRef(null);
+      React.useEffect(() => {
+        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }, []);
+
+      // Pre-process: figure out which messages start a "burst" from a sender
+      // (only first message in a burst gets avatar + name)
+      const items = [];
+      let lastFrom = null;
+      THREAD.forEach((entry, i) => {
+        if (entry.day || entry.typing) {
+          items.push({ ...entry, kind: entry.day ? 'day' : 'typing' });
+          lastFrom = null;
+        } else {
+          const burst = entry.from !== lastFrom;
+          items.push({ ...entry, kind: 'msg', burst });
+          lastFrom = entry.from;
+        }
+      });
+
+      return (
+        <SectionFrame sectionId="dumdum" theme="cosmic" background="#0b0d10">
+          {/* Soft glow background */}
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+            background: `
+              radial-gradient(ellipse 600px 400px at 18% 22%, rgba(94,158,255,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse 500px 400px at 82% 78%, rgba(167,139,250,0.05) 0%, transparent 60%)
+            `,
+          }}></div>
+
+          <div style={{ position: 'relative', zIndex: 2, padding: '20px 24px 60px', maxWidth: 880, margin: '0 auto' }}>
+            {/* Title block */}
+            <div style={{
+              padding: '14px 0 22px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+              marginBottom: 18,
+            }}>
+              <div style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                letterSpacing: '0.3em', textTransform: 'uppercase',
+                color: '#5e9eff', marginBottom: 8,
+              }}>★ thread · five members · always on do-not-disturb</div>
+              <h1 style={{
+                fontSize: 32, fontWeight: 600, lineHeight: 1.1,
+                margin: 0, color: '#e8eaed', letterSpacing: '-0.02em',
+              }}>dumdum&nbsp;<span style={{ color: '#5e9eff' }}>·</span>&nbsp;<span style={{ fontWeight: 400, color: 'rgba(232,234,237,0.55)' }}>the small dumb thoughts thread</span></h1>
+              <p style={{
+                fontSize: 13, color: 'rgba(232,234,237,0.55)', maxWidth: 540,
+                lineHeight: 1.55, marginTop: 8, marginBottom: 0,
+              }}>
+                a public-facing slice of a real-feeling group chat. half-thoughts,
+                bad jokes, the moment a thesis broke open. not curated. not really.
+              </p>
+            </div>
+
+            {/* Chat container */}
+            <div ref={scrollRef} style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: 14, padding: '16px 18px',
+            }}>
+              {/* Roster */}
+              <div style={{
+                display: 'flex', gap: 6, alignItems: 'center', marginBottom: 16,
+                paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.05)',
+              }}>
+                {Object.entries(PEOPLE).map(([id, p]) => (
+                  <Avatar key={id} p={p} size={20} style={{ marginRight: -6, border: '2px solid #0b0d10' }} />
+                ))}
+                <span style={{
+                  fontSize: 11, color: 'rgba(232,234,237,0.45)',
+                  marginLeft: 14, letterSpacing: '0.05em',
+                }}>5 people · 412 messages this month · muted</span>
+              </div>
+
+              {/* Messages */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {items.map((it, i) => {
+                  if (it.kind === 'day') return <DayDivider key={i} label={it.day} />;
+                  if (it.kind === 'typing') return <TypingRow key={i} who={it.typing} />;
+                  return <Msg key={i} m={it} />;
+                })}
+              </div>
+
+              {/* Composer (visual only) */}
+              <div style={{
+                marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.05)',
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <div style={{
+                  flex: 1, padding: '10px 14px',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 18, fontSize: 13, color: 'rgba(232,234,237,0.4)',
+                }}>iMessage · this is a read-only window into a private thread</div>
+                <button disabled style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: 'rgba(94,158,255,0.2)', border: 'none',
+                  color: 'rgba(94,158,255,0.5)', cursor: 'not-allowed', fontSize: 14,
+                }}>↑</button>
+              </div>
+            </div>
+
+            {/* Footnote */}
+            <p style={{
+              fontSize: 11, color: 'rgba(232,234,237,0.35)',
+              fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.05em',
+              marginTop: 22, lineHeight: 1.6, textAlign: 'center',
+            }}>
+              ★ everyone in here said it was ok. names lightly fictionalized.<br/>
+              if you think you recognize yourself: you probably do, and i love you.
+            </p>
+          </div>
+        </SectionFrame>
+      );
+    }
+
+    function Avatar({ p, size = 28, style = {} }) {
+      return (
+        <div style={{
+          width: size, height: size, borderRadius: '50%',
+          background: p.color, color: '#0b0d10',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: size * 0.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+          flexShrink: 0, ...style,
+        }}>{p.avatar}</div>
+      );
+    }
+
+    function DayDivider({ label }) {
+      return (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          margin: '14px 0 10px', fontFamily: 'JetBrains Mono, monospace',
+          fontSize: 10, letterSpacing: '0.18em', color: 'rgba(232,234,237,0.4)',
+          textTransform: 'uppercase',
+        }}>
+          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }}></div>
+          <span>{label}</span>
+          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }}></div>
+        </div>
+      );
+    }
+
+    function Msg({ m }) {
+      const p = PEOPLE[m.from];
+      const isMe = m.from === ME;
+      const showHead = m.burst && !isMe;
+
+      return (
+        <div style={{
+          display: 'flex', gap: 8, alignItems: 'flex-end',
+          flexDirection: isMe ? 'row-reverse' : 'row',
+          marginTop: m.burst ? 10 : 1,
+        }}>
+          {/* Avatar slot (only on first of burst, only for others) */}
+          <div style={{ width: 24, flexShrink: 0 }}>
+            {showHead && <Avatar p={p} size={24} />}
+          </div>
+
+          <div style={{ maxWidth: '74%', display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
+            {showHead && (
+              <div style={{
+                fontSize: 10, color: p.color, fontWeight: 600,
+                margin: '0 0 3px 4px', letterSpacing: '0.04em',
+              }}>{p.name}</div>
+            )}
+            <div style={{
+              padding: m.isMedia ? '6px 10px' : '7px 12px',
+              background: isMe
+                ? 'linear-gradient(180deg, #5e9eff 0%, #4078dc 100%)'
+                : 'rgba(255,255,255,0.06)',
+              color: isMe ? '#0b0d10' : '#e8eaed',
+              borderRadius: 16,
+              borderTopLeftRadius: !isMe && m.burst ? 6 : 16,
+              borderTopRightRadius: isMe && m.burst ? 6 : 16,
+              fontSize: 13.5, lineHeight: 1.4,
+              fontFamily: m.isMedia ? 'JetBrains Mono, monospace' : 'inherit',
+              fontStyle: m.isMedia ? 'italic' : 'normal',
+              opacity: m.isMedia ? 0.65 : 1,
+              position: 'relative',
+              fontWeight: isMe ? 500 : 400,
+            }} dangerouslySetInnerHTML={{ __html: m.t }}/>
+
+            {/* Reactions */}
+            {m.reactions && m.reactions.length > 0 && (
+              <div style={{
+                marginTop: 2,
+                display: 'flex', gap: 3,
+                background: 'rgba(255,255,255,0.06)',
+                padding: '2px 6px', borderRadius: 10,
+                fontSize: 11, alignSelf: isMe ? 'flex-end' : 'flex-start',
+                marginRight: isMe ? 6 : 0, marginLeft: isMe ? 0 : 6,
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}>
+                {m.reactions.map((r, i) => <span key={i}>{r.e}</span>)}
+                {m.reactions.length > 1 && (
+                  <span style={{ color: 'rgba(232,234,237,0.5)', marginLeft: 2, fontFamily: 'JetBrains Mono, monospace', fontSize: 9 }}>
+                    {m.reactions.length}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div style={{
+              fontSize: 9, color: 'rgba(232,234,237,0.3)',
+              fontFamily: 'JetBrains Mono, monospace',
+              marginTop: 2, padding: '0 6px',
+            }}>{m.ts}</div>
+          </div>
+        </div>
+      );
+    }
+
+    function TypingRow({ who }) {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+          <div style={{ display: 'flex' }}>
+            {who.map((id, i) => (
+              <Avatar key={id} p={PEOPLE[id]} size={22}
+                style={{ marginLeft: i > 0 ? -8 : 0, border: '2px solid #0b0d10' }} />
+            ))}
+          </div>
+          <div style={{
+            padding: '8px 12px', background: 'rgba(255,255,255,0.06)',
+            borderRadius: 16, display: 'flex', gap: 4,
+          }}>
+            {[0,1,2].map(i => (
+              <span key={i} style={{
+                width: 6, height: 6, borderRadius: '50%',
+                background: 'rgba(232,234,237,0.6)',
+                animation: `typing 1.2s infinite`,
+                animationDelay: `${i * 0.18}s`,
+              }}></span>
+            ))}
+          </div>
+          <span style={{ fontSize: 10, color: 'rgba(232,234,237,0.4)', fontFamily: 'JetBrains Mono, monospace' }}>
+            {who.join(' · ')} typing
+          </span>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<DumdumPage />);
+  </script>
+</body>
+</html>

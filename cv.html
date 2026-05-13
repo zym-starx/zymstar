@@ -3,23 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>zymstar — Zeynep Yıldız</title>
+  <title>zymstar / cv — Zeynep Yıldız</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; padding: 0; background: #040214; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; height: 100vh; }
+    html, body { margin: 0; padding: 0; background: #d6d3cf; font-family: 'Inter', sans-serif; }
     * { box-sizing: border-box; }
-    kbd { font-family: 'JetBrains Mono', monospace; }
+    ::selection { background: #1a1a1a; color: #faf8f4; }
+    @media print {
+      body { background: #fff; }
+      .page { box-shadow: none !important; margin: 0 !important; }
+      .controls { display: none !important; }
+      .page-break { page-break-after: always; }
+    }
+    @page { size: letter; margin: 0; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-
   <script type="text/babel" data-presets="env,react">
 // Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
 // These are meant to feel consistent across every section of zymstar.com
@@ -390,220 +395,331 @@ function Starfield({ density = 100, twinkle = true }) {
 Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCommandPalette, useKonami, Starfield, SECTIONS });
 
 </script>
-
   <script type="text/babel" data-presets="env,react">
-    // Live home: constellation — each star routes to its section page.
-    function ConstellationHome() {
-      const palette = useCommandPalette();
-      const [hovered, setHovered] = React.useState(null);
-      const [mouse, setMouse] = React.useState({ x: 0, y: 0 });
-      const [konami, setKonami] = React.useState(false);
-      useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
-      const ref = React.useRef(null);
+// Section scaffold — shared layout for every section page.
+// Provides: consistent top nav, command palette with routing, back-to-home link,
+// fonts preloaded. Each section wraps its content in <SectionFrame>.
 
-      const nodes = [
-        // personal-projects cluster — finance / hardware / ml — visually grouped via dotted ring
-        { id: 'finance',     x: 430, y: 260, size: 6, near: ['hardware','ml','tools'], group: 'project' },
-        { id: 'hardware',    x: 240, y: 310, size: 5, near: ['finance','tools'],       group: 'project' },
-        { id: 'ml',          x: 520, y: 150, size: 5, near: ['finance','thesis'],      group: 'project' },
-        { id: 'thesis',      x: 640, y: 180, size: 7, near: ['ml','writing'] },
-        { id: 'writing',     x: 760, y: 260, size: 4, near: ['thesis','reading','vlog'] },
-        { id: 'reading',     x: 900, y: 360, size: 4, near: ['writing'] },
-        { id: 'vlog',        x: 700, y: 380, size: 5, near: ['writing','photography'] },
-        { id: 'photography', x: 540, y: 430, size: 4, near: ['vlog','dumdum'] },
-        { id: 'dumdum',      x: 380, y: 400, size: 5, near: ['photography','tools'] },
-        { id: 'tools',       x: 120, y: 410, size: 4, near: ['finance','hardware','dumdum'] },
-        { id: 'cv',          x: 880, y: 180, size: 3, near: ['thesis'] },
-        { id: 'guestbook',   x: 220, y: 450, size: 3, near: ['dumdum'] },
-      ];
-      const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
-      const secById = Object.fromEntries(SECTIONS.map(s => [s.id, s]));
-      const connections = [];
-      const seen = new Set();
-      nodes.forEach(n => n.near.forEach(m => {
-        const key = [n.id, m].sort().join('|');
-        if (!seen.has(key)) { seen.add(key); connections.push([n.id, m]); }
-      }));
+// Route a section id to its html file.
+function routeToSection(id) {
+  // Map any special cases here. Default: {id}.html
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
 
-      React.useEffect(() => {
-        const onMove = (e) => {
-          const rect = ref.current?.getBoundingClientRect();
-          if (!rect) return;
-          setMouse({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-        };
-        const el = ref.current;
-        el?.addEventListener('mousemove', onMove);
-        return () => el?.removeEventListener('mousemove', onMove);
-      }, []);
+function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
+  const palette = useCommandPalette();
+  const [konami, setKonami] = React.useState(false);
+  useKonami(() => { setKonami(true); setTimeout(() => setKonami(false), 2500); });
 
-      const go = (id) => { window.location.href = `${id}.html`; };
-
-      return (
-        <div ref={ref} style={{
-          position: 'relative', width: '100vw', height: '100vh',
-          background: 'radial-gradient(ellipse at 30% 20%, #0f0a2e 0%, #050318 60%, #020108 100%)',
-          overflow: 'hidden', color: '#e9e6ff', cursor: 'crosshair',
+  return (
+    <div style={{
+      position: 'relative', minHeight: '100vh', overflow: 'hidden auto',
+      background: background || '#0a0e27',
+      color: '#e9e6ff', fontFamily: 'Inter, sans-serif',
+    }}>
+      <TopNav theme={theme} onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette
+        open={palette.open}
+        onClose={() => palette.setOpen(false)}
+        onPick={(s) => routeToSection(s.id)}
+      />
+      <div style={{ paddingTop: 68 }}>
+        {children}
+      </div>
+      {konami && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
+          letterSpacing: '0.1em', pointerEvents: 'none',
         }}>
-          <Starfield density={140} />
-          <TopNav theme="cosmic" onOpenPalette={() => palette.setOpen(true)} />
-          <CommandPalette open={palette.open} onClose={() => palette.setOpen(false)} onPick={(s) => go(s.id)} />
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+        </div>
+      )}
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
 
-          {/* Cursor glow */}
-          <div style={{
-            position: 'absolute', pointerEvents: 'none',
-            left: mouse.x, top: mouse.y, width: 360, height: 360, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167,139,250,0.09), transparent 60%)',
-            transform: 'translate(-50%, -50%)', filter: 'blur(10px)', zIndex: 1,
-          }}></div>
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '28px 56px 40px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+      letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
+      gap: 12, flexWrap: 'wrap',
+    }}>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
 
-          {/* Title — pointer-events only on interactive bits so the SVG beneath is clickable */}
-          <div style={{ position: 'absolute', left: 48, top: 92, zIndex: 5, maxWidth: 280, pointerEvents: 'none' }}>
-            <div style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 9, letterSpacing: '0.3em',
-              color: 'rgba(196,181,253,0.6)', marginBottom: 14,
-            }}>CONSTELLATION · ZS-001</div>
-            <h1 style={{
-              fontFamily: '"Space Grotesk", sans-serif', fontSize: 52, fontWeight: 500,
-              letterSpacing: '-0.03em', lineHeight: 1.05, margin: 0, paddingBottom: 6,
-              background: 'linear-gradient(180deg, #fff 0%, #c4b5fd 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>zymstar.</h1>
-            <div style={{
-              marginTop: 8, fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 10, letterSpacing: '0.25em', color: 'rgba(230,225,255,0.5)',
-            }}>ZEYNEP YILDIZ</div>
-            <p style={{
-              marginTop: 16, fontSize: 12, lineHeight: 1.55,
-              color: 'rgba(230,225,255,0.6)', maxWidth: 280,
-            }}>
-              A map of everything I make, mapped as stars. Hover a node to see what&apos;s
-              there — click to enter. Press <kbd id="modkey" style={{
-                fontFamily: 'JetBrains Mono, monospace',
-                padding: '1px 6px', borderRadius: 3, background: 'rgba(255,255,255,0.1)',
-                fontSize: 10, color: 'rgba(230,225,255,0.85)',
-              }}>Ctrl K</kbd> to search.
-            </p>
-          </div>
+const footerLink = {
+  color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+  letterSpacing: '0.15em', fontSize: 11,
+};
 
-          <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"
-               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 2 }}>
-            {/* Subtle "personal projects" cluster ring around finance/hardware/ml */}
-            <ellipse cx={397} cy={230} rx={220} ry={130} transform="rotate(-12 397 230)"
-              fill="none" stroke="rgba(167,139,250,0.12)" strokeWidth="0.6"
-              strokeDasharray="3 4" />
-            <text x={520} y={50}
-              fontFamily="JetBrains Mono, monospace" fontSize={9}
-              fill="rgba(167,139,250,0.4)" letterSpacing="0.3em"
-              style={{ textTransform: 'uppercase' }}>
-              · personal projects ·
-            </text>
-            {connections.map(([a, b], i) => {
-              const na = byId[a], nb = byId[b];
-              const isActive = hovered && (hovered === a || hovered === b);
-              return (
-                <line key={i} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
-                  stroke={isActive ? `oklch(75% 0.16 ${secById[hovered].hue})` : 'rgba(167,139,250,0.18)'}
-                  strokeWidth={isActive ? 1.2 : 0.5}
-                  style={{ transition: 'stroke .25s, stroke-width .25s' }} />
-              );
-            })}
-            {nodes.map(n => {
-              const sec = secById[n.id];
-              const isHovered = hovered === n.id;
-              const isRelated = hovered && byId[hovered]?.near?.includes(n.id);
-              const glow = isHovered ? 22 : isRelated ? 12 : 6;
-              return (
-                <g key={n.id}
-                   style={{ cursor: 'pointer' }}
-                   onMouseEnter={() => setHovered(n.id)}
-                   onMouseLeave={() => setHovered(null)}
-                   onClick={() => go(n.id)}>
-                  {/* Invisible larger hit target so labels don't eat the click */}
-                  <circle cx={n.x} cy={n.y} r={40}
-                    fill="transparent" style={{ pointerEvents: 'all' }} />
-                  <circle cx={n.x} cy={n.y} r={n.size + glow}
-                    fill={`oklch(70% 0.18 ${sec.hue})`}
-                    opacity={isHovered ? 0.3 : isRelated ? 0.15 : 0.08}
-                    style={{ transition: 'r .25s, opacity .25s', pointerEvents: 'none' }} />
-                  <circle cx={n.x} cy={n.y} r={isHovered ? n.size + 2 : n.size}
-                    fill={isHovered ? '#fff' : `oklch(85% 0.1 ${sec.hue})`}
-                    style={{ transition: 'r .2s, fill .2s', pointerEvents: 'none' }} />
-                  <text x={n.x + n.size + 10} y={n.y + 4}
-                    fontFamily="JetBrains Mono, monospace" fontSize={11}
-                    fill={isHovered ? '#fff' : isRelated ? `oklch(85% 0.1 ${sec.hue})` : 'rgba(230,225,255,0.5)'}
-                    letterSpacing="0.12em"
-                    style={{ textTransform: 'uppercase', transition: 'fill .2s', pointerEvents: 'none' }}>
-                    {sec.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+Object.assign(window, { SectionFrame, routeToSection });
 
-          {/* Hovered detail */}
-          <div style={{
-            position: 'absolute', right: 32, bottom: 32, zIndex: 5,
-            width: 240, minHeight: 120, padding: '14px 16px',
-            background: 'rgba(10,6,28,0.72)', backdropFilter: 'blur(14px)',
-            border: `1px solid ${hovered ? `oklch(70% 0.16 ${secById[hovered].hue} / 0.5)` : 'rgba(167,139,250,0.15)'}`,
-            borderRadius: 10, transition: 'border .25s',
+</script>
+  <script type="text/babel" data-presets="env,react">
+    // CV — print-ready letter sheet, classical academic typography.
+    // EB Garamond + Inter, two columns, US letter (8.5" x 11" = 816 x 1056 at 96dpi).
+    function CVPage() {
+      return (
+        <SectionFrame sectionId="cv" theme="paper" background="#d6d3cf">
+          {/* Print button */}
+          <div className="controls" style={{
+            position: 'fixed', bottom: 28, right: 28, zIndex: 20,
+            display: 'flex', gap: 10,
           }}>
-            {hovered ? (
-              <>
-                <div style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  color: `oklch(75% 0.16 ${secById[hovered].hue})`,
-                  letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: 6,
-                }}>/{hovered}</div>
-                <div style={{
-                  fontFamily: '"Space Grotesk", sans-serif', fontSize: 20,
-                  fontWeight: 500, marginBottom: 6,
-                }}>{secById[hovered].label}</div>
-                <div style={{ fontSize: 11, color: 'rgba(230,225,255,0.62)', lineHeight: 1.45, marginBottom: 12 }}>
-                  {secById[hovered].desc}
-                </div>
-                <button onClick={() => go(hovered)} style={{
-                  padding: '6px 12px', borderRadius: 30, cursor: 'pointer',
-                  background: `oklch(70% 0.16 ${secById[hovered].hue} / 0.15)`,
-                  border: `1px solid oklch(70% 0.16 ${secById[hovered].hue} / 0.5)`,
-                  color: `oklch(90% 0.06 ${secById[hovered].hue})`,
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
-                  letterSpacing: '0.2em', textTransform: 'uppercase',
-                }}>enter /{hovered} →</button>
-              </>
-            ) : (
-              <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                color: 'rgba(230,225,255,0.35)', letterSpacing: '0.12em', lineHeight: 1.55,
-              }}>
-                {'> HOVER A STAR'}<br/>
-                {'> CLICK TO ENTER'}<br/>
-                {'> ' + (typeof MOD_KEY !== 'undefined' ? MOD_KEY : 'Ctrl') + ' K TO SEARCH'}<br/>
-                <span style={{ color: 'rgba(230,225,255,0.2)' }}>{'// ↑↑↓↓←→←→ba'}</span>
-              </div>
-            )}
+            <button onClick={() => window.print()} style={{
+              padding: '10px 18px', background: '#1a1a1a', color: '#faf8f4',
+              border: 'none', fontFamily: 'Inter, sans-serif', fontSize: 12,
+              letterSpacing: '0.15em', textTransform: 'uppercase',
+              cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            }}>↓ Print / save PDF</button>
           </div>
 
           <div style={{
-            position: 'absolute', left: 56, bottom: 32,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-            letterSpacing: '0.25em', color: 'rgba(230,225,255,0.3)',
-          }}>WEST · 21:04 UTC · MAG 4.2</div>
+            padding: '40px 20px', display: 'flex', justifyContent: 'center',
+            minHeight: 'calc(100vh - 68px)',
+          }}>
+            <div className="page" style={{
+              width: 816, minHeight: 1056, background: '#fdfbf7',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.18)',
+              padding: '64px 72px 56px',
+              fontFamily: 'EB Garamond, serif', color: '#1a1a1a',
+            }}>
+              {/* Header */}
+              <header style={{
+                display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end',
+                paddingBottom: 18, borderBottom: '1.5px solid #1a1a1a',
+              }}>
+                <div>
+                  <h1 style={{
+                    fontFamily: 'EB Garamond, serif', fontSize: 56, fontWeight: 500,
+                    lineHeight: 0.95, letterSpacing: '-0.02em', margin: 0,
+                  }}>Zeynep Yıldız</h1>
+                  <div style={{
+                    fontFamily: 'Inter, sans-serif', fontSize: 11,
+                    letterSpacing: '0.3em', textTransform: 'uppercase',
+                    color: '#5d4f3a', marginTop: 8, fontWeight: 500,
+                  }}>★ candidate, m.sc. data science &amp; ai &middot; istanbul tech university</div>
+                </div>
+                <div style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                  color: '#3a3a3a', textAlign: 'right', lineHeight: 1.7,
+                  letterSpacing: '0.05em',
+                }}>
+                  zeynep@zymstar.dev<br/>
+                  zymstar.dev &middot; github/zym-starx<br/>
+                  istanbul, türkiye &middot; +90&nbsp;530&nbsp;XXX&nbsp;XX&nbsp;XX
+                </div>
+              </header>
 
-          {konami && (
-            <div style={{
-              position: 'fixed', inset: 0, zIndex: 500,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.85)',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
-              letterSpacing: '0.1em', pointerEvents: 'none',
-            }}>⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾</div>
+              {/* Two-column body */}
+              <div style={{
+                display: 'grid', gridTemplateColumns: '1fr 2.2fr', gap: 36,
+                marginTop: 28,
+              }}>
+                {/* LEFT */}
+                <aside>
+                  <CVSec title="profile">
+                    <p style={cvP}>
+                      computer-science undergrad, finance minor, m.sc. in data science &amp; ai.
+                      research focus: mechanistic interpretability of small language
+                      models. comfortable shipping product code; happiest in a notebook
+                      cell with a real question.
+                    </p>
+                  </CVSec>
+
+                  <CVSec title="education">
+                    <CVEntry
+                      org="Istanbul Tech University"
+                      role="M.Sc. Data Science &amp; AI"
+                      meta="2025 — present · GPA 3.92 / 4.00"
+                      detail="thesis: layer-by-layer activation patching for arithmetic in GPT-2-medium. supervisor: prof. d. arslan." />
+                    <CVEntry
+                      org="Istanbul Tech University"
+                      role="B.Sc. Computer Science · minor: Finance"
+                      meta="2020 — 2024 · valedictorian"
+                      detail="capstone: cnn from scratch on cifar-10 (numpy only). dean&rsquo;s list 4× semesters." />
+                  </CVSec>
+
+                  <CVSec title="research interests">
+                    <ul style={cvUL}>
+                      <li>mechanistic interpretability</li>
+                      <li>LLM evaluation &amp; behaviour</li>
+                      <li>tabular generative models</li>
+                      <li>quantitative finance ML</li>
+                    </ul>
+                  </CVSec>
+
+                  <CVSec title="languages">
+                    <div style={cvP}>
+                      Turkish <span style={cvDim}>(native)</span><br/>
+                      English <span style={cvDim}>(C2 · IELTS 8.5)</span><br/>
+                      French <span style={cvDim}>(B1 · slowly improving)</span>
+                    </div>
+                  </CVSec>
+
+                  <CVSec title="tools">
+                    <div style={{ ...cvP, fontFamily: 'JetBrains Mono, monospace', fontSize: 10, lineHeight: 1.85 }}>
+                      python · pytorch · transformer-lens<br/>
+                      jax · polars · duckdb<br/>
+                      typescript · rust · go<br/>
+                      neovim · tmux · git · slurm
+                    </div>
+                  </CVSec>
+                </aside>
+
+                {/* RIGHT */}
+                <main>
+                  <CVSec title="experience">
+                    <CVEntry
+                      org="Garanti BBVA · Risk Analytics"
+                      role="Quantitative Research Intern"
+                      meta="Jun 2024 — Sep 2024 · Istanbul"
+                      bullets={[
+                        'built an XGB earnings-surprise classifier across 312 BIST tickers; achieved AUC 0.63 on holdout (baseline 0.51).',
+                        'ported the team&rsquo;s legacy VaR pipeline from R to a python+duckdb stack, cutting nightly runtime 4×.',
+                        'authored an internal note on the 2018 turkish lira crisis as a stress-test case study, circulated to 40+ analysts.',
+                      ]} />
+                    <CVEntry
+                      org="ITU Robotics Lab"
+                      role="Undergraduate Research Assistant"
+                      meta="Sep 2022 — May 2024 · Istanbul"
+                      bullets={[
+                        'co-authored a workshop paper on sample-efficient reinforcement learning for a small bipedal walker (presented at AIRO ’24).',
+                        'maintained the lab cluster slurm config; set up shared dataset mounts now used by 6 thesis students.',
+                      ]} />
+                    <CVEntry
+                      org="Freelance · zymstar studio"
+                      role="ML &amp; data consultancy"
+                      meta="2023 — present · remote"
+                      bullets={[
+                        'built a tabular-diffusion synthetic-records pipeline for a healthtech client (HIPAA-compliant, ~85k rows).',
+                        'wrote &amp; shipped a RAG-vs-fine-tune evaluation harness used internally by three early-stage startups.',
+                      ]} />
+                  </CVSec>
+
+                  <CVSec title="selected projects">
+                    <CVEntry
+                      org="thesis · interp probe"
+                      role="mechanistic interpretability"
+                      meta="2026 · pytorch · transformer-lens"
+                      detail="located a localized 4-head cluster in layer 11 of GPT-2-medium that dominates two-digit arithmetic; ablation drops accuracy 78% → 11%." />
+                    <CVEntry
+                      org="cnn from scratch"
+                      role="numpy-only deep learning"
+                      meta="2024 · 1.4k ★ on github"
+                      detail="end-to-end cnn for cifar-10 written without an autodiff framework. used as teaching material in two undergraduate courses." />
+                    <CVEntry
+                      org="rag vs fine-tune"
+                      role="llm evaluation harness"
+                      meta="2025 · open-source"
+                      detail="benchmarked retrieval-augmented vs fine-tuned setups across 6 domain corpora; results presented at a regional ml meetup (~120 attendees)." />
+                  </CVSec>
+
+                  <CVSec title="awards · talks">
+                    <ul style={cvUL}>
+                      <li>ITU President&rsquo;s Honor &middot; 2024</li>
+                      <li>3rd place, ITU Datathon &middot; 2023 (team of 4)</li>
+                      <li>guest lecture, “interp for skeptics” &middot; ITU CS dept &middot; 2026</li>
+                    </ul>
+                  </CVSec>
+
+                  <CVSec title="references">
+                    <p style={{ ...cvP, fontStyle: 'italic', color: '#5d4f3a' }}>
+                      available on request &mdash; or from the{' '}
+                      <a href="guestbook.html" style={{ color: '#1a1a1a' }}>
+                        guestbook
+                      </a>{' '}
+                      next door.
+                    </p>
+                  </CVSec>
+                </main>
+              </div>
+
+              {/* Footer rule */}
+              <footer style={{
+                marginTop: 32, paddingTop: 14, borderTop: '0.5px solid #999',
+                display: 'flex', justifyContent: 'space-between',
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
+                color: '#5d4f3a', letterSpacing: '0.1em',
+              }}>
+                <span>zeynep yıldız · curriculum vitae</span>
+                <span>updated 2026.04 · page 1 of 1</span>
+              </footer>
+            </div>
+          </div>
+        </SectionFrame>
+      );
+    }
+
+    const cvP = { fontFamily: 'EB Garamond, serif', fontSize: 13, lineHeight: 1.55, color: '#1a1a1a', margin: '0 0 8px' };
+    const cvUL = { ...cvP, paddingLeft: 16, margin: '0' };
+    const cvDim = { color: '#7a6f5e', fontSize: 12 };
+
+    function CVSec({ title, children }) {
+      return (
+        <section style={{ marginBottom: 22 }}>
+          <h2 style={{
+            fontFamily: 'Inter, sans-serif', fontSize: 10,
+            letterSpacing: '0.3em', textTransform: 'uppercase',
+            color: '#1a1a1a', fontWeight: 600,
+            margin: '0 0 10px', paddingBottom: 4,
+            borderBottom: '0.5px solid #999',
+          }}>{title}</h2>
+          {children}
+        </section>
+      );
+    }
+
+    function CVEntry({ org, role, meta, detail, bullets }) {
+      return (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{
+            fontFamily: 'EB Garamond, serif', fontSize: 14, fontWeight: 600, color: '#1a1a1a',
+            lineHeight: 1.2,
+          }} dangerouslySetInnerHTML={{ __html: org }}/>
+          <div style={{
+            fontFamily: 'EB Garamond, serif', fontSize: 13, fontStyle: 'italic',
+            color: '#3a3a3a', marginTop: 1,
+          }} dangerouslySetInnerHTML={{ __html: role }}/>
+          <div style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 9.5,
+            color: '#7a6f5e', letterSpacing: '0.05em', marginTop: 2,
+          }} dangerouslySetInnerHTML={{ __html: meta }}/>
+          {detail && (
+            <p style={{ ...cvP, fontSize: 12, marginTop: 5, color: '#3a3a3a' }}>{detail}</p>
+          )}
+          {bullets && (
+            <ul style={{
+              fontFamily: 'EB Garamond, serif', fontSize: 12, lineHeight: 1.5,
+              color: '#3a3a3a', margin: '5px 0 0', paddingLeft: 14,
+            }}>
+              {bullets.map((b, i) => <li key={i} style={{ marginBottom: 3 }}>{b}</li>)}
+            </ul>
           )}
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<ConstellationHome />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<CVPage />);
   </script>
 </body>
 </html>
