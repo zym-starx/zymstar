@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -19,24 +19,24 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
   <script type="text/babel" data-presets="env,react">
-// Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
+// Shared shell: top nav, command palette (âŒ˜K / Ctrl+K), now-indicator, konami easter egg.
 // These are meant to feel consistent across every section of zymstar.com
 // while per-section content uses its own aesthetic underneath.
 
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
-const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl';
+const MOD_KEY = IS_MAC ? 'âŒ˜' : 'Ctrl';
 
 const SECTIONS = [
   { id: 'finance',     label: 'Finance',     hue: 140, desc: 'quant, strategies, indicators, backtests', group: 'project' },
   { id: 'hardware',    label: 'Hardware',    hue: 20,  desc: 'FPGA, Arduino, solder smoke', group: 'project' },
   { id: 'ml',          label: 'ML / AI',     hue: 180, desc: 'models, experiments, results', group: 'project' },
-  { id: 'dumdum',      label: 'Dumdum',      hue: 330, desc: 'silly ideas with no justification' },
+  { id: 'dumdum',      label: 'Dumdum',      hue: 330, desc: 'idea index — things I might build or film' },
   { id: 'thesis',      label: 'Thesis',      hue: 240, desc: "master's thesis + related work" },
   { id: 'writing',     label: 'Writing',     hue: 40,  desc: 'essays, blog posts, notes' },
   { id: 'vlog',        label: 'Vlog',        hue: 350, desc: 'video, voice, vibes' },
   { id: 'photography', label: 'Photography', hue: 200, desc: 'images, light, composition' },
   { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
-  { id: 'projects',    label: 'Random Projects', hue: 160, desc: 'side repos, half-finished ideas', group: 'project' },
+  { id: 'repos',       label: 'Repos',       hue: 160, desc: 'github repos — experiments & side code', group: 'project' },
   { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
   { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
 ];
@@ -69,7 +69,7 @@ function TopNav({ theme = 'cosmic', onOpenPalette }) {
           fontWeight: 600, fontSize: 16, letterSpacing: '-0.02em',
         }}>zymstar</span>
         <span style={{ color: dim, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>
-          / Zeynep&nbsp;Yıldız
+          / Zeynep&nbsp;YÄ±ldÄ±z
         </span>
       </div>
 
@@ -102,10 +102,10 @@ function TopNav({ theme = 'cosmic', onOpenPalette }) {
 function NowIndicator({ theme }) {
   // Realtime-ish "what I'm doing now" indicator. Cycles through states.
   const states = [
-    { icon: '●', text: 'coding — thesis chapter 3', color: 'oklch(70% 0.15 150)' },
-    { icon: '☕', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
-    { icon: '✎', text: 'writing — on failure', color: 'oklch(70% 0.15 220)' },
-    { icon: '✦', text: 'reading — borges',     color: 'oklch(70% 0.15 280)' },
+    { icon: 'â—', text: 'coding â€” thesis chapter 3', color: 'oklch(70% 0.15 150)' },
+    { icon: 'â˜•', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
+    { icon: 'âœ', text: 'writing â€” on failure', color: 'oklch(70% 0.15 220)' },
+    { icon: 'âœ¦', text: 'reading â€” borges',     color: 'oklch(70% 0.15 280)' },
   ];
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
@@ -252,12 +252,12 @@ function CommandPalette({ open, onClose, onPick }) {
           <span style={{
             fontFamily: 'JetBrains Mono, monospace',
             color: 'oklch(75% 0.15 290)', fontSize: 13,
-          }}>▸</span>
+          }}>â–¸</span>
           <input
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="jump to section, project, or idea…"
+            placeholder="jump to section, project, or ideaâ€¦"
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
               color: 'rgba(230,225,255,0.95)', fontSize: 15,
@@ -312,8 +312,8 @@ function CommandPalette({ open, onClose, onPick }) {
           fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
           color: 'rgba(230,225,255,0.4)',
         }}>
-          <span>↑↓ navigate</span>
-          <span>↵ open</span>
+          <span>â†‘â†“ navigate</span>
+          <span>â†µ open</span>
           <span>esc close</span>
           <span style={{ marginLeft: 'auto' }}>{MOD_KEY} K anywhere</span>
         </div>
@@ -337,7 +337,7 @@ function useCommandPalette() {
   return { open, setOpen };
 }
 
-// Konami easter egg — ↑↑↓↓←→←→ba. Flips the page briefly and shows a message.
+// Konami easter egg â€” â†‘â†‘â†“â†“â†â†’â†â†’ba. Flips the page briefly and shows a message.
 function useKonami(onTrigger) {
   React.useEffect(() => {
     const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
@@ -389,7 +389,7 @@ Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCo
 
 </script>
   <script type="text/babel" data-presets="env,react">
-// Section scaffold — shared layout for every section page.
+// Section scaffold â€” shared layout for every section page.
 // Provides: consistent top nav, command palette with routing, back-to-home link,
 // fonts preloaded. Each section wraps its content in <SectionFrame>.
 
@@ -428,7 +428,7 @@ function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
           fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
           letterSpacing: '0.1em', pointerEvents: 'none',
         }}>
-          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+          â¬†â¬†â¬‡â¬‡â¬…â¡â¬…â¡BA Â· hi there nerd ğŸ‘¾
         </div>
       )}
       <SectionFooter sectionId={sectionId} />
@@ -449,11 +449,11 @@ function SectionFooter({ sectionId }) {
       letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
       gap: 12, flexWrap: 'wrap',
     }}>
-      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
-      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <a href="index.html" style={footerLink}>â† BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar Â· Zeynep YÄ±ldÄ±z Â· {new Date().getFullYear()}</span>
       <div style={{ display: 'flex', gap: 16 }}>
-        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
-        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>â† /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} â†’</a>}
       </div>
     </footer>
   );
@@ -468,7 +468,7 @@ Object.assign(window, { SectionFrame, routeToSection });
 
 </script>
   <script type="text/babel" data-presets="env,react">
-    // Thesis — academic editorial. Cream paper, garamond, single column
+    // Thesis â€” academic editorial. Cream paper, garamond, single column
     // with marginalia. Feels like a printed monograph.
     const INK = '#1c1a15';
     const PAPER = '#f5f1e8';
@@ -476,14 +476,14 @@ Object.assign(window, { SectionFrame, routeToSection });
     const ACCENT = '#8a2c2c';
 
     const TOC = [
-      { n: 'I',   title: 'Introduction',         pages: '1 — 14',   status: 'final' },
-      { n: 'II',  title: 'Background & related work', pages: '15 — 42', status: 'final' },
-      { n: 'III', title: 'Method',               pages: '43 — 78',  status: 'final' },
-      { n: 'IV',  title: 'Results',              pages: '79 — 112', status: 'revising' },
-      { n: 'V',   title: 'Discussion',           pages: '113 — 134', status: 'drafting' },
-      { n: 'VI',  title: 'Conclusion & future work', pages: '135 — 142', status: 'drafting' },
-      { n: '—',   title: 'Bibliography',         pages: '143 — 168', status: 'managed' },
-      { n: '—',   title: 'Appendices',           pages: '169 —',    status: 'open' },
+      { n: 'I',   title: 'Introduction',         pages: '1 â€” 14',   status: 'final' },
+      { n: 'II',  title: 'Background & related work', pages: '15 â€” 42', status: 'final' },
+      { n: 'III', title: 'Method',               pages: '43 â€” 78',  status: 'final' },
+      { n: 'IV',  title: 'Results',              pages: '79 â€” 112', status: 'revising' },
+      { n: 'V',   title: 'Discussion',           pages: '113 â€” 134', status: 'drafting' },
+      { n: 'VI',  title: 'Conclusion & future work', pages: '135 â€” 142', status: 'drafting' },
+      { n: 'â€”',   title: 'Bibliography',         pages: '143 â€” 168', status: 'managed' },
+      { n: 'â€”',   title: 'Appendices',           pages: '169 â€”',    status: 'open' },
     ];
 
     function ThesisPage() {
@@ -502,7 +502,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               <div style={{
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
                 letterSpacing: '0.3em', color: DIM, textTransform: 'uppercase', marginBottom: 28,
-              }}>/thesis — master's dissertation</div>
+              }}>/thesis â€” master's dissertation</div>
               <h1 style={{
                 fontFamily: '"EB Garamond", serif', fontWeight: 500, fontStyle: 'italic',
                 fontSize: 64, lineHeight: 1.1, margin: '0 0 18px',
@@ -512,7 +512,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                 fontSize: 18, color: DIM, fontStyle: 'italic', marginBottom: 32,
               }}>A working title. Subtitle pending.</div>
               <div style={{ fontSize: 16, color: INK }}>
-                <div style={{ marginBottom: 4 }}>Zeynep Yıldız</div>
+                <div style={{ marginBottom: 4 }}>Zeynep YÄ±ldÄ±z</div>
                 <div style={{ fontSize: 14, color: DIM }}>Advised by Prof. [redacted]</div>
                 <div style={{ fontSize: 14, color: DIM, marginTop: 10 }}>Department of Electrical &amp; Computer Engineering</div>
                 <div style={{ fontSize: 14, color: DIM }}>MMXXVI</div>
@@ -539,7 +539,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                 and directions for future investigation.
               </p>
               <p style={{ marginTop: 14, fontSize: 13, color: DIM, fontStyle: 'italic' }}>
-                Keywords — will be filled in properly later; the Greek is placeholder too.
+                Keywords â€” will be filled in properly later; the Greek is placeholder too.
               </p>
             </section>
 
@@ -548,7 +548,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               <div style={{
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
                 letterSpacing: '0.25em', color: DIM, textTransform: 'uppercase', marginBottom: 14,
-              }}>PROGRESS · AS OF {new Date().toISOString().slice(0,10).toUpperCase()}</div>
+              }}>PROGRESS Â· AS OF {new Date().toISOString().slice(0,10).toUpperCase()}</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 18, alignItems: 'center' }}>
                 <div style={{ height: 4, background: 'rgba(28,26,21,0.12)', position: 'relative' }}>
                   <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '74%', background: ACCENT }}></div>
@@ -597,11 +597,11 @@ Object.assign(window, { SectionFrame, routeToSection });
                 <h2 style={{
                   fontFamily: '"EB Garamond", serif', fontWeight: 500, fontSize: 30,
                   fontStyle: 'italic', margin: '0 0 8px', color: INK,
-                }}>Excerpt, §III.2</h2>
+                }}>Excerpt, Â§III.2</h2>
                 <div style={{
                   fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.2em',
                   color: DIM, textTransform: 'uppercase', marginBottom: 20,
-                }}>— Method, page 47</div>
+                }}>â€” Method, page 47</div>
                 <p style={{ fontSize: 17, lineHeight: 1.8, color: INK, margin: '0 0 16px', textAlign: 'justify', textIndent: '1.5em' }}>
                   The difficulty is not that the data resist categorization, but that they resist it
                   <em> enthusiastically</em>. Each reclassification introduces a new dependency,

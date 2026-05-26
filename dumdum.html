@@ -1,17 +1,18 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>zymstar / dumdum — group chat</title>
+  <title>zymstar / dumdum â€” idea index</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; padding: 0; background: #0b0d10; font-family: 'Inter', -apple-system, sans-serif; color: #e8eaed; }
+    html, body { margin: 0; padding: 0; background: #050318; font-family: 'Inter', -apple-system, sans-serif; color: #e9e6ff; }
     * { box-sizing: border-box; }
-    ::selection { background: #5e9eff; color: #0b0d10; }
-    @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
+    ::selection { background: #a78bfa; color: #050318; }
+    @keyframes zs-twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.9; } }
+    @keyframes zs-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
   </style>
 </head>
 <body>
@@ -20,24 +21,24 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
   <script type="text/babel" data-presets="env,react">
-// Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
+// Shared shell: top nav, command palette (âŒ˜K / Ctrl+K), now-indicator, konami easter egg.
 // These are meant to feel consistent across every section of zymstar.com
 // while per-section content uses its own aesthetic underneath.
 
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
-const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl';
+const MOD_KEY = IS_MAC ? 'âŒ˜' : 'Ctrl';
 
 const SECTIONS = [
   { id: 'finance',     label: 'Finance',     hue: 140, desc: 'quant, strategies, indicators, backtests', group: 'project' },
   { id: 'hardware',    label: 'Hardware',    hue: 20,  desc: 'FPGA, Arduino, solder smoke', group: 'project' },
   { id: 'ml',          label: 'ML / AI',     hue: 180, desc: 'models, experiments, results', group: 'project' },
-  { id: 'dumdum',      label: 'Dumdum',      hue: 330, desc: 'silly ideas with no justification' },
+  { id: 'dumdum',      label: 'Dumdum',      hue: 330, desc: 'idea index â€” things I might build or film' },
   { id: 'thesis',      label: 'Thesis',      hue: 240, desc: "master's thesis + related work" },
   { id: 'writing',     label: 'Writing',     hue: 40,  desc: 'essays, blog posts, notes' },
   { id: 'vlog',        label: 'Vlog',        hue: 350, desc: 'video, voice, vibes' },
   { id: 'photography', label: 'Photography', hue: 200, desc: 'images, light, composition' },
   { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
-  { id: 'projects',    label: 'Random Projects', hue: 160, desc: 'side repos, half-finished ideas', group: 'project' },
+  { id: 'repos',       label: 'Repos',       hue: 160, desc: 'github repos â€” experiments & side code', group: 'project' },
   { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
   { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
 ];
@@ -70,7 +71,7 @@ function TopNav({ theme = 'cosmic', onOpenPalette }) {
           fontWeight: 600, fontSize: 16, letterSpacing: '-0.02em',
         }}>zymstar</span>
         <span style={{ color: dim, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>
-          / Zeynep&nbsp;Yıldız
+          / Zeynep&nbsp;YÄ±ldÄ±z
         </span>
       </div>
 
@@ -103,10 +104,10 @@ function TopNav({ theme = 'cosmic', onOpenPalette }) {
 function NowIndicator({ theme }) {
   // Realtime-ish "what I'm doing now" indicator. Cycles through states.
   const states = [
-    { icon: '●', text: 'coding — thesis chapter 3', color: 'oklch(70% 0.15 150)' },
-    { icon: '☕', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
-    { icon: '✎', text: 'writing — on failure', color: 'oklch(70% 0.15 220)' },
-    { icon: '✦', text: 'reading — borges',     color: 'oklch(70% 0.15 280)' },
+    { icon: 'â—', text: 'coding â€” thesis chapter 3', color: 'oklch(70% 0.15 150)' },
+    { icon: 'â˜•', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
+    { icon: 'âœ', text: 'writing â€” on failure', color: 'oklch(70% 0.15 220)' },
+    { icon: 'âœ¦', text: 'reading â€” borges',     color: 'oklch(70% 0.15 280)' },
   ];
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
@@ -253,12 +254,12 @@ function CommandPalette({ open, onClose, onPick }) {
           <span style={{
             fontFamily: 'JetBrains Mono, monospace',
             color: 'oklch(75% 0.15 290)', fontSize: 13,
-          }}>▸</span>
+          }}>â–¸</span>
           <input
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="jump to section, project, or idea…"
+            placeholder="jump to section, project, or ideaâ€¦"
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
               color: 'rgba(230,225,255,0.95)', fontSize: 15,
@@ -313,8 +314,8 @@ function CommandPalette({ open, onClose, onPick }) {
           fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
           color: 'rgba(230,225,255,0.4)',
         }}>
-          <span>↑↓ navigate</span>
-          <span>↵ open</span>
+          <span>â†‘â†“ navigate</span>
+          <span>â†µ open</span>
           <span>esc close</span>
           <span style={{ marginLeft: 'auto' }}>{MOD_KEY} K anywhere</span>
         </div>
@@ -338,7 +339,7 @@ function useCommandPalette() {
   return { open, setOpen };
 }
 
-// Konami easter egg — ↑↑↓↓←→←→ba. Flips the page briefly and shows a message.
+// Konami easter egg â€” â†‘â†‘â†“â†“â†â†’â†â†’ba. Flips the page briefly and shows a message.
 function useKonami(onTrigger) {
   React.useEffect(() => {
     const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
@@ -390,14 +391,14 @@ Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCo
 
 </script>
   <script type="text/babel" data-presets="env,react">
-// Section scaffold — shared layout for every section page.
+// Section scaffold â€” shared layout for every section page.
 // Provides: consistent top nav, command palette with routing, back-to-home link,
 // fonts preloaded. Each section wraps its content in <SectionFrame>.
 
 // Route a section id to its html file.
 function routeToSection(id) {
-  // Map any special cases here. Default: {id}.html
   if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  if (id === 'projects') { window.location.href = 'repos.html'; return; }
   window.location.href = `${id}.html`;
 }
 
@@ -429,7 +430,7 @@ function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
           fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
           letterSpacing: '0.1em', pointerEvents: 'none',
         }}>
-          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
+          â¬†â¬†â¬‡â¬‡â¬…â¡â¬…â¡BA Â· hi there nerd ğŸ‘¾
         </div>
       )}
       <SectionFooter sectionId={sectionId} />
@@ -450,11 +451,11 @@ function SectionFooter({ sectionId }) {
       letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
       gap: 12, flexWrap: 'wrap',
     }}>
-      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
-      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
+      <a href="index.html" style={footerLink}>â† BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar Â· Zeynep YÄ±ldÄ±z Â· {new Date().getFullYear()}</span>
       <div style={{ display: 'flex', gap: 16 }}>
-        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
-        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>â† /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} â†’</a>}
       </div>
     </footer>
   );
@@ -469,311 +470,202 @@ Object.assign(window, { SectionFrame, routeToSection });
 
 </script>
   <script type="text/babel" data-presets="env,react">
-    // Dumdum — group chat thread of small dumb things.
-    // iMessage-ish but cooler palette: deep midnight + electric blue.
-    // Smaller type, denser, less precious. The point is: half-thoughts pile up.
-    const ME = 'me';
-    const PEOPLE = {
-      me:    { name: 'me',     color: '#5e9eff', avatar: 'z' },
-      sena:  { name: 'sena',   color: '#a78bfa', avatar: 's' },
-      bora:  { name: 'bora',   color: '#f472b6', avatar: 'b' },
-      asya:  { name: 'asya',   color: '#34d399', avatar: 'a' },
-      mert:  { name: 'mert',   color: '#fb923c', avatar: 'm' },
+    const GITHUB_USER = 'zymyi';
+
+    const STATUS = {
+      spark:     { label: 'spark',     color: 'rgba(196,181,253,0.55)' },
+      sketching: { label: 'sketching', color: '#a78bfa' },
+      building:  { label: 'building',  color: '#5e9eff' },
+      shipped:   { label: 'shipped',   color: '#34d399' },
+      parked:    { label: 'parked',    color: 'rgba(230,225,255,0.35)' },
     };
 
-    // Thread is a flat list. Day separators inserted automatically.
-    const THREAD = [
-      { day: 'Sun · Apr 27' },
-      { from: 'sena', t: 'guys i finally fixed the activation patching script', ts: '01:14' },
-      { from: 'sena', t: 'turns out i was zeroing the wrong dim for three weeks', ts: '01:14' },
-      { from: 'me',   t: 'three weeks 💀', ts: '01:15' },
-      { from: 'sena', t: 'every senior researcher has done this. nobody admits it.', ts: '01:15' },
-      { from: 'me',   t: 'put that on a t-shirt', ts: '01:16', reactions: [{ e: '😂', from: 'sena' }, { e: '👏', from: 'bora' }] },
-      { from: 'bora', t: 'startup idea', ts: '01:42' },
-      { from: 'bora', t: 'an app that just zeroes the right dim for you', ts: '01:42' },
-      { from: 'me',   t: 'we already have one it&rsquo;s called pytorch', ts: '01:43' },
-      { from: 'bora', t: 'fine. an app that yells at you when you do it wrong', ts: '01:43' },
-
-      { day: 'Mon · Apr 28' },
-      { from: 'asya', t: 'i baked the bread again. third loaf.', ts: '08:02' },
-      { from: 'asya', t: '[image · sourdough boule, slight ear, charred bottom]', ts: '08:02', isMedia: true },
-      { from: 'me',   t: 'absolutely not charred. that&rsquo;s called color', ts: '08:14' },
-      { from: 'mert', t: 'looks like the M1 logic board after i spilled coffee on it', ts: '08:18' },
-      { from: 'asya', t: 'mert i will block you', ts: '08:18' },
-      { from: 'me',   t: 'don&rsquo;t block him he owes me 47 lira', ts: '08:19', reactions: [{ e: '💸', from: 'mert' }] },
-
-      { day: 'Wed · Apr 30' },
-      { from: 'me',   t: 'i think i found the addition cluster', ts: '15:09' },
-      { from: 'me',   t: 'attention heads 11.4 + 11.7 fire on every two-digit problem', ts: '15:09' },
-      { from: 'me',   t: 'ablate them, accuracy drops 78 → 11', ts: '15:09' },
-      { from: 'sena', t: 'ZEYNEP', ts: '15:11' },
-      { from: 'sena', t: 'ZEYNEP THAT IS THE THING', ts: '15:11' },
-      { from: 'sena', t: 'send the notebook NOW', ts: '15:11', reactions: [{ e: '🔥', from: 'me' }, { e: '🔥', from: 'bora' }, { e: '🤯', from: 'asya' }] },
-      { from: 'bora', t: 'congratulations you have invented arithmetic', ts: '15:24' },
-      { from: 'me',   t: 'i&rsquo;m going to cry in a coffee shop now', ts: '15:25' },
-      { from: 'asya', t: 'go to that one in cihangir, the one you like', ts: '15:26' },
-
-      { day: 'Fri · May 02' },
-      { from: 'me',   t: 'half-formed thought:', ts: '23:11' },
-      { from: 'me',   t: 'every paper is just one good plot wearing seven pages of text as a coat', ts: '23:11', reactions: [{ e: '💯', from: 'sena' }, { e: '😭', from: 'mert' }] },
-      { from: 'mert', t: 'that&rsquo;s going on the wall above my desk', ts: '23:14' },
-      { from: 'bora', t: 'imagine reading a paper that&rsquo;s just the plot', ts: '23:18' },
-      { from: 'bora', t: 'no abstract. no lit review. just FIGURE 1.', ts: '23:18' },
-      { from: 'me',   t: 'someone do it', ts: '23:19' },
-      { from: 'sena', t: 'NEURIPS short paper track. go.', ts: '23:20' },
-
-      { day: 'today' },
-      { from: 'me',   t: 'i made a pour over without checking the time and i think it was perfect', ts: '07:42' },
-      { from: 'me',   t: 'this is what trusting yourself looks like', ts: '07:42' },
-      { from: 'asya', t: 'or it was bad and you didn&rsquo;t notice', ts: '07:43' },
-      { from: 'me',   t: 'asya i WAS having a moment', ts: '07:43', reactions: [{ e: '😂', from: 'bora' }, { e: '😂', from: 'sena' }] },
-      { from: 'sena', t: 'send link to website btw, i want to show my advisor', ts: '09:02' },
-      { from: 'me',   t: 'zymstar.com', ts: '09:03' },
-      { from: 'me',   t: 'don&rsquo;t scroll the dumdum tab. that&rsquo;s us.', ts: '09:03', reactions: [{ e: '🤫', from: 'sena' }, { e: '👀', from: 'bora' }] },
-      { typing: ['bora', 'asya'] },
+    const IDEAS = [
+      {
+        id: 'hail-mary-star-map',
+        title: 'Hail Mary star map',
+        blurb: 'Navigational display like Project Hail Mary â€” constellations, ship position, the slow sweep of where you are. Personal build; strong vlog candidate.',
+        status: 'sketching',
+        tags: ['personal', 'vlog', 'build'],
+        repo: null,
+      },
+      {
+        id: 'metronome-hates-you',
+        title: 'Metronome that hates you',
+        blurb: 'Tempo drifts when you look at it. Exists because rhythm should not be trusted.',
+        status: 'building',
+        tags: ['dumb', 'hardware'],
+        repo: 'metronome-that-hates-you',
+      },
+      {
+        id: 'one-plot-papers',
+        title: 'Papers that are just Figure 1',
+        blurb: 'No abstract. No lit review. One good plot wearing seven pages of text as a coat.',
+        status: 'spark',
+        tags: ['dumb', 'writing'],
+        repo: null,
+      },
+      {
+        id: 'fpga-morse',
+        title: 'FPGA blink morse',
+        blurb: 'Sends SOS until you solder the right pin. Peak FPGA energy.',
+        status: 'shipped',
+        tags: ['hardware'],
+        repo: 'fpga-blink-morse',
+      },
+      {
+        id: 'latent-zine',
+        title: 'Latent space zine',
+        blurb: 'Embeddings as bad collage art. Print it badly on purpose.',
+        status: 'parked',
+        tags: ['ml', 'art'],
+        repo: 'latent-space-zine',
+      },
+      {
+        id: 'trust-pour-over',
+        title: 'Pour-over without a timer',
+        blurb: 'Made coffee without checking the time. Document whether that was wisdom or denial.',
+        status: 'spark',
+        tags: ['vlog', 'dumb'],
+        repo: null,
+      },
     ];
 
-    function DumdumPage() {
-      const scrollRef = React.useRef(null);
-      React.useEffect(() => {
-        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      }, []);
+    function StarfieldBg({ count = 80 }) {
+      const stars = React.useMemo(() =>
+        Array.from({ length: count }, (_, i) => ({
+          id: i,
+          x: Math.random() * 100,
+          y: Math.random() * 100,
+          size: Math.random() * 2 + 0.5,
+          delay: Math.random() * 3,
+          dur: Math.random() * 3 + 2,
+          opacity: Math.random() * 0.5 + 0.15,
+        })), [count]);
+      return (
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+          {stars.map((s) => (
+            <div key={s.id} style={{
+              position: 'absolute', left: `${s.x}%`, top: `${s.y}%`,
+              width: s.size, height: s.size, borderRadius: '50%', background: '#fff', opacity: s.opacity,
+              animation: `zs-twinkle ${s.dur}s ease-in-out ${s.delay}s infinite`,
+            }} />
+          ))}
+        </div>
+      );
+    }
 
-      // Pre-process: figure out which messages start a "burst" from a sender
-      // (only first message in a burst gets avatar + name)
-      const items = [];
-      let lastFrom = null;
-      THREAD.forEach((entry, i) => {
-        if (entry.day || entry.typing) {
-          items.push({ ...entry, kind: entry.day ? 'day' : 'typing' });
-          lastFrom = null;
-        } else {
-          const burst = entry.from !== lastFrom;
-          items.push({ ...entry, kind: 'msg', burst });
-          lastFrom = entry.from;
-        }
-      });
+    function DumdumPage() {
+      const [filter, setFilter] = React.useState('all');
+      const tags = ['all', ...new Set(IDEAS.flatMap((i) => i.tags))];
+      const filtered = filter === 'all' ? IDEAS : IDEAS.filter((i) => i.tags.includes(filter));
 
       return (
-        <SectionFrame sectionId="dumdum" theme="cosmic" background="#0b0d10">
-          {/* Soft glow background */}
+        <SectionFrame sectionId="dumdum" background="#050318">
+          <StarfieldBg />
           <div style={{
             position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-            background: `
-              radial-gradient(ellipse 600px 400px at 18% 22%, rgba(94,158,255,0.06) 0%, transparent 60%),
-              radial-gradient(ellipse 500px 400px at 82% 78%, rgba(167,139,250,0.05) 0%, transparent 60%)
-            `,
-          }}></div>
+            background: 'radial-gradient(ellipse at 20% 10%, rgba(94,158,255,0.08) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(167,139,250,0.07) 0%, transparent 55%)',
+          }} />
 
-          <div style={{ position: 'relative', zIndex: 2, padding: '20px 24px 60px', maxWidth: 880, margin: '0 auto' }}>
-            {/* Title block */}
-            <div style={{
-              padding: '14px 0 22px', borderBottom: '1px solid rgba(255,255,255,0.07)',
-              marginBottom: 18,
-            }}>
+          <div style={{ position: 'relative', zIndex: 2, maxWidth: 720, margin: '0 auto', padding: '28px 24px 80px' }}>
+            <div style={{ marginBottom: 32 }}>
               <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                letterSpacing: '0.3em', textTransform: 'uppercase',
-                color: '#5e9eff', marginBottom: 8,
-              }}>★ thread · five members · always on do-not-disturb</div>
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.3em',
+                textTransform: 'uppercase', color: 'rgba(196,181,253,0.6)', marginBottom: 12,
+              }}>â˜… idea index Â· orbit ZS-DM</div>
               <h1 style={{
-                fontSize: 32, fontWeight: 600, lineHeight: 1.1,
-                margin: 0, color: '#e8eaed', letterSpacing: '-0.02em',
-              }}>dumdum&nbsp;<span style={{ color: '#5e9eff' }}>·</span>&nbsp;<span style={{ fontWeight: 400, color: 'rgba(232,234,237,0.55)' }}>the small dumb thoughts thread</span></h1>
+                fontFamily: '"Space Grotesk", sans-serif', fontSize: 40, fontWeight: 500,
+                letterSpacing: '-0.03em', margin: '0 0 10px', lineHeight: 1.1,
+                background: 'linear-gradient(180deg, #fff 0%, #c4b5fd 85%)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              }}>dumdum</h1>
               <p style={{
-                fontSize: 13, color: 'rgba(232,234,237,0.55)', maxWidth: 540,
-                lineHeight: 1.55, marginTop: 8, marginBottom: 0,
+                fontSize: 14, lineHeight: 1.6, color: 'rgba(230,225,255,0.62)', maxWidth: 520, margin: 0,
               }}>
-                a public-facing slice of a real-feeling group chat. half-thoughts,
-                bad jokes, the moment a thesis broke open. not curated. not really.
+                Things I might build, film, or abandon gracefully. Not everything here is dumb â€”
+                some are personal. When there&apos;s code, there&apos;s a repo link.
               </p>
             </div>
 
-            {/* Chat container */}
-            <div ref={scrollRef} style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 14, padding: '16px 18px',
-            }}>
-              {/* Roster */}
-              <div style={{
-                display: 'flex', gap: 6, alignItems: 'center', marginBottom: 16,
-                paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.05)',
-              }}>
-                {Object.entries(PEOPLE).map(([id, p]) => (
-                  <Avatar key={id} p={p} size={20} style={{ marginRight: -6, border: '2px solid #0b0d10' }} />
-                ))}
-                <span style={{
-                  fontSize: 11, color: 'rgba(232,234,237,0.45)',
-                  marginLeft: 14, letterSpacing: '0.05em',
-                }}>5 people · 412 messages this month · muted</span>
-              </div>
-
-              {/* Messages */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {items.map((it, i) => {
-                  if (it.kind === 'day') return <DayDivider key={i} label={it.day} />;
-                  if (it.kind === 'typing') return <TypingRow key={i} who={it.typing} />;
-                  return <Msg key={i} m={it} />;
-                })}
-              </div>
-
-              {/* Composer (visual only) */}
-              <div style={{
-                marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.05)',
-                display: 'flex', alignItems: 'center', gap: 10,
-              }}>
-                <div style={{
-                  flex: 1, padding: '10px 14px',
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 18, fontSize: 13, color: 'rgba(232,234,237,0.4)',
-                }}>iMessage · this is a read-only window into a private thread</div>
-                <button disabled style={{
-                  width: 32, height: 32, borderRadius: '50%',
-                  background: 'rgba(94,158,255,0.2)', border: 'none',
-                  color: 'rgba(94,158,255,0.5)', cursor: 'not-allowed', fontSize: 14,
-                }}>↑</button>
-              </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
+              {tags.map((t) => (
+                <button key={t} onClick={() => setFilter(t)} style={{
+                  padding: '6px 14px', borderRadius: 20, cursor: 'pointer', fontSize: 11,
+                  fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em', textTransform: 'uppercase',
+                  border: `1px solid ${filter === t ? 'rgba(167,139,250,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                  background: filter === t ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.03)',
+                  color: filter === t ? '#e9e6ff' : 'rgba(230,225,255,0.5)',
+                }}>{t}</button>
+              ))}
             </div>
 
-            {/* Footnote */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {filtered.map((idea, idx) => {
+                const st = STATUS[idea.status] || STATUS.spark;
+                const repoUrl = idea.repo ? `https://github.com/${GITHUB_USER}/${idea.repo}` : null;
+                return (
+                  <article key={idea.id} style={{
+                    position: 'relative',
+                    padding: '18px 20px 18px 24px',
+                    background: 'rgba(10,6,28,0.55)',
+                    border: '1px solid rgba(167,139,250,0.12)',
+                    borderRadius: 12,
+                    backdropFilter: 'blur(8px)',
+                    transform: `rotate(${((idx % 5) - 2) * 0.35}deg)`,
+                  }}>
+                    <div style={{
+                      position: 'absolute', left: 10, top: 18, bottom: 18, width: 2,
+                      borderRadius: 2, background: st.color,
+                      boxShadow: idea.status === 'building' ? `0 0 12px ${st.color}` : 'none',
+                      animation: idea.status === 'building' ? 'zs-pulse 2s ease-in-out infinite' : 'none',
+                    }} />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                      <span style={{
+                        fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
+                        letterSpacing: '0.2em', textTransform: 'uppercase', color: st.color,
+                      }}>{st.label}</span>
+                      {idea.tags.map((tag) => (
+                        <span key={tag} style={{
+                          fontSize: 10, color: 'rgba(230,225,255,0.4)',
+                          fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.06em',
+                        }}>#{tag}</span>
+                      ))}
+                    </div>
+                    <h2 style={{
+                      fontFamily: '"Space Grotesk", sans-serif', fontSize: 20, fontWeight: 500,
+                      margin: '0 0 8px', color: '#f0eeff', letterSpacing: '-0.02em',
+                    }}>{idea.title}</h2>
+                    <p style={{ margin: '0 0 12px', fontSize: 13, lineHeight: 1.55, color: 'rgba(230,225,255,0.65)' }}>
+                      {idea.blurb}
+                    </p>
+                    {repoUrl ? (
+                      <a href={repoUrl} target="_blank" rel="noopener noreferrer" style={{
+                        fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                        color: '#5e9eff', textDecoration: 'none', letterSpacing: '0.06em',
+                      }}>â†’ github.com/{GITHUB_USER}/{idea.repo}</a>
+                    ) : (
+                      <span style={{
+                        fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                        color: 'rgba(230,225,255,0.28)', letterSpacing: '0.1em',
+                      }}>no repo yet</span>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+
             <p style={{
-              fontSize: 11, color: 'rgba(232,234,237,0.35)',
-              fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.05em',
-              marginTop: 22, lineHeight: 1.6, textAlign: 'center',
+              marginTop: 36, textAlign: 'center', fontSize: 11,
+              fontFamily: 'JetBrains Mono, monospace', color: 'rgba(230,225,255,0.28)',
+              letterSpacing: '0.12em', lineHeight: 1.7,
             }}>
-              ★ everyone in here said it was ok. names lightly fictionalized.<br/>
-              if you think you recognize yourself: you probably do, and i love you.
+              shipped code lives on{' '}
+              <a href="repos.html" style={{ color: 'rgba(167,139,250,0.7)', textDecoration: 'none' }}>/repos</a>
+              Â· ideas graduate or compost here
             </p>
           </div>
         </SectionFrame>
-      );
-    }
-
-    function Avatar({ p, size = 28, style = {} }) {
-      return (
-        <div style={{
-          width: size, height: size, borderRadius: '50%',
-          background: p.color, color: '#0b0d10',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: size * 0.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-          flexShrink: 0, ...style,
-        }}>{p.avatar}</div>
-      );
-    }
-
-    function DayDivider({ label }) {
-      return (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          margin: '14px 0 10px', fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 10, letterSpacing: '0.18em', color: 'rgba(232,234,237,0.4)',
-          textTransform: 'uppercase',
-        }}>
-          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }}></div>
-          <span>{label}</span>
-          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }}></div>
-        </div>
-      );
-    }
-
-    function Msg({ m }) {
-      const p = PEOPLE[m.from];
-      const isMe = m.from === ME;
-      const showHead = m.burst && !isMe;
-
-      return (
-        <div style={{
-          display: 'flex', gap: 8, alignItems: 'flex-end',
-          flexDirection: isMe ? 'row-reverse' : 'row',
-          marginTop: m.burst ? 10 : 1,
-        }}>
-          {/* Avatar slot (only on first of burst, only for others) */}
-          <div style={{ width: 24, flexShrink: 0 }}>
-            {showHead && <Avatar p={p} size={24} />}
-          </div>
-
-          <div style={{ maxWidth: '74%', display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
-            {showHead && (
-              <div style={{
-                fontSize: 10, color: p.color, fontWeight: 600,
-                margin: '0 0 3px 4px', letterSpacing: '0.04em',
-              }}>{p.name}</div>
-            )}
-            <div style={{
-              padding: m.isMedia ? '6px 10px' : '7px 12px',
-              background: isMe
-                ? 'linear-gradient(180deg, #5e9eff 0%, #4078dc 100%)'
-                : 'rgba(255,255,255,0.06)',
-              color: isMe ? '#0b0d10' : '#e8eaed',
-              borderRadius: 16,
-              borderTopLeftRadius: !isMe && m.burst ? 6 : 16,
-              borderTopRightRadius: isMe && m.burst ? 6 : 16,
-              fontSize: 13.5, lineHeight: 1.4,
-              fontFamily: m.isMedia ? 'JetBrains Mono, monospace' : 'inherit',
-              fontStyle: m.isMedia ? 'italic' : 'normal',
-              opacity: m.isMedia ? 0.65 : 1,
-              position: 'relative',
-              fontWeight: isMe ? 500 : 400,
-            }} dangerouslySetInnerHTML={{ __html: m.t }}/>
-
-            {/* Reactions */}
-            {m.reactions && m.reactions.length > 0 && (
-              <div style={{
-                marginTop: 2,
-                display: 'flex', gap: 3,
-                background: 'rgba(255,255,255,0.06)',
-                padding: '2px 6px', borderRadius: 10,
-                fontSize: 11, alignSelf: isMe ? 'flex-end' : 'flex-start',
-                marginRight: isMe ? 6 : 0, marginLeft: isMe ? 0 : 6,
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}>
-                {m.reactions.map((r, i) => <span key={i}>{r.e}</span>)}
-                {m.reactions.length > 1 && (
-                  <span style={{ color: 'rgba(232,234,237,0.5)', marginLeft: 2, fontFamily: 'JetBrains Mono, monospace', fontSize: 9 }}>
-                    {m.reactions.length}
-                  </span>
-                )}
-              </div>
-            )}
-
-            <div style={{
-              fontSize: 9, color: 'rgba(232,234,237,0.3)',
-              fontFamily: 'JetBrains Mono, monospace',
-              marginTop: 2, padding: '0 6px',
-            }}>{m.ts}</div>
-          </div>
-        </div>
-      );
-    }
-
-    function TypingRow({ who }) {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-          <div style={{ display: 'flex' }}>
-            {who.map((id, i) => (
-              <Avatar key={id} p={PEOPLE[id]} size={22}
-                style={{ marginLeft: i > 0 ? -8 : 0, border: '2px solid #0b0d10' }} />
-            ))}
-          </div>
-          <div style={{
-            padding: '8px 12px', background: 'rgba(255,255,255,0.06)',
-            borderRadius: 16, display: 'flex', gap: 4,
-          }}>
-            {[0,1,2].map(i => (
-              <span key={i} style={{
-                width: 6, height: 6, borderRadius: '50%',
-                background: 'rgba(232,234,237,0.6)',
-                animation: `typing 1.2s infinite`,
-                animationDelay: `${i * 0.18}s`,
-              }}></span>
-            ))}
-          </div>
-          <span style={{ fontSize: 10, color: 'rgba(232,234,237,0.4)', fontFamily: 'JetBrains Mono, monospace' }}>
-            {who.join(' · ')} typing
-          </span>
-        </div>
       );
     }
 
