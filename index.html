@@ -38,7 +38,7 @@ const SECTIONS = [
   { id: 'vlog',        label: 'Vlog',        hue: 350, desc: 'video, voice, vibes' },
   { id: 'photography', label: 'Photography', hue: 200, desc: 'images, light, composition' },
   { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
-  { id: 'tools',       label: 'Tools',       hue: 160, desc: 'utilities I made for myself' },
+  { id: 'projects',    label: 'Random Projects', hue: 160, desc: 'side repos, half-finished ideas', group: 'project' },
   { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
   { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
 ];
@@ -403,16 +403,16 @@ Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCo
 
       const nodes = [
         // personal-projects cluster — finance / hardware / ml — visually grouped via dotted ring
-        { id: 'finance',     x: 430, y: 260, size: 6, near: ['hardware','ml','tools'], group: 'project' },
-        { id: 'hardware',    x: 240, y: 310, size: 5, near: ['finance','tools'],       group: 'project' },
-        { id: 'ml',          x: 520, y: 150, size: 5, near: ['finance','thesis'],      group: 'project' },
+        { id: 'finance',     x: 430, y: 260, size: 6, near: ['hardware','ml','projects'], group: 'project' },
+        { id: 'hardware',    x: 240, y: 310, size: 5, near: ['finance','projects'],       group: 'project' },
+        { id: 'ml',          x: 520, y: 150, size: 5, near: ['finance','thesis','projects'], group: 'project' },
+        { id: 'projects',    x: 365, y: 295, size: 5, near: ['finance','hardware','ml'], group: 'project' },
         { id: 'thesis',      x: 640, y: 180, size: 7, near: ['ml','writing'] },
         { id: 'writing',     x: 760, y: 260, size: 4, near: ['thesis','reading','vlog'] },
         { id: 'reading',     x: 900, y: 360, size: 4, near: ['writing'] },
         { id: 'vlog',        x: 700, y: 380, size: 5, near: ['writing','photography'] },
         { id: 'photography', x: 540, y: 430, size: 4, near: ['vlog','dumdum'] },
-        { id: 'dumdum',      x: 380, y: 400, size: 5, near: ['photography','tools'] },
-        { id: 'tools',       x: 120, y: 410, size: 4, near: ['finance','hardware','dumdum'] },
+        { id: 'dumdum',      x: 380, y: 400, size: 5, near: ['photography'] },
         { id: 'cv',          x: 880, y: 180, size: 3, near: ['thesis'] },
         { id: 'guestbook',   x: 220, y: 450, size: 3, near: ['dumdum'] },
       ];
@@ -491,11 +491,15 @@ Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCo
             <ellipse cx={397} cy={230} rx={220} ry={130} transform="rotate(-12 397 230)"
               fill="none" stroke="rgba(167,139,250,0.12)" strokeWidth="0.6"
               strokeDasharray="3 4" />
-            <text x={520} y={50}
-              fontFamily="JetBrains Mono, monospace" fontSize={9}
-              fill="rgba(167,139,250,0.4)" letterSpacing="0.3em"
+            <text x={397} y={108}
+              textAnchor="middle"
+              fontFamily="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"
+              fontSize={10}
+              fontWeight={500}
+              fill="rgba(196,181,253,0.55)"
+              letterSpacing="0.2em"
               style={{ textTransform: 'uppercase' }}>
-              · personal projects ·
+              personal projects
             </text>
             {connections.map(([a, b], i) => {
               const na = byId[a], nb = byId[b];

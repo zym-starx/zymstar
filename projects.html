@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zymstar / random-projects</title>
+  <style>
+    html, body { margin: 0; padding: 0; background: #0d1117; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color: #c9d1d9; }
+    * { box-sizing: border-box; }
+    ::selection { background: #388bfd; color: #fff; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" data-presets="env,react">
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl';
+const MONO = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
+
+const SECTIONS = [
+  { id: 'finance',     label: 'Finance',     hue: 140, desc: 'quant, strategies, indicators, backtests', group: 'project' },
+  { id: 'hardware',    label: 'Hardware',    hue: 20,  desc: 'FPGA, Arduino, solder smoke', group: 'project' },
+  { id: 'ml',          label: 'ML / AI',     hue: 180, desc: 'models, experiments, results', group: 'project' },
+  { id: 'dumdum',      label: 'Dumdum',      hue: 330, desc: 'silly ideas with no justification' },
+  { id: 'thesis',      label: 'Thesis',      hue: 240, desc: "master's thesis + related work" },
+  { id: 'writing',     label: 'Writing',     hue: 40,  desc: 'essays, blog posts, notes' },
+  { id: 'vlog',        label: 'Vlog',        hue: 350, desc: 'video, voice, vibes' },
+  { id: 'photography', label: 'Photography', hue: 200, desc: 'images, light, composition' },
+  { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
+  { id: 'projects',    label: 'Random Projects', hue: 160, desc: 'side repos, half-finished ideas', group: 'project' },
+  { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
+  { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
+];
+
+function TopNav({ theme = 'cosmic', onOpenPalette }) {
+  const fg = theme === 'cosmic' ? 'rgba(230,225,255,0.92)' : 'rgba(201,209,217,0.95)';
+  const dim = theme === 'cosmic' ? 'rgba(230,225,255,0.55)' : 'rgba(139,148,158,0.9)';
+  const border = theme === 'cosmic' ? 'rgba(167,139,250,0.15)' : 'rgba(48,54,61,0.8)';
+  const bg = theme === 'cosmic' ? 'rgba(10,14,39,0.55)' : 'rgba(13,17,23,0.92)';
+  return (
+    <nav style={{
+      position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '18px 32px', fontSize: 13, color: fg,
+      backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+      background: bg, borderBottom: `1px solid ${border}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 22, height: 22, borderRadius: '50%',
+          background: 'radial-gradient(circle at 35% 30%, #fff 0%, #c084fc 40%, #6d28d9 90%)',
+          boxShadow: '0 0 18px rgba(167,139,250,0.7)',
+        }}></div>
+        <span style={{ fontWeight: 600, fontSize: 16, letterSpacing: '-0.02em' }}>zymstar</span>
+        <span style={{ color: dim, fontSize: 11, fontFamily: MONO }}>/ Zeynep&nbsp;Yıldız</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <button onClick={onOpenPalette} style={{
+          display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 8,
+          background: 'transparent', border: `1px solid ${border}`, color: dim, cursor: 'pointer',
+          fontFamily: MONO, fontSize: 11,
+        }}>
+          <span>search</span>
+          <kbd style={{ fontFamily: MONO, padding: '2px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.06)', fontSize: 10 }}>{MOD_KEY}&nbsp;K</kbd>
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function CommandPalette({ open, onClose, onPick }) {
+  const [q, setQ] = React.useState('');
+  const inputRef = React.useRef(null);
+  React.useEffect(() => { if (open && inputRef.current) { setQ(''); setTimeout(() => inputRef.current?.focus(), 10); } }, [open]);
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+  const results = SECTIONS.filter(s =>
+    !q || s.label.toLowerCase().includes(q.toLowerCase()) || s.desc.toLowerCase().includes(q.toLowerCase()));
+  if (!open) return null;
+  return (
+    <div onClick={onClose} style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(1,4,9,0.7)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 120 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: 'min(540px, 90%)', background: '#161b22', border: '1px solid #30363d', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 18px', borderBottom: '1px solid #30363d' }}>
+          <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder="jump to section…"
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#c9d1d9', fontSize: 15 }} />
+        </div>
+        <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+          {results.map((s) => (
+            <button key={s.id} onClick={() => { onPick?.(s); onClose(); }} style={{
+              display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '10px 18px',
+              background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: '#c9d1d9', fontSize: 14,
+            }}>
+              <span style={{ fontWeight: 500, minWidth: 140 }}>{s.label}</span>
+              <span style={{ color: '#8b949e', fontSize: 12 }}>{s.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function useCommandPalette() {
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    const onKey = (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setOpen(o => !o); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+  return { open, setOpen };
+}
+
+Object.assign(window, { TopNav, CommandPalette, useCommandPalette, SECTIONS });
+</script>
+  <script type="text/babel" data-presets="env,react">
+function routeToSection(id) {
+  if (id === 'home' || id === 'constellation') { window.location.href = 'index.html'; return; }
+  window.location.href = `${id}.html`;
+}
+
+function SectionFrame({ sectionId, background, children }) {
+  const palette = useCommandPalette();
+  return (
+    <div style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden auto', background: background || '#0d1117', color: '#c9d1d9' }}>
+      <TopNav theme="github" onOpenPalette={() => palette.setOpen(true)} />
+      <CommandPalette open={palette.open} onClose={() => palette.setOpen(false)} onPick={(s) => routeToSection(s.id)} />
+      <div style={{ paddingTop: 68 }}>{children}</div>
+      <SectionFooter sectionId={sectionId} />
+    </div>
+  );
+}
+
+const MONO_STACK = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
+
+function SectionFooter({ sectionId }) {
+  const idx = SECTIONS.findIndex(s => s.id === sectionId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx >= 0 && idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <footer style={{ borderTop: '1px solid #21262d', padding: '28px 56px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: MONO_STACK, fontSize: 12, color: '#8b949e', gap: 12, flexWrap: 'wrap' }}>
+      <a href="index.html" style={{ color: '#58a6ff', textDecoration: 'none' }}>← constellation</a>
+      <span>zymstar · {new Date().getFullYear()}</span>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {prev && <a href={`${prev.id}.html`} style={{ color: '#58a6ff', textDecoration: 'none' }}>← {prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={{ color: '#58a6ff', textDecoration: 'none' }}>{next.id} →</a>}
+      </div>
+    </footer>
+  );
+}
+
+Object.assign(window, { SectionFrame, routeToSection, MONO_STACK });
+</script>
+  <script type="text/babel" data-presets="env,react">
+    const REPOS = [
+      { name: 'metronome-that-hates-you', desc: 'tempo drifts when you look at it', lang: 'Rust', langColor: '#dea584', stars: 2, updated: '3 days ago' },
+      { name: 'fpga-blink-morse', desc: 'sends SOS until you solder the right pin', lang: 'Verilog', langColor: '#b07219', stars: 1, updated: '1 week ago' },
+      { name: 'backtest-on-a-postcard', desc: 'one strategy, one chart, fits in 4kb', lang: 'Python', langColor: '#3572A5', stars: 4, updated: '2 weeks ago' },
+      { name: 'latent-space-zine', desc: 'visualizing embeddings as bad collage art', lang: 'TypeScript', langColor: '#3178c6', stars: 0, updated: 'last month' },
+      { name: 'guestbook-counter', desc: 'increments. that is the product.', lang: 'JavaScript', langColor: '#f1e05a', stars: 7, updated: 'yesterday' },
+    ];
+
+    const MONO = window.MONO_STACK;
+    const LANG_DOT = { Python: '#3572A5', Rust: '#dea584', TypeScript: '#3178c6', JavaScript: '#f1e05a', Verilog: '#b07219' };
+
+    function RepoIcon() {
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="#8b949e" aria-hidden="true">
+          <path fillRule="evenodd" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.348.348 0 01-.11.25zM5.75 12h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 010-1.5zM5 10.25a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z"/>
+        </svg>
+      );
+    }
+
+    function ProjectsPage() {
+      const [tab, setTab] = React.useState('code');
+      const tabs = ['code', 'issues', 'pull requests', 'actions'];
+
+      return (
+        <SectionFrame sectionId="projects" background="#0d1117">
+          <div style={{ maxWidth: 1012, margin: '0 auto', padding: '24px 24px 80px' }}>
+            {/* Repo header */}
+            <div style={{ borderBottom: '1px solid #21262d', paddingBottom: 16, marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 20, color: '#58a6ff', flexWrap: 'wrap' }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"/><path fill="#0d1117" d="M8 2.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/></svg>
+                <a href="index.html" style={{ color: '#58a6ff', textDecoration: 'none', fontWeight: 600 }}>zymstar</a>
+                <span style={{ color: '#8b949e' }}>/</span>
+                <span style={{ color: '#58a6ff', fontWeight: 600 }}>random-projects</span>
+                <span style={{
+                  marginLeft: 8, padding: '0 7px', fontSize: 12, fontWeight: 500,
+                  border: '1px solid #30363d', borderRadius: 12, color: '#8b949e',
+                }}>Public</span>
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: 14, color: '#8b949e' }}>
+                a graveyard of side repos — started with enthusiasm, archived with honesty
+              </p>
+              <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12, color: '#8b949e' }}>★ 14 stars</span>
+                <span style={{ fontSize: 12, color: '#8b949e' }}>⑂ 2 forks</span>
+                <span style={{ fontSize: 12, color: '#8b949e' }}>watching · 1</span>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid #21262d', marginBottom: 24 }}>
+              {tabs.map((t) => (
+                <button key={t} onClick={() => setTab(t)} style={{
+                  padding: '8px 12px', marginBottom: -1, background: 'transparent', border: 'none', cursor: 'pointer',
+                  fontSize: 14, color: tab === t ? '#f0f6fc' : '#8b949e', fontWeight: tab === t ? 600 : 400,
+                  borderBottom: tab === t ? '2px solid #f78166' : '2px solid transparent',
+                }}>{t === 'code' ? '<> Code' : t}</button>
+              ))}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 296px', gap: 24 }}>
+              {/* Main: README */}
+              <div>
+                <div style={{
+                  border: '1px solid #30363d', borderRadius: 6, overflow: 'hidden',
+                  background: '#0d1117',
+                }}>
+                  <div style={{
+                    padding: '8px 16px', background: '#161b22', borderBottom: '1px solid #30363d',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: '#8b949e',
+                  }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <RepoIcon /> README.md
+                    </span>
+                  </div>
+                  <div style={{ padding: '32px 40px', fontSize: 16, lineHeight: 1.5 }}>
+                    <h1 style={{ fontSize: 32, fontWeight: 600, margin: '0 0 16px', paddingBottom: 8, borderBottom: '1px solid #21262d', color: '#f0f6fc' }}>
+                      random-projects
+                    </h1>
+                    <p style={{ color: '#c9d1d9', margin: '0 0 16px' }}>
+                      Things that did not fit finance, hardware, or ML — but still wanted a commit message.
+                    </p>
+                    <h2 style={{ fontSize: 20, fontWeight: 600, margin: '24px 0 12px', paddingBottom: 6, borderBottom: '1px solid #21262d', color: '#f0f6fc' }}>
+                      repos
+                    </h2>
+                    <ul style={{ margin: 0, paddingLeft: 24, color: '#c9d1d9' }}>
+                      {REPOS.map((r) => (
+                        <li key={r.name} style={{ marginBottom: 8 }}>
+                          <code style={{ fontFamily: MONO, fontSize: 14, background: 'rgba(110,118,129,0.2)', padding: '2px 6px', borderRadius: 6 }}>{r.name}</code>
+                          <span style={{ color: '#8b949e' }}> — {r.desc}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <blockquote style={{
+                      margin: '24px 0 0', padding: '0 16px', borderLeft: '4px solid #30363d', color: '#8b949e',
+                    }}>
+                      no roadmap. no semver. maybe a README later.
+                    </blockquote>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar: About */}
+              <aside>
+                <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 12px', color: '#f0f6fc' }}>About</h2>
+                <p style={{ fontSize: 14, color: '#8b949e', lineHeight: 1.5, margin: '0 0 16px' }}>
+                  Scratch space for experiments that might graduate — or stay archived forever.
+                </p>
+                <div style={{ fontSize: 12, color: '#8b949e', lineHeight: 2 }}>
+                  <div>📄 MIT-ish vibes</div>
+                  <div>⭐ 14 stars</div>
+                  <div>🍴 2 forks</div>
+                </div>
+
+                <h3 style={{ fontSize: 14, fontWeight: 600, margin: '24px 0 8px', color: '#f0f6fc' }}>Languages</h3>
+                <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
+                  <div style={{ width: '40%', background: '#3572A5' }} />
+                  <div style={{ width: '25%', background: '#dea584' }} />
+                  <div style={{ width: '20%', background: '#3178c6' }} />
+                  <div style={{ width: '15%', background: '#f1e05a' }} />
+                </div>
+                {Object.entries(LANG_DOT).map(([lang, color]) => (
+                  <div key={lang} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#8b949e', marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+                    {lang}
+                  </div>
+                ))}
+              </aside>
+            </div>
+
+            {/* File listing */}
+            <div style={{
+              marginTop: 24, border: '1px solid #30363d', borderRadius: 6, overflow: 'hidden',
+            }}>
+              <div style={{
+                padding: '8px 16px', background: '#161b22', borderBottom: '1px solid #30363d',
+                fontSize: 12, color: '#8b949e', display: 'flex', justifyContent: 'space-between',
+              }}>
+                <span><strong style={{ color: '#c9d1d9' }}>main</strong> · 1 branch · 0 tags</span>
+                <span>Go to file</span>
+              </div>
+              <div style={{ padding: '8px 16px', borderBottom: '1px solid #21262d', fontSize: 12, color: '#8b949e' }}>
+                <span style={{ color: '#3fb950' }}>zymstar</span> initial graveyard commit
+              </div>
+              {['README.md', 'LICENSE', '.gitignore', ...REPOS.map(r => r.name)].map((file, i) => (
+                <div key={file} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '8px 16px', fontSize: 14,
+                  borderTop: i > 0 ? '1px solid #21262d' : 'none',
+                  background: i % 2 ? 'transparent' : 'rgba(22,27,34,0.4)',
+                }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#58a6ff' }}>
+                    <RepoIcon />
+                    {file.endsWith('/') || REPOS.some(r => r.name === file) ? (
+                      <span style={{ color: REPOS.some(r => r.name === file) ? '#58a6ff' : '#c9d1d9' }}>{file}{REPOS.some(r => r.name === file) ? '/' : ''}</span>
+                    ) : (
+                      <span style={{ color: '#c9d1d9' }}>{file}</span>
+                    )}
+                  </span>
+                  <span style={{ fontSize: 12, color: '#8b949e' }}>{i === 0 ? 'readme' : 'side quest'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </SectionFrame>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<ProjectsPage />);
+  </script>
+</body>
+</html>
