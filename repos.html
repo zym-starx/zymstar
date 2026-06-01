@@ -163,12 +163,13 @@ Object.assign(window, { SectionFrame, routeToSection, MONO_STACK });
     const PROFILE_URL = `https://github.com/${GITHUB_USER}`;
 
     const REPOS = [
+      { name: 'phm-starmap', desc: 'navigational star map like Project Hail Mary — constellations & ship position', lang: 'JavaScript', langColor: '#f1e05a', stars: 0, updated: 'just now', url: 'https://github.com/zym-starx/phm-starmap', live: 'https://phm-starmap.zymstar.com' },
       { name: 'metronome-that-hates-you', desc: 'tempo drifts when you look at it', lang: 'Rust', langColor: '#dea584', stars: 2, updated: '3 days ago' },
       { name: 'fpga-blink-morse', desc: 'sends SOS until you solder the right pin', lang: 'Verilog', langColor: '#b07219', stars: 1, updated: '1 week ago' },
       { name: 'backtest-on-a-postcard', desc: 'one strategy, one chart, fits in 4kb', lang: 'Python', langColor: '#3572A5', stars: 4, updated: '2 weeks ago' },
       { name: 'latent-space-zine', desc: 'visualizing embeddings as bad collage art', lang: 'TypeScript', langColor: '#3178c6', stars: 0, updated: 'last month' },
       { name: 'guestbook-counter', desc: 'increments. that is the product.', lang: 'JavaScript', langColor: '#f1e05a', stars: 7, updated: 'yesterday' },
-    ].map((r) => ({ ...r, url: `https://github.com/${GITHUB_USER}/${r.name}` }));
+    ].map((r) => ({ ...r, url: r.url || `https://github.com/${GITHUB_USER}/${r.name}` }));
 
     const MONO = window.MONO_STACK;
     const totalStars = REPOS.reduce((n, r) => n + (r.stars || 0), 0);
@@ -275,6 +276,15 @@ Object.assign(window, { SectionFrame, routeToSection, MONO_STACK });
                         )}
                         {r.stars != null && <span>★ {r.stars}</span>}
                         <span>Updated {r.updated}</span>
+                        {r.live && (
+                          <a href={r.live} target="_blank" rel="noopener noreferrer" style={{
+                            color: '#3fb950', textDecoration: 'none', marginLeft: 'auto',
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                          }}>
+                            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3fb950', display: 'inline-block' }} />
+                            live
+                          </a>
+                        )}
                       </div>
                     </div>
                   ))}
