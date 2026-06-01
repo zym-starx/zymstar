@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>zymstar / ml â€” notebook</title>
+  <title>zymstar / ml — notebook</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+Pro:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -26,12 +27,12 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
   <script type="text/babel" data-presets="env,react">
-// Shared shell: top nav, command palette (âŒ˜K / Ctrl+K), now-indicator, konami easter egg.
+// Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
 // These are meant to feel consistent across every section of zymstar.com
 // while per-section content uses its own aesthetic underneath.
 
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
-const MOD_KEY = IS_MAC ? 'âŒ˜' : 'Ctrl';
+const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl';
 
 const SECTIONS = [
   { id: 'finance',     label: 'Finance',     hue: 140, desc: 'quant, strategies, indicators, backtests', group: 'project' },
@@ -76,7 +77,7 @@ function TopNav({ theme = 'cosmic', onOpenPalette }) {
           fontWeight: 600, fontSize: 16, letterSpacing: '-0.02em',
         }}>zymstar</span>
         <span style={{ color: dim, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>
-          / Zeynep&nbsp;YÄ±ldÄ±z
+          / Zeynep&nbsp;Yıldız
         </span>
       </div>
 
@@ -109,10 +110,10 @@ function TopNav({ theme = 'cosmic', onOpenPalette }) {
 function NowIndicator({ theme }) {
   // Realtime-ish "what I'm doing now" indicator. Cycles through states.
   const states = [
-    { icon: 'â—', text: 'coding â€” thesis chapter 3', color: 'oklch(70% 0.15 150)' },
-    { icon: 'â˜•', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
-    { icon: 'âœ', text: 'writing â€” on failure', color: 'oklch(70% 0.15 220)' },
-    { icon: 'âœ¦', text: 'reading â€” borges',     color: 'oklch(70% 0.15 280)' },
+    { icon: '●', text: 'coding — thesis chapter 3', color: 'oklch(70% 0.15 150)' },
+    { icon: '☕', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
+    { icon: '✎', text: 'writing — on failure', color: 'oklch(70% 0.15 220)' },
+    { icon: '✦', text: 'reading — borges',     color: 'oklch(70% 0.15 280)' },
   ];
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
@@ -259,12 +260,12 @@ function CommandPalette({ open, onClose, onPick }) {
           <span style={{
             fontFamily: 'JetBrains Mono, monospace',
             color: 'oklch(75% 0.15 290)', fontSize: 13,
-          }}>â–¸</span>
+          }}>▸</span>
           <input
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="jump to section, project, or ideaâ€¦"
+            placeholder="jump to section, project, or idea…"
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
               color: 'rgba(230,225,255,0.95)', fontSize: 15,
@@ -319,8 +320,8 @@ function CommandPalette({ open, onClose, onPick }) {
           fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
           color: 'rgba(230,225,255,0.4)',
         }}>
-          <span>â†‘â†“ navigate</span>
-          <span>â†µ open</span>
+          <span>↑↓ navigate</span>
+          <span>↵ open</span>
           <span>esc close</span>
           <span style={{ marginLeft: 'auto' }}>{MOD_KEY} K anywhere</span>
         </div>
@@ -344,7 +345,7 @@ function useCommandPalette() {
   return { open, setOpen };
 }
 
-// Konami easter egg â€” â†‘â†‘â†“â†“â†â†’â†â†’ba. Flips the page briefly and shows a message.
+// Konami easter egg — ↑↑↓↓←→←→ba. Flips the page briefly and shows a message.
 function useKonami(onTrigger) {
   React.useEffect(() => {
     const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
@@ -396,7 +397,7 @@ Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCo
 
 </script>
   <script type="text/babel" data-presets="env,react">
-// Section scaffold â€” shared layout for every section page.
+// Section scaffold — shared layout for every section page.
 // Provides: consistent top nav, command palette with routing, back-to-home link,
 // fonts preloaded. Each section wraps its content in <SectionFrame>.
 
@@ -435,7 +436,7 @@ function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
           fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
           letterSpacing: '0.1em', pointerEvents: 'none',
         }}>
-          â¬†â¬†â¬‡â¬‡â¬…â¡â¬…â¡BA Â· hi there nerd ğŸ‘¾
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
         </div>
       )}
       <SectionFooter sectionId={sectionId} />
@@ -456,11 +457,11 @@ function SectionFooter({ sectionId }) {
       letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
       gap: 12, flexWrap: 'wrap',
     }}>
-      <a href="index.html" style={footerLink}>â† BACK TO CONSTELLATION</a>
-      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar Â· Zeynep YÄ±ldÄ±z Â· {new Date().getFullYear()}</span>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
       <div style={{ display: 'flex', gap: 16 }}>
-        {prev && <a href={`${prev.id}.html`} style={footerLink}>â† /{prev.id}</a>}
-        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} â†’</a>}
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
       </div>
     </footer>
   );
@@ -475,7 +476,7 @@ Object.assign(window, { SectionFrame, routeToSection });
 
 </script>
   <script type="text/babel" data-presets="env,react">
-    // ML / AI â€” Jupyter notebook style.
+    // ML / AI — Jupyter notebook style.
     // Real-feeling .ipynb layout: markdown intro, code cells with In[]/Out[],
     // plot outputs as SVG, kernel sidebar, file tree.
     const COUNT = (n) => n;
@@ -518,7 +519,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                   borderLeft: `3px solid ${f.sel ? '#0366d6' : 'transparent'}`,
                   cursor: 'pointer',
                 }}>
-                  <span style={{ color: '#6a737d', marginRight: 6 }}>{f.name.endsWith('/') ? 'â–¸' : 'â—¯'}</span>
+                  <span style={{ color: '#6a737d', marginRight: 6 }}>{f.name.endsWith('/') ? '▸' : '◯'}</span>
                   {f.name}
                 </div>
               ))}
@@ -528,8 +529,8 @@ Object.assign(window, { SectionFrame, routeToSection });
                   color: '#6a737d', letterSpacing: '0.18em',
                 }}>KERNEL</div>
                 <div style={{ padding: '0 16px', fontSize: 11, color: '#24292e' }}>
-                  <span style={{ color: '#28a745' }}>â—</span> python 3.11.4<br/>
-                  <span style={{ color: '#6a737d', fontSize: 10 }}>idle Â· last run 2m ago</span>
+                  <span style={{ color: '#28a745' }}>●</span> python 3.11.4<br/>
+                  <span style={{ color: '#6a737d', fontSize: 10 }}>idle · last run 2m ago</span>
                 </div>
               </div>
             </aside>
@@ -547,7 +548,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                 organized as cells so it stays a notebook, not a portfolio.
               </p>
               <p style={{ fontSize: 13, lineHeight: 1.5, color: '#6a737d', fontFamily: 'JetBrains Mono, monospace', marginTop: 16 }}>
-                # zeynep yÄ±ldÄ±z &middot; last edited 2026-04-28 &middot; kernel: python3.11
+                # zeynep yıldız &middot; last edited 2026-04-28 &middot; kernel: python3.11
               </p>
               </MdCell>
 
@@ -571,7 +572,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               ]} />
 
               <MdCell>
-                <h2 style={mlH2}>1 Â· current focus</h2>
+                <h2 style={mlH2}>1 · current focus</h2>
                 <p style={mlP}>
                   thesis is layer-by-layer probing of how transformers represent number sense.
                   spent the last quarter activation-patching layer 11 attention heads and
@@ -590,7 +591,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               <PlotOut><HeatmapPlot /></PlotOut>
 
               <MdCell>
-                <h2 style={mlH2}>2 Â· finance / quant</h2>
+                <h2 style={mlH2}>2 · finance / quant</h2>
                 <p style={mlP}>
                   the cross-pollination from my finance minor. these usually live on{' '}
                   <a href="finance.html" style={{ color: '#0366d6' }}>/finance</a> &mdash; the
@@ -611,7 +612,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               <PlotOut><LossCurvePlot /></PlotOut>
 
               <MdCell>
-                <h2 style={mlH2}>3 Â· foundations &amp; experiments</h2>
+                <h2 style={mlH2}>3 · foundations &amp; experiments</h2>
                 <p style={mlP}>
                   re-implementations to actually understand the math.
                   CIFAR-10 cnn from raw numpy. naive bayes spam. GANs on my sketchbook.
@@ -649,7 +650,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#6a737d',
                 display: 'flex', justifyContent: 'space-between',
               }}>
-                <span>kernel: python 3.11 Â· idle Â· 4 cells executed</span>
+                <span>kernel: python 3.11 · idle · 4 cells executed</span>
                 <span>autosaved 2026-04-28 14:02</span>
               </div>
             </main>
@@ -671,11 +672,11 @@ Object.assign(window, { SectionFrame, routeToSection });
         }}>
           <span style={{ color: '#f29e1f', fontSize: 16 }}>ğŸ““</span>
           <span style={{ color: '#24292e', fontWeight: 600 }}>index.ipynb</span>
-          <span>Â·</span>
+          <span>·</span>
           <span>last checkpoint: 2 min ago</span>
           <span style={{ marginLeft: 'auto' }}>
-            <Btn>ï¼‹</Btn><Btn>âœ‚</Btn><Btn>â–¶</Btn><Btn>â– </Btn><Btn>â†»</Btn>
-            <span style={{ marginLeft: 14, color: '#28a745' }}>â— python 3.11</span>
+            <Btn>＋</Btn><Btn>✂</Btn><Btn>▶</Btn><Btn>■</Btn><Btn>↻</Btn>
+            <span style={{ marginLeft: 14, color: '#28a745' }}>● python 3.11</span>
           </span>
         </div>
       );
@@ -772,7 +773,7 @@ Object.assign(window, { SectionFrame, routeToSection });
       return (
         <div>
           <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#6a737d', marginBottom: 8 }}>
-            attention head activation Â· layer 11 Â· task=add_2digit
+            attention head activation · layer 11 · task=add_2digit
           </div>
           <svg viewBox="0 0 480 240" width="100%">
             {cells.map((c, i) => (
@@ -804,7 +805,7 @@ Object.assign(window, { SectionFrame, routeToSection });
       return (
         <div>
           <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#6a737d', marginBottom: 8 }}>
-            train / val loss Â· earnings-surprise model
+            train / val loss · earnings-surprise model
           </div>
           <svg viewBox={`0 0 ${W} ${H}`} width="100%">
             {[0, 0.5, 1, 1.5].map(v => (
@@ -812,7 +813,7 @@ Object.assign(window, { SectionFrame, routeToSection });
             ))}
             <path d={path(train)} fill="none" stroke="#0366d6" strokeWidth={2} />
             <path d={path(val)}   fill="none" stroke="#d73a49" strokeWidth={2} strokeDasharray="5 4" />
-            <text x={W - 80} y={28} fill="#0366d6" fontFamily="JetBrains Mono, monospace" fontSize="11">â€” train</text>
+            <text x={W - 80} y={28} fill="#0366d6" fontFamily="JetBrains Mono, monospace" fontSize="11">— train</text>
             <text x={W - 80} y={44} fill="#d73a49" fontFamily="JetBrains Mono, monospace" fontSize="11">-- val</text>
             <text x={W / 2} y={H - 4} textAnchor="middle" fill="#6a737d" fontFamily="JetBrains Mono, monospace" fontSize="10">epoch</text>
           </svg>
@@ -843,7 +844,7 @@ Object.assign(window, { SectionFrame, routeToSection });
       return (
         <div>
           <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#6a737d', marginBottom: 8 }}>
-            UMAP of project descriptions Â· n_neighbors=5
+            UMAP of project descriptions · n_neighbors=5
           </div>
           <svg viewBox="0 0 600 240" width="100%">
             {pts.map((p, i) => (

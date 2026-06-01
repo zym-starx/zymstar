@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>zymstar / reading â€” library</title>
+  <title>zymstar / reading — library</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Special+Elite&family=Courier+Prime:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -34,12 +35,12 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
   <script type="text/babel" data-presets="env,react">
-// Shared shell: top nav, command palette (âŒ˜K / Ctrl+K), now-indicator, konami easter egg.
+// Shared shell: top nav, command palette (⌘K / Ctrl+K), now-indicator, konami easter egg.
 // These are meant to feel consistent across every section of zymstar.com
 // while per-section content uses its own aesthetic underneath.
 
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
-const MOD_KEY = IS_MAC ? 'âŒ˜' : 'Ctrl';
+const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl';
 
 const SECTIONS = [
   { id: 'finance',     label: 'Finance',     hue: 140, desc: 'quant, strategies, indicators, backtests', group: 'project' },
@@ -84,7 +85,7 @@ function TopNav({ theme = 'cosmic', onOpenPalette }) {
           fontWeight: 600, fontSize: 16, letterSpacing: '-0.02em',
         }}>zymstar</span>
         <span style={{ color: dim, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>
-          / Zeynep&nbsp;YÄ±ldÄ±z
+          / Zeynep&nbsp;Yıldız
         </span>
       </div>
 
@@ -117,10 +118,10 @@ function TopNav({ theme = 'cosmic', onOpenPalette }) {
 function NowIndicator({ theme }) {
   // Realtime-ish "what I'm doing now" indicator. Cycles through states.
   const states = [
-    { icon: 'â—', text: 'coding â€” thesis chapter 3', color: 'oklch(70% 0.15 150)' },
-    { icon: 'â˜•', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
-    { icon: 'âœ', text: 'writing â€” on failure', color: 'oklch(70% 0.15 220)' },
-    { icon: 'âœ¦', text: 'reading â€” borges',     color: 'oklch(70% 0.15 280)' },
+    { icon: '●', text: 'coding — thesis chapter 3', color: 'oklch(70% 0.15 150)' },
+    { icon: '☕', text: 'coffee #3 today',     color: 'oklch(70% 0.15 50)'  },
+    { icon: '✎', text: 'writing — on failure', color: 'oklch(70% 0.15 220)' },
+    { icon: '✦', text: 'reading — borges',     color: 'oklch(70% 0.15 280)' },
   ];
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
@@ -267,12 +268,12 @@ function CommandPalette({ open, onClose, onPick }) {
           <span style={{
             fontFamily: 'JetBrains Mono, monospace',
             color: 'oklch(75% 0.15 290)', fontSize: 13,
-          }}>â–¸</span>
+          }}>▸</span>
           <input
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="jump to section, project, or ideaâ€¦"
+            placeholder="jump to section, project, or idea…"
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
               color: 'rgba(230,225,255,0.95)', fontSize: 15,
@@ -327,8 +328,8 @@ function CommandPalette({ open, onClose, onPick }) {
           fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
           color: 'rgba(230,225,255,0.4)',
         }}>
-          <span>â†‘â†“ navigate</span>
-          <span>â†µ open</span>
+          <span>↑↓ navigate</span>
+          <span>↵ open</span>
           <span>esc close</span>
           <span style={{ marginLeft: 'auto' }}>{MOD_KEY} K anywhere</span>
         </div>
@@ -352,7 +353,7 @@ function useCommandPalette() {
   return { open, setOpen };
 }
 
-// Konami easter egg â€” â†‘â†‘â†“â†“â†â†’â†â†’ba. Flips the page briefly and shows a message.
+// Konami easter egg — ↑↑↓↓←→←→ba. Flips the page briefly and shows a message.
 function useKonami(onTrigger) {
   React.useEffect(() => {
     const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
@@ -404,7 +405,7 @@ Object.assign(window, { TopNav, NowIndicator, MusicTicker, CommandPalette, useCo
 
 </script>
   <script type="text/babel" data-presets="env,react">
-// Section scaffold â€” shared layout for every section page.
+// Section scaffold — shared layout for every section page.
 // Provides: consistent top nav, command palette with routing, back-to-home link,
 // fonts preloaded. Each section wraps its content in <SectionFrame>.
 
@@ -443,7 +444,7 @@ function SectionFrame({ sectionId, theme = 'cosmic', background, children }) {
           fontFamily: 'JetBrains Mono, monospace', fontSize: 32, color: '#fff',
           letterSpacing: '0.1em', pointerEvents: 'none',
         }}>
-          â¬†â¬†â¬‡â¬‡â¬…â¡â¬…â¡BA Â· hi there nerd ğŸ‘¾
+          ⬆⬆⬇⬇⬅➡⬅➡BA · hi there nerd 👾
         </div>
       )}
       <SectionFooter sectionId={sectionId} />
@@ -464,11 +465,11 @@ function SectionFooter({ sectionId }) {
       letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)',
       gap: 12, flexWrap: 'wrap',
     }}>
-      <a href="index.html" style={footerLink}>â† BACK TO CONSTELLATION</a>
-      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar Â· Zeynep YÄ±ldÄ±z Â· {new Date().getFullYear()}</span>
+      <a href="index.html" style={footerLink}>← BACK TO CONSTELLATION</a>
+      <span style={{ color: 'rgba(255,255,255,0.2)' }}>zymstar · Zeynep Yıldız · {new Date().getFullYear()}</span>
       <div style={{ display: 'flex', gap: 16 }}>
-        {prev && <a href={`${prev.id}.html`} style={footerLink}>â† /{prev.id}</a>}
-        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} â†’</a>}
+        {prev && <a href={`${prev.id}.html`} style={footerLink}>← /{prev.id}</a>}
+        {next && <a href={`${next.id}.html`} style={footerLink}>/{next.id} →</a>}
       </div>
     </footer>
   );
@@ -483,7 +484,7 @@ Object.assign(window, { SectionFrame, routeToSection });
 
 </script>
   <script type="text/babel" data-presets="env,react">
-    // Reading â€” actual library. Bookshelves with spines + card catalog.
+    // Reading — actual library. Bookshelves with spines + card catalog.
     // Shelves grouped by section (FIC, NF, REF, POE), each spine clickable.
     const SHELVES = [
       {
@@ -501,7 +502,7 @@ Object.assign(window, { SectionFrame, routeToSection });
       {
         label: 'SCIENCE & MIND', code: 'SCI', span: '500.QC',
         books: [
-          { t: 'GÃ¶del, Escher, Bach',        a: 'Hofstadter',           color: '#5d4a2a', light: '#d9a441', h: 230, w: 60, year: 2022, status: 'reread' },
+          { t: 'Gödel, Escher, Bach',        a: 'Hofstadter',           color: '#5d4a2a', light: '#d9a441', h: 230, w: 60, year: 2022, status: 'reread' },
           { t: 'The Information',            a: 'James Gleick',         color: '#2e3a4a', light: '#6b8fbf', h: 210, w: 36, year: 2023, status: 'finished' },
           { t: 'Thinking Fast and Slow',     a: 'Kahneman',             color: '#1c1810', light: '#f5e6c8', h: 215, w: 46, year: 2022, status: 'finished' },
           { t: 'A Brief History of Time',    a: 'Stephen Hawking',      color: '#0a0d28', light: '#f5e6c8', h: 195, w: 26, year: 2021, status: 'finished' },
@@ -514,21 +515,21 @@ Object.assign(window, { SectionFrame, routeToSection });
         books: [
           { t: 'Pattern Recognition & ML',   a: 'Bishop',               color: '#3a5d3e', light: '#f5e6c8', h: 240, w: 52, year: 2023, status: 'reference' },
           { t: 'Deep Learning',              a: 'Goodfellow et al.',    color: '#1c1810', light: '#d9a441', h: 235, w: 50, year: 2023, status: 'reference' },
-          { t: 'The Elements of Stat. Lrn.', a: 'Hastie Â· Tibshirani',  color: '#3a5d6b', light: '#f5e6c8', h: 235, w: 48, year: 2024, status: 'reference' },
+          { t: 'The Elements of Stat. Lrn.', a: 'Hastie · Tibshirani',  color: '#3a5d6b', light: '#f5e6c8', h: 235, w: 48, year: 2024, status: 'reference' },
           { t: 'Information Theory',         a: 'MacKay',               color: '#5d4a2a', light: '#f5e6c8', h: 230, w: 44, year: 2024, status: 'reading' },
-          { t: 'Designing Data-Intensiveâ€¦',  a: 'Kleppmann',            color: '#1c2238', light: '#d9a441', h: 215, w: 36, year: 2025, status: 'finished' },
+          { t: 'Designing Data-Intensive…',  a: 'Kleppmann',            color: '#1c2238', light: '#d9a441', h: 215, w: 36, year: 2025, status: 'finished' },
           { t: 'Crafting Interpreters',      a: 'Robert Nystrom',       color: '#8c281e', light: '#f5e6c8', h: 210, w: 34, year: 2025, status: 'reading' },
         ],
       },
       {
         label: 'FINANCE & MISC', code: 'FIN', span: '332.HG',
         books: [
-          { t: 'Options Â· Futures',          a: 'Hull',                 color: '#1c1810', light: '#d9a441', h: 230, w: 50, year: 2023, status: 'reference' },
-          { t: 'Advances in Financial ML',   a: 'LÃ³pez de Prado',       color: '#3a5d3e', light: '#f5e6c8', h: 220, w: 38, year: 2024, status: 'reference' },
+          { t: 'Options · Futures',          a: 'Hull',                 color: '#1c1810', light: '#d9a441', h: 230, w: 50, year: 2023, status: 'reference' },
+          { t: 'Advances in Financial ML',   a: 'López de Prado',       color: '#3a5d3e', light: '#f5e6c8', h: 220, w: 38, year: 2024, status: 'reference' },
           { t: 'When Genius Failed',         a: 'Roger Lowenstein',     color: '#5d2a2a', light: '#f5e6c8', h: 200, w: 30, year: 2025, status: 'finished' },
           { t: 'The Man Who Solved the Mkt', a: 'Gregory Zuckerman',    color: '#1c2238', light: '#d9a441', h: 205, w: 32, year: 2024, status: 'finished' },
           { t: 'Pale Fire',                  a: 'Nabokov',              color: '#9a7fce', light: '#1c1810', h: 195, w: 28, year: 2026, status: 'wishlist' },
-          { t: 'Borges Â· Labyrinths',        a: 'Jorge Luis Borges',    color: '#5d4a2a', light: '#d9a441', h: 200, w: 26, year: 2025, status: 'finished' },
+          { t: 'Borges · Labyrinths',        a: 'Jorge Luis Borges',    color: '#5d4a2a', light: '#d9a441', h: 200, w: 26, year: 2025, status: 'finished' },
         ],
       },
     ];
@@ -569,7 +570,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                 <div style={{
                   fontFamily: 'Special Elite, monospace', fontSize: 11,
                   letterSpacing: '0.3em', color: '#d9a441', marginBottom: 14,
-                }}>â˜… THE ZYMSTAR LIBRARY Â· WING B Â· {total} VOLUMES</div>
+                }}>★ THE ZYMSTAR LIBRARY · WING B · {total} VOLUMES</div>
                 <h1 style={{
                   fontFamily: '"Cormorant Garamond", serif',
                   fontSize: 96, fontWeight: 500, fontStyle: 'italic',
@@ -591,11 +592,11 @@ Object.assign(window, { SectionFrame, routeToSection });
                 color: 'rgba(245,230,200,0.7)', lineHeight: 1.9,
                 paddingLeft: 22, borderLeft: '1px solid rgba(245,230,200,0.2)',
               }}>
-                â†³ READING <span style={{ color: STATUS_TINT.reading, marginLeft: 10 }}>{counts.reading || 0}</span><br/>
-                â†³ FINISHED <span style={{ color: STATUS_TINT.finished, marginLeft: 8 }}>{counts.finished || 0}</span><br/>
-                â†³ REREAD <span style={{ color: STATUS_TINT.reread, marginLeft: 18 }}>{counts.reread || 0}</span><br/>
-                â†³ REFERENCE <span style={{ color: STATUS_TINT.reference, marginLeft: 4 }}>{counts.reference || 0}</span><br/>
-                â†³ WISHLIST <span style={{ color: STATUS_TINT.wishlist, marginLeft: 14 }}>{counts.wishlist || 0}</span>
+                ↳ READING <span style={{ color: STATUS_TINT.reading, marginLeft: 10 }}>{counts.reading || 0}</span><br/>
+                ↳ FINISHED <span style={{ color: STATUS_TINT.finished, marginLeft: 8 }}>{counts.finished || 0}</span><br/>
+                ↳ REREAD <span style={{ color: STATUS_TINT.reread, marginLeft: 18 }}>{counts.reread || 0}</span><br/>
+                ↳ REFERENCE <span style={{ color: STATUS_TINT.reference, marginLeft: 4 }}>{counts.reference || 0}</span><br/>
+                ↳ WISHLIST <span style={{ color: STATUS_TINT.wishlist, marginLeft: 14 }}>{counts.wishlist || 0}</span>
               </div>
             </div>
 
@@ -609,7 +610,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                     fontFamily: 'Special Elite, monospace', fontSize: 11,
                     letterSpacing: '0.3em', color: 'rgba(245,230,200,0.6)',
                   }}>
-                    <span>â–¸ {shelf.code} &mdash; {shelf.label}</span>
+                    <span>▸ {shelf.code} &mdash; {shelf.label}</span>
                     <span>{shelf.span} &middot; {shelf.books.length} vol.</span>
                   </div>
                   <div style={{
@@ -691,7 +692,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               <div style={{
                 marginTop: 8, fontFamily: 'Special Elite, monospace',
                 fontSize: 11, letterSpacing: '0.2em', color: 'rgba(245,230,200,0.5)',
-              }}>â€” HENRY WARD BEECHER (and the librarian agrees)</div>
+              }}>— HENRY WARD BEECHER (and the librarian agrees)</div>
             </div>
           </div>
 
@@ -714,7 +715,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               }}>
                 <div style={{ fontSize: 18, fontStyle: 'italic', marginBottom: 4 }}>{book.t}</div>
                 <div style={{ fontFamily: 'Special Elite, monospace', fontSize: 11, letterSpacing: '0.15em', color: 'rgba(245,230,200,0.6)' }}>
-                  {book.a} Â· {book.year} Â· {book.status}
+                  {book.a} · {book.year} · {book.status}
                 </div>
               </div>
             );
@@ -751,7 +752,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               borderBottom: '1px solid #2b1d12', paddingBottom: 6, marginBottom: 16,
               display: 'flex', justifyContent: 'space-between',
             }}>
-              <span>â†³ {shelf.code}/{shelf.span}</span>
+              <span>↳ {shelf.code}/{shelf.span}</span>
               <span>CARD CATALOG</span>
             </div>
             <div style={{
@@ -765,7 +766,7 @@ Object.assign(window, { SectionFrame, routeToSection });
             }}>by {book.a}</div>
             <CardRow k="STATUS"   v={<span style={{ color: STATUS_TINT[book.status], fontWeight: 700 }}>{book.status.toUpperCase()}</span>} />
             <CardRow k="READ"     v={book.year} />
-            <CardRow k="SHELF"    v={`${shelf.label} Â· ${shelf.span}`} />
+            <CardRow k="SHELF"    v={`${shelf.label} · ${shelf.span}`} />
             <CardRow k="PAGES"    v={`${120 + book.h} (give or take)`} />
             <div style={{
               marginTop: 22, paddingTop: 14, borderTop: '1px dashed #2b1d12',
@@ -775,7 +776,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               {NOTES[book.t] || 'a book i lived inside for a while.'}
             </div>
             <div style={{ marginTop: 18, textAlign: 'center', fontFamily: 'Special Elite, monospace', fontSize: 10, letterSpacing: '0.3em', color: '#8c281e' }}>
-              â˜… click outside to return to the shelf â˜…
+              ★ click outside to return to the shelf ★
             </div>
           </div>
         </div>
@@ -785,7 +786,7 @@ Object.assign(window, { SectionFrame, routeToSection });
     const NOTES = {
       'Project Hail Mary': 'made me think building useless things on purpose was, in fact, the point. rocky lives rent-free.',
       'A Little Life':     'put it down for a week. picked it up again. cried in three different cafes.',
-      'GÃ¶del, Escher, Bach': 'the only book i\u2019ve started, abandoned, and started again four times. each pass i understand a different chapter.',
+      'Gödel, Escher, Bach': 'the only book i\u2019ve started, abandoned, and started again four times. each pass i understand a different chapter.',
       'Tomorrow & Tomorrow & Tomorrow': 'a love story disguised as a videogame studio post-mortem.',
       'Piranesi':          'cathedral built out of a single lonely sentence.',
       'The Goldfinch':     'too long. perfect.',
