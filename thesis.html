@@ -520,6 +520,36 @@ Object.assign(window, { SectionFrame, routeToSection });
               </div>
             </div>
 
+            {/* ICAIF paper */}
+            <section id="paper" style={{ marginBottom: 56 }}>
+              <h2 style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                letterSpacing: '0.3em', color: DIM, textTransform: 'uppercase',
+                margin: '0 0 16px', fontWeight: 400,
+              }}>ICAIF ’26 · Author version</h2>
+              <p style={{
+                fontSize: 18, lineHeight: 1.7, color: INK, margin: 0, textAlign: 'justify',
+                hyphens: 'auto',
+              }}>
+                <em>Internalizing Investment Mandates: A Neurosymbolic RL Approach to Portfolio Allocation</em><br/>
+                Zeynep Yıldız, Satchit Chatterji, Ercan Atam, and Erman Acar<br/>
+                ICAIF ’26 · November 14–17, 2026 · Milan, Italy · 9 pages<br/><br/>
+                Institutional portfolios operate under investment policy statements that specify asset allocation constraints, often conditioned on market regime information. Deep reinforcement learning has been shown to optimize financial performance but typically does not enforce rule compliance, making it unsuitable for real-world deployment. Existing neurosymbolic methods such as Probabilistic Logic Policy Gradient (PLPG) offer constraint-satisfying reinforcement learning (RL) via differentiable symbolic supervision but assume a finite, discrete action space. We present a PLPG-inspired continuous allocation method that estimates the probability that the policy’s own executed action satisfies the investment mandate, using reparameterized Monte Carlo sampling, and adds it to the training objective. No post-hoc enforcement mechanism intercepts actions at inference time and compliance is learned by the agent. Audited directly on deterministic mean actions with no correction, the policy reduces violations of a six-rule regime-conditional mandate from 96-98% for unconstrained RL and 33.4% for a reward-penalty baseline to 4.8%, showing that a continuous-action neurosymbolic policy can substantially internalize a symbolic mandate.
+              </p>
+              <p style={{ marginTop: 14, fontSize: 13, color: DIM, fontStyle: 'italic' }}>
+                Keywords — safe reinforcement learning, portfolio optimization, neurosymbolic AI, market regime detection, constrained MDP
+              </p>
+
+            <div style={{
+              display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center',
+              paddingTop: 24, borderTop: `1px solid ${INK}`,
+            }}>
+              <a href="uploads/icaif26_218_authorversion.pdf" style={downloadBtn}>read paper (author version · PDF)</a>
+              <a href="https://doi.org/10.1145/3858063.3858904" style={{...downloadBtn, background: 'transparent', color: INK, border: `1px solid ${INK}`}}>ACM version / DOI</a>
+            </div>
+              <p style={{ marginTop: 14, fontSize: 13, color: DIM, fontStyle: 'italic' }}>Author version. © 2026 Copyright held by the owner/author(s). For personal use; not for redistribution. The definitive Version of Record is available through the DOI above.</p>
+            </section>
+
             {/* Abstract */}
             <section style={{ marginBottom: 56 }}>
               <h2 style={{

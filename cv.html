@@ -518,16 +518,15 @@ Object.assign(window, { SectionFrame, routeToSection });
                     fontFamily: 'Inter, sans-serif', fontSize: 11,
                     letterSpacing: '0.3em', textTransform: 'uppercase',
                     color: '#5d4f3a', marginTop: 8, fontWeight: 500,
-                  }}>★ candidate, m.sc. data science &amp; ai &middot; istanbul tech university</div>
+                  }}>MSc student, data science &amp; AI &middot; Boğaziçi University</div>
                 </div>
                 <div style={{
                   fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
                   color: '#3a3a3a', textAlign: 'right', lineHeight: 1.7,
                   letterSpacing: '0.05em',
                 }}>
-                  zeynep@zymstar.dev<br/>
-                  zymstar.dev &middot; github/zym-starx<br/>
-                  istanbul, türkiye &middot; +90&nbsp;530&nbsp;XXX&nbsp;XX&nbsp;XX
+                  linkedin.com/in/zymstar/<br/>
+                  github.com/zym-starx &middot; Istanbul, Türkiye
                 </div>
               </header>
 
@@ -538,120 +537,26 @@ Object.assign(window, { SectionFrame, routeToSection });
               }}>
                 {/* LEFT */}
                 <aside>
-                  <CVSec title="profile">
-                    <p style={cvP}>
-                      computer-science undergrad, finance minor, m.sc. in data science &amp; ai.
-                      research focus: mechanistic interpretability of small language
-                      models. comfortable shipping product code; happiest in a notebook
-                      cell with a real question.
-                    </p>
-                  </CVSec>
+                  <CVSec title="profile"><p style={cvP}>MSc student in Data Science &amp; AI, with a Computer Science &amp; Engineering major and Finance minor. Research focuses on neurosymbolic reinforcement learning for regime-aware asset allocation.</p></CVSec>
 
-                  <CVSec title="education">
-                    <CVEntry
-                      org="Istanbul Tech University"
-                      role="M.Sc. Data Science &amp; AI"
-                      meta="2025 — present · GPA 3.92 / 4.00"
-                      detail="thesis: layer-by-layer activation patching for arithmetic in GPT-2-medium. supervisor: prof. d. arslan." />
-                    <CVEntry
-                      org="Istanbul Tech University"
-                      role="B.Sc. Computer Science · minor: Finance"
-                      meta="2020 — 2024 · valedictorian"
-                      detail="capstone: cnn from scratch on cifar-10 (numpy only). dean&rsquo;s list 4× semesters." />
-                  </CVSec>
+                  <CVSec title="education"><CVEntry org="Boğaziçi University" role="MSc Data Science and Artificial Intelligence" meta="Oct 2024 – expected Jan 2027 · GPA 3.57" detail="Thesis: Internalizing Investment Mandates: Neurosymbolic Reinforcement Learning for Regime-Aware Asset Allocation. Advisors: Ercan Atam (Boğaziçi) and Erman Acar (UvA)." /><CVEntry org="Sabancı University" role="BSc Computer Science &amp; Engineering · Finance minor" meta="Oct 2020 – Jun 2024 · GPA 3.32" detail="Faculty of Engineering and Natural Sciences. 50% scholarship." /></CVSec>
 
-                  <CVSec title="research interests">
-                    <ul style={cvUL}>
-                      <li>mechanistic interpretability</li>
-                      <li>LLM evaluation &amp; behaviour</li>
-                      <li>tabular generative models</li>
-                      <li>quantitative finance ML</li>
-                    </ul>
-                  </CVSec>
+                  <CVSec title="research interests"><ul style={cvUL}><li>neurosymbolic reinforcement learning</li><li>safe reinforcement learning</li><li>market regime detection</li><li>portfolio allocation</li></ul></CVSec>
 
-                  <CVSec title="languages">
-                    <div style={cvP}>
-                      Turkish <span style={cvDim}>(native)</span><br/>
-                      English <span style={cvDim}>(C2 · IELTS 8.5)</span><br/>
-                      French <span style={cvDim}>(B1 · slowly improving)</span>
-                    </div>
-                  </CVSec>
+                  <CVSec title="languages"><div style={cvP}>Turkish <span style={cvDim}>(native)</span><br/>English <span style={cvDim}>(full professional)</span></div></CVSec>
 
-                  <CVSec title="tools">
-                    <div style={{ ...cvP, fontFamily: 'JetBrains Mono, monospace', fontSize: 10, lineHeight: 1.85 }}>
-                      python · pytorch · transformer-lens<br/>
-                      jax · polars · duckdb<br/>
-                      typescript · rust · go<br/>
-                      neovim · tmux · git · slurm
-                    </div>
-                  </CVSec>
+                  <CVSec title="tools"><div style={{ ...cvP, fontFamily: 'JetBrains Mono, monospace', fontSize: 10, lineHeight: 1.85 }}>Python · C++<br/>PyTorch · PPO (Stable-Baselines3)<br/>HMMs · XGBoost · Monte Carlo<br/>statistical testing<br/>pandas · NumPy · FAISS<br/>AWS Lambda · Git</div></CVSec>
                 </aside>
 
                 {/* RIGHT */}
                 <main>
-                  <CVSec title="experience">
-                    <CVEntry
-                      org="Garanti BBVA · Risk Analytics"
-                      role="Quantitative Research Intern"
-                      meta="Jun 2024 — Sep 2024 · Istanbul"
-                      bullets={[
-                        'built an XGB earnings-surprise classifier across 312 BIST tickers; achieved AUC 0.63 on holdout (baseline 0.51).',
-                        'ported the team&rsquo;s legacy VaR pipeline from R to a python+duckdb stack, cutting nightly runtime 4×.',
-                        'authored an internal note on the 2018 turkish lira crisis as a stress-test case study, circulated to 40+ analysts.',
-                      ]} />
-                    <CVEntry
-                      org="ITU Robotics Lab"
-                      role="Undergraduate Research Assistant"
-                      meta="Sep 2022 — May 2024 · Istanbul"
-                      bullets={[
-                        'co-authored a workshop paper on sample-efficient reinforcement learning for a small bipedal walker (presented at AIRO \'24).',
-                        'maintained the lab cluster slurm config; set up shared dataset mounts now used by 6 thesis students.',
-                      ]} />
-                    <CVEntry
-                      org="Freelance · zymstar studio"
-                      role="ML &amp; data consultancy"
-                      meta="2023 — present · remote"
-                      bullets={[
-                        'built a tabular-diffusion synthetic-records pipeline for a healthtech client (HIPAA-compliant, ~85k rows).',
-                        'wrote &amp; shipped a RAG-vs-fine-tune evaluation harness used internally by three early-stage startups.',
-                      ]} />
-                  </CVSec>
+                  <CVSec title="experience"><CVEntry org="University of Amsterdam · SIAS Group / Finesse Lab" role="Research Visit &amp; Collaboration" meta="Oct 2025 – ongoing · Amsterdam" bullets={["Conducted MSc thesis research with Asst. Prof. Erman Acar in the SIAS group.", "Co-supervising two UvA MSc theses extending the work to multi-agent settings and probabilistic regime detection."]} /><CVEntry org="Boğaziçi University" role="Research Assistant · Scientific Research Project (BAP)" meta="Nov 2024 – Nov 2025 · Istanbul" bullets={["Contributed to “Deep Learning-based Exploration of Linguistic Structures and Semantic Entities in Historical Turkish Texts.”", "Assisted in data preparation, feature extraction, and developing NLP models for text processing."]} /><CVEntry org="Invent Analytics" role="Junior Software Developer" meta="Oct 2023 – May 2024 · Istanbul" bullets={["Extended and stabilized Invent Mind: hardened bots, built CI/CD pipelines, and refined prompts. Built an RFP assistant for the sales proposal process.", "Organized and restructured client data using machine learning methods."]} /><CVEntry org="Invent Analytics" role="Machine Learning Intern" meta="Jun 2023 – Sep 2023 · Istanbul" bullets={["Built and deployed Invent Mind and Invent Echo, RAG conversational systems using FAISS over company documents.", "Developed retrieval and generation pipelines, integrated Slack, and deployed on AWS Lambda."]} /><CVEntry org="Sabancı University" role="Learning Assistant · CS201, Introduction to Computer Science" meta="Mar 2022 – Nov 2022 · Istanbul" bullets={["Conducted weekly recitations and office hours on C++ algorithms and problem-solving."]} /><CVEntry org="GFDS Global Future Design and Solutions Inc." role="Software Engineering Intern" meta="Jul 2022 – Aug 2022 · Ankara" bullets={["Developed conversational AI using NVIDIA Riva; worked with GitHub, Unreal Engine, Docker, Python, and C++."]} /></CVSec>
 
-                  <CVSec title="selected projects">
-                    <CVEntry
-                      org="thesis · interp probe"
-                      role="mechanistic interpretability"
-                      meta="2026 · pytorch · transformer-lens"
-                      detail="located a localized 4-head cluster in layer 11 of GPT-2-medium that dominates two-digit arithmetic; ablation drops accuracy 78% → 11%." />
-                    <CVEntry
-                      org="cnn from scratch"
-                      role="numpy-only deep learning"
-                      meta="2024 · 1.4k ★ on github"
-                      detail="end-to-end cnn for cifar-10 written without an autodiff framework. used as teaching material in two undergraduate courses." />
-                    <CVEntry
-                      org="rag vs fine-tune"
-                      role="llm evaluation harness"
-                      meta="2025 · open-source"
-                      detail="benchmarked retrieval-augmented vs fine-tuned setups across 6 domain corpora; results presented at a regional ml meetup (~120 attendees)." />
-                  </CVSec>
+                  <CVSec title="academic &amp; personal projects"><CVEntry org="MSc thesis · Internalizing Investment Mandates" role="Neurosymbolic RL for Regime-Aware Asset Allocation" meta="Oct 2025 – ongoing" detail="Adapts Probabilistic Logic Policy Gradient to continuous actions with a reparameterized Monte Carlo surrogate (PLPG-MC). Combines shielded PPO and HMM-based regime detection across 10 ETFs, reducing constraint violations to ~4.8% versus ~96–98% for an unconstrained baseline." /><CVEntry org="BSc graduation project · Intelligent Waste Management" role="Machine learning and optimization algorithms" meta="Oct 2023 – Jun 2024" detail="Developed RL-based routing for the Traveling Salesman Problem in waste collection. Combined RL, clustering, and optimization to achieve routing within 5% of benchmarks." /><CVEntry org="Network Science Research Project &amp; Paper" role="CS414 · Turkish Twitter network analysis" meta="Jan 2023 – Jun 2023" detail="Analyzed clustering and bias in politicians’, TV channels’, and political parties’ Twitter followings using network metrics and Gephi. Wrote a research paper and presented at an in-class mini conference." /><CVEntry org="Political Tweet &amp; Bot Detection" role="CS412 · Turkish Twitter" meta="Nov 2022 – Jan 2023" detail="Used XGBoost to detect political tweets and bot accounts; ranked highly on the class model-accuracy leaderboard." /></CVSec>
 
-                  <CVSec title="awards · talks">
-                    <ul style={cvUL}>
-                      <li>ITU President&rsquo;s Honor &middot; 2024</li>
-                      <li>3rd place, ITU Datathon &middot; 2023 (team of 4)</li>
-                      <li>guest lecture, "interp for skeptics" &middot; ITU CS dept &middot; 2026</li>
-                    </ul>
-                  </CVSec>
+                  <CVSec title="publications &amp; awards"><p style={cvP}>Z. Yıldız, S. Chatterji, E. Atam, E. Acar. <em>Internalizing Investment Mandates: A Neurosymbolic RL Approach to Portfolio Allocation.</em> Proceedings of the 7th ACM International Conference on AI in Finance (ICAIF ’26), Milan, Italy, 2026. DOI: <a href="https://doi.org/10.1145/3858063.3858904">10.1145/3858063.3858904</a></p><ul style={cvUL}><li>QRT Student Travel Award to attend ICAIF ’26 · one of 10 recipients.</li></ul></CVSec>
 
-                  <CVSec title="references">
-                    <p style={{ ...cvP, fontStyle: 'italic', color: '#5d4f3a' }}>
-                      available on request &mdash; or from the{' '}
-                      <a href="guestbook.html" style={{ color: '#1a1a1a' }}>
-                        guestbook
-                      </a>{' '}
-                      next door.
-                    </p>
-                  </CVSec>
+                  <CVSec title="activities"><CVEntry org="IEEE Computer Society · Sabancı University Branch" role="President / Vice President" meta="2021 – 2023" detail="Led 60 active members; organized Inspire Talks, Alumni Talks, and networking events with alumni and employers." /><CVEntry org="IEEE Women in Engineering (WIE)" role="Organization department member" meta="2021 – 2023" detail="Collaborated on annual events and helped organize STEMs from Women." /></CVSec>
                 </main>
               </div>
 
@@ -663,7 +568,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                 color: '#5d4f3a', letterSpacing: '0.1em',
               }}>
                 <span>zeynep yıldız · curriculum vitae</span>
-                <span>updated 2026.04 · page 1 of 1</span>
+                <span>updated 2026.11</span>
               </footer>
             </div>
           </div>
