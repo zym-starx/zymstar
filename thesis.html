@@ -476,16 +476,6 @@ Object.assign(window, { SectionFrame, routeToSection });
     const DIM = '#6b5f48';
     const ACCENT = '#8a2c2c';
 
-    const TOC = [
-      { n: 'I',   title: 'Introduction',         pages: '1 — 14',   status: 'final' },
-      { n: 'II',  title: 'Background & related work', pages: '15 — 42', status: 'final' },
-      { n: 'III', title: 'Method',               pages: '43 — 78',  status: 'final' },
-      { n: 'IV',  title: 'Results',              pages: '79 — 112', status: 'revising' },
-      { n: 'V',   title: 'Discussion',           pages: '113 — 134', status: 'drafting' },
-      { n: 'VI',  title: 'Conclusion & future work', pages: '135 — 142', status: 'drafting' },
-      { n: '—',   title: 'Bibliography',         pages: '143 — 168', status: 'managed' },
-      { n: '—',   title: 'Appendices',           pages: '169 —',    status: 'open' },
-    ];
 
     function ThesisPage() {
       return (
@@ -508,15 +498,15 @@ Object.assign(window, { SectionFrame, routeToSection });
                 fontFamily: '"EB Garamond", serif', fontWeight: 500, fontStyle: 'italic',
                 fontSize: 64, lineHeight: 1.1, margin: '0 0 18px',
                 color: INK, letterSpacing: '-0.01em',
-              }}>On the ordering of things<br/>that do not wish to be ordered</h1>
+              }}>Thesis</h1>
               <div style={{
                 fontSize: 18, color: DIM, fontStyle: 'italic', marginBottom: 32,
-              }}>A working title. Subtitle pending.</div>
+              }}>Thesis content will be shared after completion.</div>
               <div style={{ fontSize: 16, color: INK }}>
                 <div style={{ marginBottom: 4 }}>Zeynep Yıldız</div>
-                <div style={{ fontSize: 14, color: DIM }}>Advised by Prof. [redacted]</div>
-                <div style={{ fontSize: 14, color: DIM, marginTop: 10 }}>Department of Electrical &amp; Computer Engineering</div>
-                <div style={{ fontSize: 14, color: DIM }}>MMXXVI</div>
+                <div style={{ fontSize: 14, color: DIM }}>MSc in Data Science and Artificial Intelligence</div>
+                <div style={{ fontSize: 14, color: DIM, marginTop: 10 }}>Boğaziçi University</div>
+                <div style={{ fontSize: 14, color: DIM }}>Forthcoming</div>
               </div>
             </div>
 
@@ -526,142 +516,26 @@ Object.assign(window, { SectionFrame, routeToSection });
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
                 letterSpacing: '0.3em', color: DIM, textTransform: 'uppercase',
                 margin: '0 0 16px', fontWeight: 400,
-              }}>ICAIF ’26 · Author version</h2>
+              }}>ICAIF ’26 paper</h2>
               <p style={{
                 fontSize: 18, lineHeight: 1.7, color: INK, margin: 0, textAlign: 'justify',
                 hyphens: 'auto',
               }}>
                 <em>Internalizing Investment Mandates: A Neurosymbolic RL Approach to Portfolio Allocation</em><br/>
                 Zeynep Yıldız, Satchit Chatterji, Ercan Atam, and Erman Acar<br/>
-                ICAIF ’26 · November 14–17, 2026 · Milan, Italy · 9 pages<br/><br/>
-                Institutional portfolios operate under investment policy statements that specify asset allocation constraints, often conditioned on market regime information. Deep reinforcement learning has been shown to optimize financial performance but typically does not enforce rule compliance, making it unsuitable for real-world deployment. Existing neurosymbolic methods such as Probabilistic Logic Policy Gradient (PLPG) offer constraint-satisfying reinforcement learning (RL) via differentiable symbolic supervision but assume a finite, discrete action space. We present a PLPG-inspired continuous allocation method that estimates the probability that the policy’s own executed action satisfies the investment mandate, using reparameterized Monte Carlo sampling, and adds it to the training objective. No post-hoc enforcement mechanism intercepts actions at inference time and compliance is learned by the agent. Audited directly on deterministic mean actions with no correction, the policy reduces violations of a six-rule regime-conditional mandate from 96-98% for unconstrained RL and 33.4% for a reward-penalty baseline to 4.8%, showing that a continuous-action neurosymbolic policy can substantially internalize a symbolic mandate.
+                ICAIF ’26 · Milan, Italy · 2026
               </p>
-              <p style={{ marginTop: 14, fontSize: 13, color: DIM, fontStyle: 'italic' }}>
-                Keywords — safe reinforcement learning, portfolio optimization, neurosymbolic AI, market regime detection, constrained MDP
-              </p>
+
 
             <div style={{
               display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center',
               paddingTop: 24, borderTop: `1px solid ${INK}`,
             }}>
-              <a href="uploads/icaif26_218_authorversion.pdf" style={downloadBtn}>read paper (author version · PDF)</a>
-              <a href="https://doi.org/10.1145/3858063.3858904" style={{...downloadBtn, background: 'transparent', color: INK, border: `1px solid ${INK}`}}>ACM version / DOI</a>
+              <a href="icaif.html" style={downloadBtn}>paper page &amp; resources</a>
+              <a href="uploads/icaif26_218_authorversion.pdf" style={{...downloadBtn, background: 'transparent', color: INK, border: `1px solid ${INK}`}}>author’s copy (PDF)</a>
             </div>
-              <p style={{ marginTop: 14, fontSize: 13, color: DIM, fontStyle: 'italic' }}>Author version. © 2026 Copyright held by the owner/author(s). For personal use; not for redistribution. The definitive Version of Record is available through the DOI above.</p>
-            </section>
 
-            {/* Abstract */}
-            <section style={{ marginBottom: 56 }}>
-              <h2 style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                letterSpacing: '0.3em', color: DIM, textTransform: 'uppercase',
-                margin: '0 0 16px', fontWeight: 400,
-              }}>Abstract</h2>
-              <p style={{
-                fontSize: 18, lineHeight: 1.7, color: INK, margin: 0, textAlign: 'justify',
-                hyphens: 'auto',
-              }}>
-                This thesis investigates <em>[one-sentence summary of what you actually studied]</em>.
-                We propose a method that combines <em>[technique A]</em> with <em>[technique B]</em>
-                and demonstrate, through experiments on <em>[dataset / platform]</em>, improvements
-                of <span style={{ color: ACCENT, fontVariantNumeric: 'tabular-nums' }}>X%</span> over prior work while reducing
-                <em> [resource]</em> by <span style={{ color: ACCENT, fontVariantNumeric: 'tabular-nums' }}>Y%</span>.
-                Implications for <em>[domain]</em> are discussed, alongside limitations
-                and directions for future investigation.
-              </p>
-              <p style={{ marginTop: 14, fontSize: 13, color: DIM, fontStyle: 'italic' }}>
-                Keywords — will be filled in properly later; the Greek is placeholder too.
-              </p>
             </section>
-
-            {/* Progress dial */}
-            <section style={{ marginBottom: 56, padding: '24px 28px', background: 'rgba(28,26,21,0.04)', border: `1px solid rgba(28,26,21,0.15)` }}>
-              <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                letterSpacing: '0.25em', color: DIM, textTransform: 'uppercase', marginBottom: 14,
-              }}>PROGRESS · AS OF {new Date().toISOString().slice(0,10).toUpperCase()}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 18, alignItems: 'center' }}>
-                <div style={{ height: 4, background: 'rgba(28,26,21,0.12)', position: 'relative' }}>
-                  <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '74%', background: ACCENT }}></div>
-                </div>
-                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: ACCENT, fontVariantNumeric: 'tabular-nums' }}>0.74 / 1.00</div>
-              </div>
-              <div style={{ marginTop: 8, fontSize: 13, color: DIM, fontStyle: 'italic' }}>
-                Two chapters left. Then defense. Then sleep.
-              </div>
-            </section>
-
-            {/* Table of Contents */}
-            <section style={{ marginBottom: 56 }}>
-              <h2 style={{
-                fontFamily: '"EB Garamond", serif', fontWeight: 500, fontSize: 30,
-                fontStyle: 'italic', margin: '0 0 24px', color: INK,
-              }}>Contents</h2>
-              <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                {TOC.map((c, i) => (
-                  <li key={i} style={{
-                    display: 'grid',
-                    gridTemplateColumns: '44px 1fr auto auto',
-                    gap: 14, padding: '12px 0',
-                    borderBottom: '1px dotted rgba(28,26,21,0.15)',
-                    alignItems: 'baseline',
-                    fontSize: 17, color: INK,
-                  }}>
-                    <span style={{ fontFamily: '"EB Garamond", serif', fontStyle: 'italic', color: DIM }}>{c.n}</span>
-                    <a href="#" style={{ color: INK, textDecoration: 'none' }}>{c.title}</a>
-                    <span style={{
-                      fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                      letterSpacing: '0.15em', textTransform: 'uppercase',
-                      padding: '2px 8px',
-                      color: c.status === 'final' ? '#3a6b3a' : c.status === 'revising' ? ACCENT : DIM,
-                      border: `1px solid ${c.status === 'final' ? '#3a6b3a' : c.status === 'revising' ? ACCENT : DIM}`,
-                    }}>{c.status}</span>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: DIM, fontVariantNumeric: 'tabular-nums' }}>{c.pages}</span>
-                  </li>
-                ))}
-              </ol>
-            </section>
-
-            {/* Excerpt with marginalia */}
-            <section style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: 32, marginBottom: 48 }}>
-              <div>
-                <h2 style={{
-                  fontFamily: '"EB Garamond", serif', fontWeight: 500, fontSize: 30,
-                  fontStyle: 'italic', margin: '0 0 8px', color: INK,
-                }}>Excerpt, §III.2</h2>
-                <div style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.2em',
-                  color: DIM, textTransform: 'uppercase', marginBottom: 20,
-                }}>— Method, page 47</div>
-                <p style={{ fontSize: 17, lineHeight: 1.8, color: INK, margin: '0 0 16px', textAlign: 'justify', textIndent: '1.5em' }}>
-                  The difficulty is not that the data resist categorization, but that they resist it
-                  <em> enthusiastically</em>. Each reclassification introduces a new dependency,
-                  and each dependency, in turn, demands its own ontology<sup style={{ color: ACCENT }}>1</sup>.
-                  What begins as a tidy taxonomy unravels into a correspondence.
-                </p>
-                <p style={{ fontSize: 17, lineHeight: 1.8, color: INK, margin: 0, textAlign: 'justify', textIndent: '1.5em' }}>
-                  We therefore propose a weaker commitment: instead of a tree, a scaffolding that
-                  tolerates cycles<sup style={{ color: ACCENT }}>2</sup>. The following sections make this precise.
-                </p>
-              </div>
-              <aside style={{
-                fontSize: 12, color: DIM, lineHeight: 1.6, fontStyle: 'italic',
-                borderLeft: `1px solid ${DIM}`, paddingLeft: 16, alignSelf: 'flex-start',
-                marginTop: 60,
-              }}>
-                <sup style={{ color: ACCENT, fontStyle: 'normal' }}>1</sup> cf. Borges, "The Analytical Language of John Wilkins."<br/><br/>
-                <sup style={{ color: ACCENT, fontStyle: 'normal' }}>2</sup> which is heresy to my committee. we shall see.
-              </aside>
-            </section>
-
-            {/* Download */}
-            <div style={{
-              display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center',
-              paddingTop: 24, borderTop: `1px solid ${INK}`,
-            }}>
-              <a href="#" style={downloadBtn}>read current draft (pdf)</a>
-              <a href="#" style={{...downloadBtn, background: 'transparent', color: INK, border: `1px solid ${INK}`}}>view source (latex)</a>
-            </div>
           </div>
         </SectionFrame>
       );

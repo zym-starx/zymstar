@@ -486,6 +486,12 @@ Object.assign(window, { SectionFrame, routeToSection });
             position: 'fixed', bottom: 28, right: 28, zIndex: 20,
             display: 'flex', gap: 10,
           }}>
+            <a href="uploads/zeynep-yildiz-cv.pdf" download="Zeynep-Yildiz-CV.pdf" style={{
+              textDecoration: 'none', padding: '10px 18px', background: '#1a1a1a', color: '#faf8f4',
+              border: 'none', fontFamily: 'Inter, sans-serif', fontSize: 12,
+              letterSpacing: '0.15em', textTransform: 'uppercase',
+              cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            }}>↓ Download PDF</a>
             <button onClick={() => window.print()} style={{
               padding: '10px 18px', background: '#1a1a1a', color: '#faf8f4',
               border: 'none', fontFamily: 'Inter, sans-serif', fontSize: 12,
@@ -554,7 +560,7 @@ Object.assign(window, { SectionFrame, routeToSection });
 
                   <CVSec title="academic &amp; personal projects"><CVEntry org="MSc thesis · Internalizing Investment Mandates" role="Neurosymbolic RL for Regime-Aware Asset Allocation" meta="Oct 2025 – ongoing" detail="Adapts Probabilistic Logic Policy Gradient to continuous actions with a reparameterized Monte Carlo surrogate (PLPG-MC). Combines shielded PPO and HMM-based regime detection across 10 ETFs, reducing constraint violations to ~4.8% versus ~96–98% for an unconstrained baseline." /><CVEntry org="BSc graduation project · Intelligent Waste Management" role="Machine learning and optimization algorithms" meta="Oct 2023 – Jun 2024" detail="Developed RL-based routing for the Traveling Salesman Problem in waste collection. Combined RL, clustering, and optimization to achieve routing within 5% of benchmarks." /><CVEntry org="Network Science Research Project &amp; Paper" role="CS414 · Turkish Twitter network analysis" meta="Jan 2023 – Jun 2023" detail="Analyzed clustering and bias in politicians’, TV channels’, and political parties’ Twitter followings using network metrics and Gephi. Wrote a research paper and presented at an in-class mini conference." /><CVEntry org="Political Tweet &amp; Bot Detection" role="CS412 · Turkish Twitter" meta="Nov 2022 – Jan 2023" detail="Used XGBoost to detect political tweets and bot accounts; ranked highly on the class model-accuracy leaderboard." /></CVSec>
 
-                  <CVSec title="publications &amp; awards"><p style={cvP}>Z. Yıldız, S. Chatterji, E. Atam, E. Acar. <em>Internalizing Investment Mandates: A Neurosymbolic RL Approach to Portfolio Allocation.</em> Proceedings of the 7th ACM International Conference on AI in Finance (ICAIF ’26), Milan, Italy, 2026. DOI: <a href="https://doi.org/10.1145/3858063.3858904">10.1145/3858063.3858904</a></p><ul style={cvUL}><li>QRT Student Travel Award to attend ICAIF ’26 · one of 10 recipients.</li></ul></CVSec>
+                  <CVSec title="publications &amp; awards"><p style={cvP}>Z. Yıldız, S. Chatterji, E. Atam, E. Acar. <a href="icaif.html" style={{ color: 'inherit', textDecoration: 'none' }}><em>Internalizing Investment Mandates: A Neurosymbolic RL Approach to Portfolio Allocation.</em></a> Proceedings of the 7th ACM International Conference on AI in Finance (ICAIF ’26), Milan, Italy, 2026. DOI: <a href="https://doi.org/10.1145/3858063.3858904">10.1145/3858063.3858904</a></p><ul style={cvUL}><li>QRT Student Travel Award to attend ICAIF ’26 · one of 10 recipients.</li></ul></CVSec>
 
                   <CVSec title="activities"><CVEntry org="IEEE Computer Society · Sabancı University Branch" role="President / Vice President" meta="2021 – 2023" detail="Led 60 active members; organized Inspire Talks, Alumni Talks, and networking events with alumni and employers." /><CVEntry org="IEEE Women in Engineering (WIE)" role="Organization department member" meta="2021 – 2023" detail="Collaborated on annual events and helped organize STEMs from Women." /></CVSec>
                 </main>
