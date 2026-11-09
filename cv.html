@@ -481,7 +481,7 @@ Object.assign(window, { SectionFrame, routeToSection });
     function CVPage() {
       return (
         <SectionFrame sectionId="cv" theme="paper" background="#d6d3cf">
-          {/* Print button */}
+          {/* Download the original CV PDF, with personal email removed */}
           <div className="controls" style={{
             position: 'fixed', bottom: 28, right: 28, zIndex: 20,
             display: 'flex', gap: 10,
@@ -492,12 +492,6 @@ Object.assign(window, { SectionFrame, routeToSection });
               letterSpacing: '0.15em', textTransform: 'uppercase',
               cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
             }}>↓ Download PDF</a>
-            <button onClick={() => window.print()} style={{
-              padding: '10px 18px', background: '#1a1a1a', color: '#faf8f4',
-              border: 'none', fontFamily: 'Inter, sans-serif', fontSize: 12,
-              letterSpacing: '0.15em', textTransform: 'uppercase',
-              cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            }}>↓ Print / save PDF</button>
           </div>
 
           <div style={{
