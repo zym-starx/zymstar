@@ -477,7 +477,7 @@ Object.assign(window, { SectionFrame, routeToSection });
     // Add each public URL here when its release is ready.
     const PAPER_LINKS = {
       author: 'uploads/icaif26_218_authorversion.pdf',
-      acm: null,
+      acm: 'https://dl.acm.org/doi/10.1145/3858063.3858904',
       arxiv: 'https://arxiv.org/abs/2611.17329',
       github: null,
     };
@@ -521,7 +521,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                 <a href={PAPER_LINKS.author} style={downloadBtn}>author’s copy (PDF)</a>
                 {[['acm', 'ACM'], ['arxiv', 'arXiv'], ['github', 'GitHub']].map(([key, label]) =>
                   PAPER_LINKS[key] ? (
-                    <a key={key} href={PAPER_LINKS[key]} style={{...downloadBtn, background: 'transparent', color: INK, border: `1px solid ${INK}`}}>{label}</a>
+                    <a key={key} href={PAPER_LINKS[key]} style={{downloadBtn}}>{label}</a>
                   ) : (
                     <span key={key} style={{...downloadBtn, background: 'transparent', color: DIM, border: `1px solid ${DIM}`}}>{label} · coming soon</span>
                   )
