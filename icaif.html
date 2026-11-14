@@ -521,7 +521,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                 <a href={PAPER_LINKS.author} style={downloadBtn}>author’s copy (PDF)</a>
                 {[['acm', 'ACM'], ['arxiv', 'arXiv'], ['github', 'GitHub']].map(([key, label]) =>
                   PAPER_LINKS[key] ? (
-                    <a key={key} href={PAPER_LINKS[key]} style={{downloadBtn}}>{label}</a>
+                    <a key={key} href={PAPER_LINKS[key]} style={downloadBtn}>{label}</a>
                   ) : (
                     <span key={key} style={{...downloadBtn, background: 'transparent', color: DIM, border: `1px solid ${DIM}`}}>{label} · coming soon</span>
                   )
