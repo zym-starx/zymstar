@@ -39,7 +39,6 @@ const SECTIONS = [
   { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
   { id: 'repos',       label: 'Repos',       hue: 160, desc: 'github repos — experiments & side code', group: 'project' },
   { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
-  { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
 ];
 
 function TopNav({ theme = 'cosmic', onOpenPalette }) {
@@ -509,6 +508,17 @@ Object.assign(window, { SectionFrame, routeToSection });
           theme="cosmic"
           background="#080a08"
         >
+          {/* Placeholder notice — remove once real content is in */}
+          <div role="note" style={{
+            position: 'relative', zIndex: 30,
+            display: 'flex', gap: 14, alignItems: 'baseline', flexWrap: 'wrap',
+            padding: '12px 24px', background: '#fde047', color: '#1a1a1a',
+            borderBottom: '2px solid #1a1a1a',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, lineHeight: 1.5,
+          }}>
+            <strong style={{ letterSpacing: '0.2em', fontSize: 12 }}>PLACEHOLDER</strong>
+            <span>The projects on this page are sample content, not real builds. Real entries coming soon.</span>
+          </div>
           {/* Scanlines overlay */}
           <div style={{
             position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9,
