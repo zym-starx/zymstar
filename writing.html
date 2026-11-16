@@ -39,7 +39,6 @@ const SECTIONS = [
   { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
   { id: 'repos',       label: 'Repos',       hue: 160, desc: 'github repos — experiments & side code', group: 'project' },
   { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
-  { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
 ];
 
 function TopNav({ theme = 'cosmic', onOpenPalette }) {
@@ -472,72 +471,8 @@ Object.assign(window, { SectionFrame, routeToSection });
   <script type="text/babel" data-presets="env,react">
     // Writing — personal blog. Iris West vibe: lowkey, stylish, serif-led.
     // No noisy chrome. Just a quiet column of dated entries.
-    const POSTS = [
-      {
-        slug: 'on-being-the-loud-one',
-        title: 'on being the loud one in a quiet field',
-        date: '2026-04-12',
-        readMin: 6,
-        tags: ['notes'],
-        excerpt:
-          "the academy taught me to whisper and the internet taught me to yell. lately i\u2019ve been trying to find a register that is mine. somewhere between paper-voice and twitter-voice.",
-        featured: true,
-      },
-      {
-        slug: 'i-built-a-thing-no-one-asked-for',
-        title: 'i built a thing no one asked for',
-        date: '2026-03-28',
-        readMin: 4,
-        tags: ['making'],
-        excerpt:
-          "every weekend i ship something useless. a metronome that hates you. a calendar for yesterday. it turns out useless is a kind of permission.",
-      },
-      {
-        slug: 'reading-fiction-while-debugging',
-        title: 'reading fiction while debugging',
-        date: '2026-03-09',
-        readMin: 5,
-        tags: ['notes', 'reading'],
-        excerpt:
-          "a stack trace is a story. so is a paragraph. i started keeping novels open in a tab beside the IDE. they help.",
-      },
-      {
-        slug: 'thesis-week-12',
-        title: 'thesis · week 12 · the layer that knew',
-        date: '2026-02-22',
-        readMin: 8,
-        tags: ['research'],
-        excerpt:
-          "i found a cluster of attention heads that lights up for two-digit addition and only two-digit addition. i sat in a coffee shop and cried, briefly, about it.",
-      },
-      {
-        slug: 'small-things-i-am-allowed-to-want',
-        title: 'small things i am allowed to want',
-        date: '2026-02-04',
-        readMin: 3,
-        tags: ['notes'],
-        excerpt:
-          "a slow morning. a finished paper. a friend who texts back. a dataset that loads on the first try.",
-      },
-      {
-        slug: 'finance-minor-confession',
-        title: 'finance minor, slight confession',
-        date: '2026-01-18',
-        readMin: 5,
-        tags: ['notes', 'making'],
-        excerpt:
-          "i did the finance minor because i wanted to know how money lies to itself. the models were the most honest thing in the room.",
-      },
-      {
-        slug: 'on-not-shipping',
-        title: 'on not shipping',
-        date: '2025-12-29',
-        readMin: 4,
-        tags: ['notes'],
-        excerpt:
-          "year-end. half my projects are still in the drafts folder. i\u2019m trying to decide whether that\u2019s shame or compost.",
-      },
-    ];
+    // Add entries here: { slug, title, date: 'YYYY-MM-DD', tags: [...], excerpt, readMin, featured? }
+    const POSTS = [];
 
     const ALL_TAGS = ['all', ...Array.from(new Set(POSTS.flatMap(p => p.tags)))];
 
@@ -559,7 +494,7 @@ Object.assign(window, { SectionFrame, routeToSection });
                 fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 500,
                 letterSpacing: '0.3em', textTransform: 'uppercase',
                 color: '#7a6f5e', marginBottom: 22,
-              }}>by zeynep yıldız &middot; est. 2024 &middot; updated weekly-ish</div>
+              }}>by zeynep yıldız &middot; first entries coming soon</div>
               <h1 style={{
                 fontFamily: 'Fraunces, serif',
                 fontSize: 96, fontWeight: 400, lineHeight: 0.92,
@@ -570,13 +505,33 @@ Object.assign(window, { SectionFrame, routeToSection });
                 fontSize: 19, color: '#5d4f3a', maxWidth: 520,
                 lineHeight: 1.5, marginTop: 22, marginBottom: 0,
               }}>
-                a slow blog. essays, half-thoughts, and the occasional confession.
-                no comments, no feed, no algorithm. just dates and paragraphs.
+                a slow blog. essays, half-thoughts and the occasional confession.
               </p>
             </header>
 
+            {POSTS.length === 0 && (
+              <div style={{
+                padding: '24px 0 8px',
+              }}>
+                <div style={{
+                  fontFamily: 'Inter, sans-serif', fontSize: 10,
+                  letterSpacing: '0.3em', textTransform: 'uppercase',
+                  color: '#a08054', marginBottom: 14,
+                }}>★ status</div>
+                <h2 style={{
+                  fontFamily: 'Fraunces, serif',
+                  fontSize: 48, fontWeight: 400, lineHeight: 1.1,
+                  letterSpacing: '-0.02em', margin: '0 0 18px', color: '#1a1a1a',
+                }}>coming soon<em style={{ fontWeight: 300, color: '#5d4f3a' }}>.</em></h2>
+                <p style={{
+                  fontFamily: 'Fraunces, serif', fontSize: 18, lineHeight: 1.6,
+                  color: '#3a3528', maxWidth: 620, margin: 0,
+                }}>the first entries are still in drafts.</p>
+              </div>
+            )}
+
             {/* Tags */}
-            <div style={{
+            {POSTS.length > 0 && <div style={{
               display: 'flex', gap: 16, marginBottom: 56,
               fontFamily: 'Inter, sans-serif', fontSize: 12,
               letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -596,7 +551,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               <span style={{ marginLeft: 'auto', color: '#a89b85', textTransform: 'none', letterSpacing: '0.05em' }}>
                 {list.length} {list.length === 1 ? 'entry' : 'entries'}
               </span>
-            </div>
+            </div>}
 
             {/* Featured */}
             {featured && (
@@ -699,7 +654,7 @@ Object.assign(window, { SectionFrame, routeToSection });
               <span style={{ fontFamily: 'Fraunces, serif', fontStyle: 'italic', fontSize: 16 }}>
                 — that&rsquo;s all for now.
               </span>
-              <span>rss · email · ←&nbsp;<a href="index.html" style={{ color: '#1a1a1a' }}>back to map</a></span>
+              <span>←&nbsp;<a href="index.html" style={{ color: '#1a1a1a' }}>back to map</a></span>
             </footer>
           </article>
         </SectionFrame>
