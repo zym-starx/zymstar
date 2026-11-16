@@ -41,7 +41,6 @@ const SECTIONS = [
   { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
   { id: 'repos',       label: 'Repos',       hue: 160, desc: 'github repos — experiments & side code', group: 'project' },
   { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
-  { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
 ];
 
 function TopNav({ theme = 'cosmic', onOpenPalette }) {
@@ -472,7 +471,7 @@ Object.assign(window, { SectionFrame, routeToSection });
 
 </script>
   <script type="text/babel" data-presets="env,react">
-    const GITHUB_USER = 'zymyi';
+    const GITHUB_USER = 'zym-starx';
 
     const STATUS = {
       spark:     { label: 'spark',     color: 'rgba(196,181,253,0.55)' },
@@ -493,46 +492,6 @@ Object.assign(window, { SectionFrame, routeToSection });
         repoUser: 'zym-starx',
         app: 'https://phm-starmap.zymstar.com',
         screenshots: [],
-      },
-      {
-        id: 'metronome-hates-you',
-        title: 'Metronome that hates you',
-        blurb: 'Tempo drifts when you look at it. Exists because rhythm should not be trusted.',
-        status: 'building',
-        tags: ['dumb', 'hardware'],
-        repo: 'metronome-that-hates-you',
-      },
-      {
-        id: 'one-plot-papers',
-        title: 'Papers that are just Figure 1',
-        blurb: 'No abstract. No lit review. One good plot wearing seven pages of text as a coat.',
-        status: 'spark',
-        tags: ['dumb', 'writing'],
-        repo: null,
-      },
-      {
-        id: 'fpga-morse',
-        title: 'FPGA blink morse',
-        blurb: 'Sends SOS until you solder the right pin. Peak FPGA energy.',
-        status: 'shipped',
-        tags: ['hardware'],
-        repo: 'fpga-blink-morse',
-      },
-      {
-        id: 'latent-zine',
-        title: 'Latent space zine',
-        blurb: 'Embeddings as bad collage art. Print it badly on purpose.',
-        status: 'parked',
-        tags: ['ml', 'art'],
-        repo: 'latent-space-zine',
-      },
-      {
-        id: 'trust-pour-over',
-        title: 'Pour-over without a timer',
-        blurb: 'Made coffee without checking the time. Document whether that was wisdom or denial.',
-        status: 'spark',
-        tags: ['vlog', 'dumb'],
-        repo: null,
       },
     ];
 
