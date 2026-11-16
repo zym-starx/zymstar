@@ -46,7 +46,6 @@ const SECTIONS = [
   { id: 'reading',     label: 'Reading',     hue: 100, desc: 'what I am reading now + shelf' },
   { id: 'repos',       label: 'Repos',       hue: 160, desc: 'github repos — experiments & side code', group: 'project' },
   { id: 'cv',          label: 'CV',          hue: 0,   desc: 'resume, work history' },
-  { id: 'guestbook',   label: 'Guestbook',   hue: 60,  desc: 'leave a note, see the counter' },
 ];
 
 function TopNav({ theme = 'cosmic', onOpenPalette }) {
@@ -482,27 +481,41 @@ Object.assign(window, { SectionFrame, routeToSection });
     // plot outputs as SVG, kernel sidebar, file tree.
     const COUNT = (n) => n;
     const FILES = [
-      { name: 'index.ipynb',                      sel: true },
-      { name: 'thesis_interp_probe.ipynb' },
-      { name: 'tabular_diffusion.ipynb' },
-      { name: 'rag_vs_finetune.ipynb' },
-      { name: 'cnn_from_scratch.ipynb' },
-      { name: 'sketchbook_gan.ipynb' },
-      { name: 'wordle_agent.ipynb' },
-      { name: 'datasets/' },
-      { name: 'figures/' },
-      { name: 'requirements.txt' },
+      { name: 'index.ipynb', sel: true },
+      { name: 'icaif26_plpg_mc/' },
+      { name: 'invent_mind_rag/' },
+      { name: 'waste_routing_rl/' },
+      { name: 'tweet_bot_detection/' },
+      { name: 'twitter_network/' },
+    ];
+
+    const PROJECTS = [
+      { id: 'icaif26',     title: 'neurosymbolic RL for investment mandates', domain: 'safe rl',          stack: 'pytorch + stable-baselines3 + hmm', status: 'published' },
+      { id: 'invent-mind', title: 'RAG assistant over company docs',          domain: 'llm / rag',        stack: 'faiss + aws lambda + slack',        status: 'shipped' },
+      { id: 'waste-rl',    title: 'RL routing for waste collection',          domain: 'rl / optimization', stack: 'rl + clustering',                  status: 'done' },
+      { id: 'tweet-bots',  title: 'political tweet & bot detection',          domain: 'classification',   stack: 'xgboost',                           status: 'done' },
+      { id: 'tw-network',  title: 'Turkish Twitter network analysis',         domain: 'network science',  stack: 'gephi',                             status: 'done' },
+    ];
+
+    // ICAIF '26, Table 1: share of test days violating the six-rule mandate.
+    const ICAIF_RESULTS = [
+      { method: 'PPO (unconstrained)',         violations: '96.2' },
+      { method: 'regime-aware PPO',            violations: '97.9' },
+      { method: 'reward penalty',              violations: '33.4' },
+      { method: 'PLPG-MC (ours, \u03bb = 0.15)', violations: '4.8' },
     ];
 
     function MLPage() {
+      const narrow = typeof window !== 'undefined' && window.innerWidth < 760;
       return (
         <SectionFrame sectionId="ml" theme="cosmic" background="#f7f7f7">
           <div style={{
-            display: 'grid', gridTemplateColumns: '220px 1fr',
+            display: 'grid', gridTemplateColumns: narrow ? '1fr' : '220px 1fr',
             minHeight: 'calc(100vh - 68px)',
           }}>
             {/* Sidebar */}
             <aside style={{
+              display: narrow ? 'none' : 'block',
               background: '#fafbfc', borderRight: '1px solid #e1e4e8',
               padding: '16px 0', fontFamily: 'JetBrains Mono, monospace',
               position: 'sticky', top: 68, height: 'calc(100vh - 68px)', overflowY: 'auto',
@@ -530,118 +543,93 @@ Object.assign(window, { SectionFrame, routeToSection });
                   color: '#6a737d', letterSpacing: '0.18em',
                 }}>KERNEL</div>
                 <div style={{ padding: '0 16px', fontSize: 11, color: '#24292e' }}>
-                  <span style={{ color: '#28a745' }}>●</span> python 3.11.4<br/>
-                  <span style={{ color: '#6a737d', fontSize: 10 }}>idle · last run 2m ago</span>
+                  <span style={{ color: '#28a745' }}>●</span> python 3<br/>
+                  <span style={{ color: '#6a737d', fontSize: 10 }}>idle</span>
                 </div>
               </div>
             </aside>
 
             {/* Notebook */}
-            <main style={{ padding: '24px 36px 80px', maxWidth: 1080, margin: '0 auto', width: '100%' }}>
+            <main style={{ padding: narrow ? '16px 14px 64px' : '24px 36px 80px', maxWidth: 1080, margin: '0 auto', width: '100%', minWidth: 0 }}>
               <NotebookHeader />
               <MdCell><h1 style={{
-                fontFamily: 'Source Serif Pro, serif', fontSize: 44, margin: '12px 0 8px',
+                fontFamily: 'Source Serif Pro, serif', fontSize: narrow ? 34 : 44, margin: '12px 0 8px',
                 fontWeight: 600, color: '#24292e', letterSpacing: '-0.02em',
               }}>ml/ai notebook</h1>
               <p style={{ fontSize: 16, lineHeight: 1.6, color: '#3a4148', maxWidth: 720 }}>
-                an index of every model i&rsquo;ve trained, every paper i&rsquo;ve re-implemented,
-                and every late-night what-if. CS undergrad, finance minor, masters in DS/AI.
+                an index of the ML work i&rsquo;ve done: research, industry, and coursework.
+                CS undergrad, finance minor, masters in DS/AI.
                 organized as cells so it stays a notebook, not a portfolio.
               </p>
               <p style={{ fontSize: 13, lineHeight: 1.5, color: '#6a737d', fontFamily: 'JetBrains Mono, monospace', marginTop: 16 }}>
-                # zeynep yıldız &middot; last edited 2026-04-28 &middot; kernel: python3.11
+                # zeynep yıldız &middot; last edited 2026-11-16
               </p>
               </MdCell>
 
               <CodeCell n={1} code={[
-                ['# pull the project index', 'cm'],
-                [' '],
-                ['import', 'kw'], [' ', null], ['pandas', 'nm'], [' ', null], ['as', 'kw'], [' pd\n'],
-                ['from', 'kw'], [' zymstar ', null], ['import', 'kw'], [' projects\n\n'],
-                ['df = projects.', null], ['load', 'fn'], ['(', null], ['"all"', 'st'], [')\n'],
-                ['df.', null], ['head', 'fn'], ['(', null], ['12', 'nu'], [')'],
+                ['# the project index', 'cm'],
+                [' \n'],
+                ['projects', null], ['[[', null], ['"id"', 'st'], [', ', null], ['"title"', 'st'], [', ', null],
+                ['"domain"', 'st'], [', ', null], ['"stack"', 'st'], [', ', null], ['"status"', 'st'], [']]'],
               ]} />
-              <DataFrameOut rows={[
-                { id: 'ml-thesis', title: 'mech. interp. of number sense',     domain: 'interpretability', stack: 'pytorch + transformer-lens', status: 'active' },
-                { id: 'ml-diff',   title: 'diffusion on tabular healthcare',   domain: 'generative',       stack: 'pytorch',                    status: 'active' },
-                { id: 'ml-rag',    title: 'RAG vs fine-tune across domains',   domain: 'llm-eval',         stack: 'lmsys + sklearn',            status: 'shipped' },
-                { id: 'ml-cnn',    title: 'CNN from scratch on CIFAR-10',     domain: 'foundations',      stack: 'numpy',                      status: 'shipped' },
-                { id: 'ml-gan',    title: 'GAN that paints in my style',      domain: 'generative',       stack: 'pytorch (StyleGAN2-ADA)',   status: 'wip' },
-                { id: 'ml-word',   title: 'CoT agent plays Wordle',           domain: 'llm-eval',         stack: 'openai api + numpy',        status: 'shipped' },
-                { id: 'ml-ocr',    title: 'OCR on my own handwriting',         domain: 'computer vision', stack: 'pytorch + albumentations',  status: 'wip' },
-                { id: 'ml-rl',     title: 'RL chef from fridge contents',      domain: 'rl',              stack: 'cleanrl + ppo',             status: 'cold' },
-              ]} />
+              <DataFrameOut n={1} columns={['id', 'title', 'domain', 'stack', 'status']} rows={PROJECTS} />
 
               <MdCell>
-                <h2 style={mlH2}>1 · current focus</h2>
+                <h2 style={mlH2}>1 · research: ICAIF &rsquo;26</h2>
                 <p style={mlP}>
-                  thesis is layer-by-layer probing of how transformers represent number sense.
-                  spent the last quarter activation-patching layer 11 attention heads and
-                  finding a localized cluster that dominates two-digit arithmetic.
+                  my thesis work, published at the ACM International Conference on AI in Finance.
+                  institutional portfolios must follow investment mandates: allocation rules that
+                  change with the market regime. standard deep RL ignores those rules. i adapted
+                  Probabilistic Logic Policy Gradient (PLPG) to continuous portfolio weights with a
+                  reparameterized Monte Carlo surrogate, so the agent learns the mandate during
+                  training and needs no correction at inference time. setup: 10 ETFs, HMM regime
+                  detection, PPO, 5 seeds, test period 2021&ndash;2026.
+                </p>
+                <p style={mlP}>
+                  paper, abstract and PDF:{' '}
+                  <a href="icaif.html" style={{ color: '#0366d6' }}>/icaif</a>.
                 </p>
               </MdCell>
 
               <CodeCell n={2} code={[
-                ['# locate where number sense lives', 'cm'],
-                [' '],
-                ['from', 'kw'], [' transformer_lens ', null], ['import', 'kw'], [' HookedTransformer\n'],
-                ['model = HookedTransformer.', null], ['from_pretrained', 'fn'], ['(', null], ['"gpt2-medium"', 'st'], [')\n\n'],
-                ['scores = ', null], ['probe_layer', 'fn'], ['(model, ', null], ['layer', null], ['=', null], ['11', 'nu'], [', ', null], ['task', null], ['=', null], ['"add_2digit"', 'st'], [')\n'],
-                ['plot_attention_heatmap', 'fn'], ['(scores)'],
+                ['# % of test days that break the mandate (mean over 5 seeds)', 'cm'],
+                [' \n'],
+                ['table1', null], ['[[', null], ['"method"', 'st'], [', ', null], ['"violations_%"', 'st'], [']]'],
               ]} />
-              <PlotOut><HeatmapPlot /></PlotOut>
+              <DataFrameOut n={2} columns={['method', 'violations_%']} rows={ICAIF_RESULTS.map(r => ({ method: r.method, 'violations_%': r.violations }))} />
 
               <MdCell>
-                <h2 style={mlH2}>2 · finance / quant</h2>
+                <h2 style={mlH2}>2 · industry: RAG at Invent Analytics</h2>
                 <p style={mlP}>
-                  the cross-pollination from my finance minor. these usually live on{' '}
-                  <a href="finance.html" style={{ color: '#0366d6' }}>/finance</a> &mdash; the
-                  ML-heavy ones get cross-posted here.
+                  as an ML intern i built and deployed Invent Mind and Invent Echo, conversational
+                  assistants that answer questions over internal company documents. retrieval runs
+                  on FAISS, the API on AWS Lambda, and the bots live in Slack.
+                </p>
+                <p style={mlP}>
+                  as a junior developer i kept extending them: hardened the bots, built CI/CD
+                  pipelines, refined prompts, and built an RFP assistant for the sales team.
                 </p>
               </MdCell>
 
-              <CodeCell n={3} code={[
-                ['# earnings-surprise predictor (xgb)', 'cm'],
-                [' '],
-                ['from', 'kw'], [' xgboost ', null], ['import', 'kw'], [' XGBClassifier\n'],
-                ['from', 'kw'], [' sklearn.metrics ', null], ['import', 'kw'], [' roc_auc_score\n\n'],
-                ['model = ', null], ['XGBClassifier', 'fn'], ['(', null], ['n_estimators', null], ['=', null], ['400', 'nu'], [', ', null], ['max_depth', null], ['=', null], ['5', 'nu'], [')\n'],
-                ['model.', null], ['fit', 'fn'], ['(X_train, y_train)\n'],
-                ['print', 'fn'], ['(', null], ['"AUC:"', 'st'], [', ', null], ['roc_auc_score', 'fn'], ['(y_test, model.', null], ['predict_proba', 'fn'], ['(X_test)[:,', null], ['1', 'nu'], ['])'],
-              ]} />
-              <TextOut>AUC: 0.6312</TextOut>
-              <PlotOut><LossCurvePlot /></PlotOut>
-
               <MdCell>
-                <h2 style={mlH2}>3 · foundations &amp; experiments</h2>
+                <h2 style={mlH2}>3 · projects &amp; coursework</h2>
                 <p style={mlP}>
-                  re-implementations to actually understand the math.
-                  CIFAR-10 cnn from raw numpy. naive bayes spam. GANs on my sketchbook.
-                  RL agent that, given my fridge, suggests pasta every single time.
+                  <strong>waste collection routing.</strong> BSc graduation project. RL-based routing
+                  for the travelling salesman problem in waste collection, combined with clustering
+                  and optimization. routes came within 5% of benchmarks.
                 </p>
-              </MdCell>
-
-              <CodeCell n={4} code={[
-                ['# umap of all my project embeddings', 'cm'],
-                [' '],
-                ['import', 'kw'], [' umap\n'],
-                ['emb = ', null], ['embed_descriptions', 'fn'], ['(df.title.', null], ['tolist', 'fn'], ['())\n'],
-                ['xy = umap.', null], ['UMAP', 'fn'], ['(', null], ['n_neighbors', null], ['=', null], ['5', 'nu'], [').', null], ['fit_transform', 'fn'], ['(emb)\n'],
-                ['plot_embeddings', 'fn'], ['(xy, df.domain)'],
-              ]} />
-              <PlotOut><ScatterPlot /></PlotOut>
-
-              <MdCell>
-                <h2 style={mlH2}>open notebooks</h2>
                 <p style={mlP}>
-                  each one is a separate <code style={mlCode}>.ipynb</code>:
-                  thesis_interp_probe, tabular_diffusion, rag_vs_finetune, cnn_from_scratch,
-                  sketchbook_gan, wordle_agent. file tree on the left.
+                  <strong>political tweet &amp; bot detection.</strong> XGBoost classifiers for
+                  political tweets and bot accounts on Turkish Twitter. ranked high on the class
+                  leaderboard.
+                </p>
+                <p style={mlP}>
+                  <strong>Turkish Twitter network analysis.</strong> clustering and bias in the
+                  followings of politicians, TV channels and parties, using network metrics and
+                  Gephi. written up as a paper and presented at an in-class mini conference.
                 </p>
                 <p style={{ ...mlP, fontSize: 13, color: '#6a737d', marginTop: 18 }}>
-                  the cells above are real summaries with synthetic numbers.
-                  full code lives on{' '}
-                  <a href="https://github.com/zym-starx" style={{ color: '#0366d6' }}>github</a>.
+                  full history on the <a href="cv.html" style={{ color: '#0366d6' }}>cv</a>.
                 </p>
               </MdCell>
 
@@ -649,10 +637,10 @@ Object.assign(window, { SectionFrame, routeToSection });
                 marginTop: 40, padding: 12,
                 background: '#f6f8fa', border: '1px solid #e1e4e8',
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#6a737d',
-                display: 'flex', justifyContent: 'space-between',
+                display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8,
               }}>
-                <span>kernel: python 3.11 · idle · 4 cells executed</span>
-                <span>autosaved 2026-04-28 14:02</span>
+                <span>kernel: python 3 · idle · 2 cells executed</span>
+                <span>saved 2026-11-16</span>
               </div>
             </main>
           </div>
@@ -671,13 +659,13 @@ Object.assign(window, { SectionFrame, routeToSection });
           padding: '10px 0 14px', borderBottom: '1px solid #e1e4e8',
           fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#586069',
         }}>
-          <span style={{ color: '#f29e1f', fontSize: 16 }}>ğŸ""</span>
+          <span style={{ fontSize: 16 }}>📓</span>
           <span style={{ color: '#24292e', fontWeight: 600 }}>index.ipynb</span>
           <span>·</span>
-          <span>last checkpoint: 2 min ago</span>
-          <span style={{ marginLeft: 'auto' }}>
+          <span>last checkpoint: 2026-11-16</span>
+          <span style={{ marginLeft: 'auto', display: window.innerWidth < 760 ? 'none' : 'inline' }}>
             <Btn>＋</Btn><Btn>✂</Btn><Btn>▶</Btn><Btn>■</Btn><Btn>↻</Btn>
-            <span style={{ marginLeft: 14, color: '#28a745' }}>● python 3.11</span>
+            <span style={{ marginLeft: 14, color: '#28a745' }}>● python 3</span>
           </span>
         </div>
       );
@@ -697,7 +685,7 @@ Object.assign(window, { SectionFrame, routeToSection });
     function CodeCell({ n, code }) {
       return (
         <div style={{
-          display: 'grid', gridTemplateColumns: '64px 1fr', gap: 0,
+          display: 'grid', gridTemplateColumns: '64px minmax(0, 1fr)', gap: 0,
           margin: '14px 0 0', borderLeft: '3px solid #2188ff',
         }}>
           <div style={{
@@ -706,7 +694,7 @@ Object.assign(window, { SectionFrame, routeToSection });
           }}>In [{n}]:</div>
           <pre style={{
             margin: 0, padding: '12px 14px',
-            background: '#f6f8fa',
+            background: '#f6f8fa', color: '#24292e',
             fontFamily: 'JetBrains Mono, monospace', fontSize: 13, lineHeight: 1.55,
             overflow: 'auto', whiteSpace: 'pre-wrap',
           }}>
@@ -717,147 +705,33 @@ Object.assign(window, { SectionFrame, routeToSection });
         </div>
       );
     }
-    function DataFrameOut({ rows }) {
+    function DataFrameOut({ n, columns, rows }) {
+      const statusColor = (v) => (v === 'published' || v === 'shipped') ? '#28a745' : v === 'active' ? '#d73a49' : '#959da5';
+      const cellColor = (c, v) => c === 'id' ? '#0366d6' : c === 'domain' ? '#6f42c1' : c === 'status' ? statusColor(v) : c === 'title' || c === 'method' ? '#24292e' : '#3a4148';
       return (
-        <div style={{ display: 'grid', gridTemplateColumns: '64px 1fr', gap: 0, marginTop: 4 }}>
-          <div style={{ padding: '12px 8px 12px 0', textAlign: 'right', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#d73a49' }}>Out[1]:</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '64px minmax(0, 1fr)', gap: 0, marginTop: 4 }}>
+          <div style={{ padding: '12px 8px 12px 0', textAlign: 'right', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#d73a49' }}>Out[{n}]:</div>
           <div style={{ overflow: 'auto', background: '#fff', border: '1px solid #e1e4e8' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>
               <thead>
                 <tr style={{ background: '#f6f8fa' }}>
-                  {['', 'id', 'title', 'domain', 'stack', 'status'].map(h => (
-                    <th key={h} style={{ padding: '6px 10px', borderBottom: '1px solid #e1e4e8', textAlign: 'left', fontWeight: 700, color: '#24292e' }}>{h}</th>
+                  {['', ...columns].map(h => (
+                    <th key={h || '_idx'} style={{ padding: '6px 10px', borderBottom: '1px solid #e1e4e8', textAlign: 'left', fontWeight: 700, color: '#24292e', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r, i) => (
-                  <tr key={r.id} style={{ background: i % 2 ? '#fafbfc' : '#fff' }}>
+                  <tr key={i} style={{ background: i % 2 ? '#fafbfc' : '#fff' }}>
                     <td style={{ padding: '6px 10px', color: '#6a737d' }}>{i}</td>
-                    <td style={{ padding: '6px 10px', color: '#0366d6' }}>{r.id}</td>
-                    <td style={{ padding: '6px 10px', color: '#24292e' }}>{r.title}</td>
-                    <td style={{ padding: '6px 10px', color: '#6f42c1' }}>{r.domain}</td>
-                    <td style={{ padding: '6px 10px', color: '#3a4148' }}>{r.stack}</td>
-                    <td style={{ padding: '6px 10px', color: r.status === 'shipped' ? '#28a745' : r.status === 'active' ? '#d73a49' : r.status === 'wip' ? '#f29e1f' : '#959da5' }}>{r.status}</td>
+                    {columns.map(c => (
+                      <td key={c} style={{ padding: '6px 10px', color: cellColor(c, r[c]) }}>{r[c]}</td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
-      );
-    }
-    function PlotOut({ children }) {
-      return (
-        <div style={{ display: 'grid', gridTemplateColumns: '64px 1fr', gap: 0, marginTop: 4 }}>
-          <div style={{ padding: '12px 8px 12px 0', textAlign: 'right', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#d73a49' }}>Out:</div>
-          <div style={{ background: '#fff', padding: 16, border: '1px solid #e1e4e8' }}>{children}</div>
-        </div>
-      );
-    }
-    function TextOut({ children }) {
-      return (
-        <div style={{ display: 'grid', gridTemplateColumns: '64px 1fr', gap: 0, marginTop: 4 }}>
-          <div style={{ padding: '6px 8px 6px 0', textAlign: 'right', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#d73a49' }}>Out:</div>
-          <pre style={{ margin: 0, padding: '6px 14px', fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: '#24292e' }}>{children}</pre>
-        </div>
-      );
-    }
-
-    function HeatmapPlot() {
-      const W = 12, H = 8;
-      const cells = [];
-      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-        const v = (Math.sin(x * 0.7 + y * 0.4) + Math.cos(x * 0.3) + (y === 5 && x > 7 ? 1.6 : 0)) / 3 + 0.5;
-        cells.push({ x, y, v });
-      }
-      return (
-        <div>
-          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#6a737d', marginBottom: 8 }}>
-            attention head activation · layer 11 · task=add_2digit
-          </div>
-          <svg viewBox="0 0 480 240" width="100%">
-            {cells.map((c, i) => (
-              <rect key={i} x={c.x * 36 + 30} y={c.y * 26 + 8}
-                width={34} height={24}
-                fill={`rgba(${Math.round(60 + c.v * 80)},${Math.round(50 + c.v * 100)},${Math.round(180 - c.v * 60)},${0.3 + c.v * 0.7})`}
-                stroke="#fff" strokeWidth="0.5" />
-            ))}
-            {Array.from({ length: H }).map((_, y) => (
-              <text key={y} x={24} y={y * 26 + 24}
-                fontFamily="JetBrains Mono, monospace" fontSize={9} fill="#6a737d" textAnchor="end">L{y + 8}</text>
-            ))}
-            {Array.from({ length: W }).map((_, x) => (
-              <text key={x} x={x * 36 + 47} y={H * 26 + 22}
-                fontFamily="JetBrains Mono, monospace" fontSize={9} fill="#6a737d" textAnchor="middle">h{x}</text>
-            ))}
-          </svg>
-        </div>
-      );
-    }
-    function LossCurvePlot() {
-      const N = 80;
-      const train = Array.from({ length: N }, (_, i) => 1.4 * Math.exp(-i * 0.04) + 0.04 * Math.sin(i * 0.6) + 0.18);
-      const val   = Array.from({ length: N }, (_, i) => 1.5 * Math.exp(-i * 0.035) + 0.06 * Math.sin(i * 0.4 + 1) + 0.24);
-      const W = 600, H = 220;
-      const xs = (i) => 40 + (i / (N - 1)) * (W - 56);
-      const ys = (v) => H - 24 - v * (H - 40);
-      const path = (arr) => arr.map((v, i) => `${i ? 'L' : 'M'}${xs(i)},${ys(v)}`).join('');
-      return (
-        <div>
-          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#6a737d', marginBottom: 8 }}>
-            train / val loss · earnings-surprise model
-          </div>
-          <svg viewBox={`0 0 ${W} ${H}`} width="100%">
-            {[0, 0.5, 1, 1.5].map(v => (
-              <line key={v} x1={40} x2={W - 16} y1={ys(v)} y2={ys(v)} stroke="#e1e4e8" strokeDasharray="2 4" />
-            ))}
-            <path d={path(train)} fill="none" stroke="#0366d6" strokeWidth={2} />
-            <path d={path(val)}   fill="none" stroke="#d73a49" strokeWidth={2} strokeDasharray="5 4" />
-            <text x={W - 80} y={28} fill="#0366d6" fontFamily="JetBrains Mono, monospace" fontSize="11">— train</text>
-            <text x={W - 80} y={44} fill="#d73a49" fontFamily="JetBrains Mono, monospace" fontSize="11">-- val</text>
-            <text x={W / 2} y={H - 4} textAnchor="middle" fill="#6a737d" fontFamily="JetBrains Mono, monospace" fontSize="10">epoch</text>
-          </svg>
-        </div>
-      );
-    }
-    function ScatterPlot() {
-      const groups = [
-        { c: '#0366d6', name: 'interp' },
-        { c: '#28a745', name: 'generative' },
-        { c: '#d73a49', name: 'llm-eval' },
-        { c: '#f29e1f', name: 'foundations' },
-        { c: '#6f42c1', name: 'cv' },
-        { c: '#959da5', name: 'rl' },
-      ];
-      const pts = [];
-      groups.forEach((g, gi) => {
-        const cx = 90 + (gi % 3) * 160 + (gi >= 3 ? 30 : 0);
-        const cy = 60 + Math.floor(gi / 3) * 100;
-        for (let i = 0; i < 6; i++) {
-          pts.push({
-            x: cx + Math.cos(i * 1.7 + gi) * 30 + Math.sin(i * 0.4) * 10,
-            y: cy + Math.sin(i * 1.3 + gi) * 26 + Math.cos(i * 0.2) * 8,
-            c: g.c,
-          });
-        }
-      });
-      return (
-        <div>
-          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#6a737d', marginBottom: 8 }}>
-            UMAP of project descriptions · n_neighbors=5
-          </div>
-          <svg viewBox="0 0 600 240" width="100%">
-            {pts.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y} r={5} fill={p.c} fillOpacity={0.7} />
-            ))}
-            {groups.map((g, i) => (
-              <g key={g.name}>
-                <circle cx={500} cy={32 + i * 18} r={4} fill={g.c} />
-                <text x={510} y={36 + i * 18} fontFamily="JetBrains Mono, monospace" fontSize={11} fill="#3a4148">{g.name}</text>
-              </g>
-            ))}
-          </svg>
         </div>
       );
     }
